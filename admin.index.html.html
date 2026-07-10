@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kauze Admin | Desarrollo interno</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fdfdfd;
+      --card: #ffffff;
+      --surface: #f8fafc;
+      --text: #1A1F36;
+      --muted: #64748B;
+      --border: #E2E8F0;
+      --blue: #2563EB;
+      --purple: #6366F1;
+      --teal: #10B981;
+      --amber: #D97706;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, rgba(99,102,241,.08), transparent 32%), var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 32px 18px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .shell { max-width: 1040px; margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      font-family: 'Sora', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid rgba(217,119,6,.22);
+      border-radius: 999px;
+      background: rgba(217,119,6,.06);
+      color: var(--amber);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .hero {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 34px;
+      box-shadow: 0 14px 36px rgba(15, 23, 42, .045);
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(30px, 5vw, 48px);
+      line-height: 1.05;
+      letter-spacing: -1.2px;
+      margin-bottom: 14px;
+    }
+
+    .lead {
+      color: var(--muted);
+      max-width: 720px;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .warning {
+      margin-top: 22px;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(217,119,6,.2);
+      background: rgba(217,119,6,.055);
+      color: #8a4b05;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      min-height: 170px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, .035);
+    }
+
+    .card h2 {
+      font-family: 'Sora', sans-serif;
+      font-size: 17px;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .card.blue { border-top: 4px solid var(--blue); }
+    .card.purple { border-top: 4px solid var(--purple); }
+    .card.teal { border-top: 4px solid var(--teal); }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    a.button {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 44px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: #fff;
+    }
+
+    a.button.primary {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .footer {
+      margin-top: 24px;
+      color: #94a3b8;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .hero { padding: 24px; }
+      .grid { grid-template-columns: 1fr; }
+      .actions a.button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">Kauze</div>
+      <div class="badge">Modo desarrollo interno</div>
+    </header>
+
+    <section class="hero">
+      <h1>Panel interno Kauze</h1>
+      <p class="lead">
+        Esta es una primera zona de trabajo para ordenar el desarrollo del proyecto. Por ahora es una página estática en GitHub Pages, pensada solo para pruebas visuales y estructura inicial.
+      </p>
+      <div class="warning">
+        Importante: mientras no activemos Cloudflare Access, cualquier persona con el enlace <strong>/admin/</strong> podría ver esta página. No subas claves, datos de clientes, correos privados, contraseñas ni información sensible.
+      </div>
+      <div class="actions">
+        <a class="button primary" href="/">Volver a la landing</a>
+        <a class="button" href="https://docs.google.com/forms/d/e/1FAIpQLSf4uF0gpSasdglJ4JDbvn06RGFI3IJ3-FC6rEJUHqgOzTeEmg/viewform" target="_blank" rel="noopener noreferrer">Abrir formulario</a>
+      </div>
+    </section>
+
+    <section class="grid" aria-label="Áreas internas de Kauze">
+      <article class="card blue">
+        <h2>Landing</h2>
+        <p>Espacio para anotar próximos cambios antes de tocar la página pública: copy, secciones, contador, formulario y mensajes.</p>
+      </article>
+      <article class="card purple">
+        <h2>Producto</h2>
+        <p>Base para planificar el futuro panel de reservas, clientes, postventa, recordatorios y flujos automáticos.</p>
+      </article>
+      <article class="card teal">
+        <h2>Fundadores</h2>
+        <p>Zona futura para revisar postulaciones, estado de cupos, negocios contactados y seguimiento comercial.</p>
+      </article>
+    </section>
+
+    <footer class="footer">
+      © 2026 Kauze.cl · Admin estático temporal
+    </footer>
+  </main>
+</body>
+</html>
