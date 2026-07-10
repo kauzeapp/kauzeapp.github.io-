@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kauze Admin | Desarrollo interno</title>
+  <title>Kauze Admin | Panel interno</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@700;800&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --bg: #fdfdfd;
+      --bg: #f8fafc;
       --card: #ffffff;
-      --surface: #f8fafc;
+      --surface: #f1f5f9;
       --text: #1A1F36;
       --muted: #64748B;
       --border: #E2E8F0;
@@ -21,6 +21,8 @@
       --purple: #6366F1;
       --teal: #10B981;
       --amber: #D97706;
+      --danger: #DC2626;
+      --dark: #0f172a;
     }
 
     * {
@@ -29,17 +31,24 @@
       padding: 0;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top left, rgba(99,102,241,.08), transparent 32%), var(--bg);
+      background:
+        radial-gradient(circle at top left, rgba(99,102,241,.10), transparent 30%),
+        radial-gradient(circle at top right, rgba(37,99,235,.08), transparent 28%),
+        var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding: 32px 18px;
+      padding: 28px 18px;
       -webkit-font-smoothing: antialiased;
     }
 
     .shell {
-      max-width: 1040px;
+      max-width: 1180px;
       margin: 0 auto;
     }
 
@@ -48,14 +57,23 @@
       justify-content: space-between;
       align-items: center;
       gap: 18px;
-      margin-bottom: 28px;
+      margin-bottom: 22px;
     }
 
     .brand {
       font-family: 'Sora', sans-serif;
-      font-size: 28px;
+      font-size: 30px;
       font-weight: 800;
-      letter-spacing: -0.8px;
+      letter-spacing: -0.9px;
+      color: var(--dark);
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .badge {
@@ -72,26 +90,63 @@
       white-space: nowrap;
     }
 
-    .hero {
-      background: var(--card);
+    a.button, button.button {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 42px;
+      padding: 10px 15px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
       border: 1px solid var(--border);
-      border-radius: 24px;
+      color: var(--text);
+      background: #fff;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    a.button:hover, button.button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, .06);
+    }
+
+    .button.primary {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .button.danger {
+      border-color: rgba(220,38,38,.24);
+      color: var(--danger);
+      background: rgba(220,38,38,.04);
+    }
+
+    .hero {
+      background: rgba(255,255,255,.88);
+      border: 1px solid var(--border);
+      border-radius: 28px;
       padding: 34px;
       box-shadow: 0 14px 36px rgba(15, 23, 42, .045);
       margin-bottom: 18px;
+      backdrop-filter: blur(12px);
     }
 
     h1 {
       font-family: 'Sora', sans-serif;
-      font-size: clamp(30px, 5vw, 48px);
-      line-height: 1.05;
-      letter-spacing: -1.2px;
+      font-size: clamp(32px, 5vw, 52px);
+      line-height: 1.04;
+      letter-spacing: -1.4px;
       margin-bottom: 14px;
+      color: var(--dark);
     }
 
     .lead {
       color: var(--muted);
-      max-width: 720px;
+      max-width: 780px;
       font-size: 16px;
       line-height: 1.7;
     }
@@ -107,26 +162,57 @@
       line-height: 1.6;
     }
 
-    .grid {
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+      margin: 28px 0 14px;
+    }
+
+    .section-title h2 {
+      font-family: 'Sora', sans-serif;
+      font-size: 22px;
+      letter-spacing: -0.4px;
+      color: var(--dark);
+    }
+
+    .section-title p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .grid-3 {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
-      margin-top: 18px;
+      gap: 14px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
     }
 
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 20px;
+      border-radius: 22px;
       padding: 22px;
-      min-height: 170px;
       box-shadow: 0 8px 24px rgba(15, 23, 42, .035);
     }
 
-    .card h2 {
+    .card h3 {
       font-family: 'Sora', sans-serif;
       font-size: 17px;
       margin-bottom: 8px;
+      color: var(--dark);
     }
 
     .card p {
@@ -135,75 +221,221 @@
       line-height: 1.65;
     }
 
-    .card.blue {
-      border-top: 4px solid var(--blue);
+    .metric {
+      min-height: 128px;
     }
 
-    .card.purple {
-      border-top: 4px solid var(--purple);
+    .metric .label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      margin-bottom: 10px;
     }
 
-    .card.teal {
-      border-top: 4px solid var(--teal);
+    .metric .value {
+      font-family: 'Sora', sans-serif;
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--dark);
+      letter-spacing: -1px;
     }
 
-    .actions {
+    .metric .hint {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 8px;
+      line-height: 1.45;
+    }
+
+    .border-blue { border-top: 4px solid var(--blue); }
+    .border-purple { border-top: 4px solid var(--purple); }
+    .border-teal { border-top: 4px solid var(--teal); }
+    .border-amber { border-top: 4px solid var(--amber); }
+
+    .roadmap-step {
       display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 24px;
+      gap: 14px;
+      align-items: flex-start;
     }
 
-    a.button {
+    .number {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
       display: inline-flex;
       justify-content: center;
       align-items: center;
-      min-height: 44px;
-      padding: 10px 16px;
-      border-radius: 999px;
+      background: var(--surface);
+      color: var(--blue);
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    .task-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .task {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 13px;
+      border-radius: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    .task input {
+      margin-top: 3px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--blue);
+      flex: 0 0 auto;
+    }
+
+    .task span {
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--text);
+    }
+
+    .task input:checked + span {
+      color: var(--muted);
+      text-decoration: line-through;
+    }
+
+    .links {
+      display: grid;
+      gap: 10px;
+    }
+
+    .quick-link {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
       text-decoration: none;
+      color: var(--text);
+      padding: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 16px;
+      transition: .2s ease;
       font-size: 14px;
       font-weight: 700;
-      border: 1px solid var(--border);
-      color: var(--text);
-      background: #fff;
-      transition: all 0.2s ease;
     }
 
-    a.button:hover {
+    .quick-link:hover {
       transform: translateY(-1px);
-      box-shadow: 0 8px 20px rgba(15, 23, 42, .06);
+      border-color: rgba(37,99,235,.35);
+      background: #fff;
     }
 
-    a.button.primary {
-      border-color: var(--blue);
-      background: var(--blue);
-      color: #fff;
+    .quick-link small {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    textarea, input[type="number"] {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      border-radius: 16px;
+      padding: 14px;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      resize: vertical;
+    }
+
+    textarea:focus, input[type="number"]:focus {
+      border-color: rgba(37,99,235,.45);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.08);
+    }
+
+    textarea {
+      min-height: 190px;
+      line-height: 1.6;
+    }
+
+    .save-status {
+      color: var(--teal);
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 10px;
+      min-height: 18px;
+    }
+
+    .founder-control {
+      display: grid;
+      gap: 12px;
+    }
+
+    .progress-bg {
+      width: 100%;
+      height: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 10%;
+      background: linear-gradient(90deg, #f59e0b, #d97706);
+      border-radius: 999px;
+      transition: width .35s ease;
     }
 
     .footer {
-      margin-top: 24px;
+      margin: 34px 0 12px;
       color: #94a3b8;
       font-size: 12px;
       text-align: center;
     }
 
-    @media (max-width: 760px) {
+    @media (max-width: 980px) {
+      .grid-4, .grid-3, .grid-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      body {
+        padding: 20px 14px;
+      }
+
       .topbar {
         align-items: flex-start;
         flex-direction: column;
+      }
+
+      .top-actions {
+        justify-content: flex-start;
+        width: 100%;
+      }
+
+      .top-actions .button, .top-actions .badge {
+        width: 100%;
       }
 
       .hero {
         padding: 24px;
       }
 
-      .grid {
+      .grid-4, .grid-3, .grid-2 {
         grid-template-columns: 1fr;
       }
 
-      .actions a.button {
-        width: 100%;
+      .section-title {
+        align-items: flex-start;
+        flex-direction: column;
       }
     }
   </style>
@@ -213,61 +445,307 @@
   <main class="shell">
     <header class="topbar">
       <div class="brand">Kauze</div>
-      <div class="badge">Modo desarrollo interno</div>
+
+      <div class="top-actions">
+        <div class="badge">Modo desarrollo interno</div>
+        <a class="button" href="/">Ver landing</a>
+        <a class="button primary" href="https://docs.google.com/forms/d/e/1FAIpQLSf4uF0gpSasdglJ4JDbvn06RGFI3IJ3-FC6rEJUHqgOzTeEmg/viewform" target="_blank" rel="noopener noreferrer">
+          Abrir formulario
+        </a>
+      </div>
     </header>
 
     <section class="hero">
       <h1>Panel interno Kauze</h1>
-
       <p class="lead">
-        Esta es una primera zona de trabajo para ordenar el desarrollo del proyecto.
-        Por ahora es una página estática en GitHub Pages, pensada solo para pruebas
-        visuales y estructura inicial.
+        Zona de trabajo para ordenar el desarrollo del proyecto, priorizar tareas,
+        revisar avances y preparar el futuro producto de reservas, clientes y postventa
+        para negocios de belleza y cuidado personal.
       </p>
 
       <div class="warning">
-        Importante: mientras no activemos Cloudflare Access, cualquier persona con el enlace
-        <strong>/admin/</strong> podría ver esta página. No subas claves, datos de clientes,
-        correos privados, contraseñas ni información sensible.
-      </div>
-
-      <div class="actions">
-        <a class="button primary" href="/">Volver a la landing</a>
-        <a class="button" href="https://docs.google.com/forms/d/e/1FAIpQLSf4uF0gpSasdglJ4JDbvn06RGFI3IJ3-FC6rEJUHqgOzTeEmg/viewform" target="_blank" rel="noopener noreferrer">
-          Abrir formulario
-        </a>
+        <strong>Importante:</strong> mientras no activemos Cloudflare Access, esta ruta
+        <strong>/admin/</strong> sigue siendo pública. Usa este panel solo para estructura,
+        tareas generales y pruebas visuales. No subas claves, datos de clientes, correos privados
+        ni información sensible.
       </div>
     </section>
 
-    <section class="grid" aria-label="Áreas internas de Kauze">
-      <article class="card blue">
-        <h2>Landing</h2>
-        <p>
-          Espacio para anotar próximos cambios antes de tocar la página pública:
-          copy, secciones, contador, formulario y mensajes.
-        </p>
+    <div class="section-title">
+      <div>
+        <h2>Estado general</h2>
+        <p>Resumen rápido del proyecto en esta etapa.</p>
+      </div>
+    </div>
+
+    <section class="grid-4">
+      <article class="card metric border-blue">
+        <div class="label">Landing</div>
+        <div class="value">Online</div>
+        <div class="hint">Kauze.cl está publicado y funcionando.</div>
       </article>
 
-      <article class="card purple">
-        <h2>Producto</h2>
-        <p>
-          Base para planificar el futuro panel de reservas, clientes, postventa,
-          recordatorios y flujos automáticos.
-        </p>
+      <article class="card metric border-purple">
+        <div class="label">Formulario</div>
+        <div class="value">Activo</div>
+        <div class="hint">Google Form conectado a la landing.</div>
       </article>
 
-      <article class="card teal">
+      <article class="card metric border-amber">
+        <div class="label">Fundadores</div>
+        <div class="value"><span id="founderMetric">3</span>/30</div>
+        <div class="hint">Cupos aprobados manualmente por ahora.</div>
+      </article>
+
+      <article class="card metric border-teal">
+        <div class="label">Seguridad</div>
+        <div class="value">Pendiente</div>
+        <div class="hint">Próxima etapa: Cloudflare Access.</div>
+      </article>
+    </section>
+
+    <div class="section-title">
+      <div>
+        <h2>Roadmap Kauze</h2>
+        <p>Orden base para pasar de landing a producto real.</p>
+      </div>
+    </div>
+
+    <section class="grid-4">
+      <article class="card roadmap-step">
+        <div class="number">1</div>
+        <div>
+          <h3>Validación</h3>
+          <p>Recolectar respuestas, hablar con dueños y confirmar dolores reales.</p>
+        </div>
+      </article>
+
+      <article class="card roadmap-step">
+        <div class="number">2</div>
+        <div>
+          <h3>Oferta</h3>
+          <p>Definir propuesta, precio fundador, beneficios y condiciones.</p>
+        </div>
+      </article>
+
+      <article class="card roadmap-step">
+        <div class="number">3</div>
+        <div>
+          <h3>MVP</h3>
+          <p>Crear primera versión funcional: agenda, clientes y recordatorios.</p>
+        </div>
+      </article>
+
+      <article class="card roadmap-step">
+        <div class="number">4</div>
+        <div>
+          <h3>Piloto</h3>
+          <p>Probar con pocos negocios reales antes de vender masivamente.</p>
+        </div>
+      </article>
+    </section>
+
+    <div class="section-title">
+      <div>
+        <h2>Tareas pendientes</h2>
+        <p>Estas marcas se guardan solo en este navegador.</p>
+      </div>
+      <button class="button danger" id="resetTasks">Reiniciar tareas</button>
+    </div>
+
+    <section class="card">
+      <div class="task-list">
+        <label class="task">
+          <input type="checkbox" data-task="task-1">
+          <span>Revisar respuestas del Google Form y detectar patrones de dolor.</span>
+        </label>
+
+        <label class="task">
+          <input type="checkbox" data-task="task-2">
+          <span>Definir el perfil exacto del cliente fundador ideal.</span>
+        </label>
+
+        <label class="task">
+          <input type="checkbox" data-task="task-3">
+          <span>Crear mensaje de contacto por WhatsApp para quienes postulen.</span>
+        </label>
+
+        <label class="task">
+          <input type="checkbox" data-task="task-4">
+          <span>Definir precio fundador y beneficios de por vida.</span>
+        </label>
+
+        <label class="task">
+          <input type="checkbox" data-task="task-5">
+          <span>Diseñar flujo mínimo de producto: reserva, confirmación, recordatorio y postventa.</span>
+        </label>
+
+        <label class="task">
+          <input type="checkbox" data-task="task-6">
+          <span>Configurar Cloudflare Access antes de subir datos internos reales.</span>
+        </label>
+      </div>
+    </section>
+
+    <div class="section-title">
+      <div>
         <h2>Fundadores</h2>
+        <p>Control temporal sin datos personales.</p>
+      </div>
+    </div>
+
+    <section class="grid-2">
+      <article class="card">
+        <h3>Cupos aprobados</h3>
+        <p>Modifica solo el número general. No guardes nombres ni datos personales aquí todavía.</p>
+
+        <div class="founder-control" style="margin-top: 16px;">
+          <input id="founderInput" type="number" min="0" max="30" value="3">
+          <div class="progress-bg">
+            <div class="progress-fill" id="founderProgress"></div>
+          </div>
+          <p><strong id="founderText">3 de 30</strong> cupos aprobados.</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <h3>Criterios de selección</h3>
         <p>
-          Zona futura para revisar postulaciones, estado de cupos, negocios contactados
-          y seguimiento comercial.
+          Priorizar negocios que tengan flujo real de clientes, dolor con WhatsApp,
+          disposición a probar tecnología y necesidad clara de mejorar reservas/postventa.
         </p>
       </article>
+    </section>
+
+    <div class="section-title">
+      <div>
+        <h2>Links rápidos</h2>
+        <p>Accesos útiles para trabajar más rápido.</p>
+      </div>
+    </div>
+
+    <section class="grid-2">
+      <article class="card">
+        <div class="links">
+          <a class="quick-link" href="/" target="_blank" rel="noopener noreferrer">
+            Landing pública <small>kauze.cl</small>
+          </a>
+
+          <a class="quick-link" href="https://docs.google.com/forms/d/e/1FAIpQLSf4uF0gpSasdglJ4JDbvn06RGFI3IJ3-FC6rEJUHqgOzTeEmg/viewform" target="_blank" rel="noopener noreferrer">
+            Formulario público <small>Google Forms</small>
+          </a>
+
+          <a class="quick-link" href="https://github.com/kauzeapp/kauzeapp.github.io-" target="_blank" rel="noopener noreferrer">
+            Repositorio GitHub <small>código web</small>
+          </a>
+        </div>
+      </article>
+
+      <article class="card">
+        <h3>Próxima protección</h3>
+        <p>
+          Cuando el panel empiece a manejar datos reales, protegeremos esta ruta con
+          Cloudflare Access para permitir entrada solo por correos autorizados.
+        </p>
+      </article>
+    </section>
+
+    <div class="section-title">
+      <div>
+        <h2>Notas internas</h2>
+        <p>Guardado local en tu navegador. No se sincroniza entre computadores.</p>
+      </div>
+      <button class="button danger" id="clearNotes">Borrar notas</button>
+    </div>
+
+    <section class="card">
+      <textarea id="notes" placeholder="Ejemplo: ideas de producto, cambios futuros, observaciones generales. No escribir datos sensibles."></textarea>
+      <div class="save-status" id="saveStatus"></div>
     </section>
 
     <footer class="footer">
-      © 2026 Kauze.cl · Admin estático temporal
+      © 2026 Kauze.cl · Admin estático temporal · Sin datos sensibles
     </footer>
   </main>
+
+  <script>
+    const TOTAL_FOUNDERS = 30;
+
+    const founderInput = document.getElementById("founderInput");
+    const founderMetric = document.getElementById("founderMetric");
+    const founderText = document.getElementById("founderText");
+    const founderProgress = document.getElementById("founderProgress");
+
+    function updateFounderCount(value) {
+      let count = Number(value);
+
+      if (Number.isNaN(count)) count = 0;
+      if (count < 0) count = 0;
+      if (count > TOTAL_FOUNDERS) count = TOTAL_FOUNDERS;
+
+      localStorage.setItem("kauzeFounderCount", String(count));
+
+      founderInput.value = count;
+      founderMetric.textContent = count;
+      founderText.textContent = `${count} de ${TOTAL_FOUNDERS}`;
+      founderProgress.style.width = `${(count / TOTAL_FOUNDERS) * 100}%`;
+    }
+
+    const savedFounderCount = localStorage.getItem("kauzeFounderCount");
+    updateFounderCount(savedFounderCount ?? 3);
+
+    founderInput.addEventListener("input", () => {
+      updateFounderCount(founderInput.value);
+    });
+
+    const taskInputs = document.querySelectorAll("[data-task]");
+
+    taskInputs.forEach((input) => {
+      const key = `kauze-${input.dataset.task}`;
+      input.checked = localStorage.getItem(key) === "true";
+
+      input.addEventListener("change", () => {
+        localStorage.setItem(key, input.checked ? "true" : "false");
+      });
+    });
+
+    document.getElementById("resetTasks").addEventListener("click", () => {
+      const confirmReset = confirm("¿Seguro que quieres reiniciar las tareas?");
+      if (!confirmReset) return;
+
+      taskInputs.forEach((input) => {
+        input.checked = false;
+        localStorage.removeItem(`kauze-${input.dataset.task}`);
+      });
+    });
+
+    const notes = document.getElementById("notes");
+    const saveStatus = document.getElementById("saveStatus");
+
+    notes.value = localStorage.getItem("kauzeAdminNotes") || "";
+
+    let saveTimer;
+
+    notes.addEventListener("input", () => {
+      localStorage.setItem("kauzeAdminNotes", notes.value);
+
+      saveStatus.textContent = "Notas guardadas localmente.";
+
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        saveStatus.textContent = "";
+      }, 1800);
+    });
+
+    document.getElementById("clearNotes").addEventListener("click", () => {
+      const confirmClear = confirm("¿Seguro que quieres borrar las notas locales?");
+      if (!confirmClear) return;
+
+      notes.value = "";
+      localStorage.removeItem("kauzeAdminNotes");
+      saveStatus.textContent = "Notas borradas.";
+      setTimeout(() => saveStatus.textContent = "", 1800);
+    });
+  </script>
 </body>
 </html>
