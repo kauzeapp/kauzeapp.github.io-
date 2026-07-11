@@ -47,9 +47,124 @@
       -webkit-font-smoothing: antialiased;
     }
 
+    /* PANTALLA DE LOGO Y BLOQUEO */
+    #authOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .login-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 14px 36px rgba(15, 23, 42, .045);
+      text-align: center;
+    }
+
+    .login-card .brand-login {
+      font-family: 'Sora', sans-serif;
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+
+    .login-badge {
+      display: inline-block;
+      background: rgba(217,119,6,.06);
+      color: var(--amber);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(217,119,6,.15);
+    }
+
+    .login-card p {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .form-group {
+      text-align: left;
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .form-group input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.08);
+    }
+
+    .btn-login {
+      width: 100%;
+      background: var(--blue);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 10px;
+    }
+
+    .btn-login:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(37,99,235,.15);
+    }
+
+    .error-message {
+      color: var(--danger);
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+      font-weight: 600;
+    }
+
+    /* CONTENIDO DEL PANEL INTERNO */
     .shell {
       max-width: 1180px;
       margin: 0 auto;
+      display: none; /* Se activa dinámicamente si la clave es correcta */
     }
 
     .topbar {
@@ -442,12 +557,37 @@
 </head>
 
 <body>
-  <main class="shell">
+
+  <div id="authOverlay">
+    <div class="login-card">
+      <div class="brand-login">Kauze</div>
+      <span class="login-badge">🔒 Consola Interna</span>
+      <p>Ruta restringida. Por favor verifica tus credenciales para acceder al panel de desarrollo.</p>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">Usuario corporativo</label>
+          <input type="text" id="username" placeholder="ejemplo@kauze.cl" required autocomplete="off">
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="btn-login">Verificar Identidad</button>
+        <div class="error-message" id="errorMessage">⚠️ Credenciales incorrectas o sin autorización.</div>
+      </form>
+    </div>
+  </div>
+
+  <main class="shell" id="mainContent">
     <header class="topbar">
       <div class="brand">Kauze</div>
 
       <div class="top-actions">
         <div class="badge">Modo desarrollo interno</div>
+        <button class="button" id="logoutBtn" style="min-height:36px; padding: 4px 14px; font-size:13px;">Cerrar sesión</button>
         <a class="button" href="/">Ver landing</a>
         <a class="button primary" href="https://docs.google.com/forms/d/e/1FAIpQLSf4uF0gpSasdglJ4JDbvn06RGFI3IJ3-FC6rEJUHqgOzTeEmg/viewform" target="_blank" rel="noopener noreferrer">
           Abrir formulario
@@ -499,8 +639,8 @@
 
       <article class="card metric border-teal">
         <div class="label">Seguridad</div>
-        <div class="value">Pendiente</div>
-        <div class="hint">Próxima etapa: Cloudflare Access.</div>
+        <div class="value">Activa</div>
+        <div class="hint">Bloqueo local frontend activo.</div>
       </article>
     </section>
 
@@ -669,6 +809,48 @@
   </main>
 
   <script>
+    // --- SISTEMA DE CONTROL DE ACCESO ---
+    const USUARIO_CORRECTO = "admin@kauze.cl";
+    const CLAVE_CORRECTA = "Kauze2026!Fundadores";
+
+    const authOverlay = document.getElementById("authOverlay");
+    const mainContent = document.getElementById("mainContent");
+    const loginForm = document.getElementById("loginForm");
+    const errorMessage = document.getElementById("errorMessage");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    // Verificar si ya tiene sesión iniciada en esta pestaña
+    if (sessionStorage.getItem("kauzeAdminAuth") === "true") {
+      authOverlay.style.display = "none";
+      mainContent.style.display = "block";
+    }
+
+    // Evento de Login
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const user = document.getElementById("username").value.trim();
+      const pass = document.getElementById("password").value;
+
+      if (user === USUARIO_CORRECTO && pass === CLAVE_CORRECTA) {
+        sessionStorage.setItem("kauzeAdminAuth", "true");
+        errorMessage.style.display = "none";
+        
+        // Desvanecer el bloqueo y mostrar el panel
+        authOverlay.style.display = "none";
+        mainContent.style.display = "block";
+      } else {
+        errorMessage.style.display = "block";
+      }
+    });
+
+    // Evento de Logout
+    logoutBtn.addEventListener("click", () => {
+      sessionStorage.removeItem("kauzeAdminAuth");
+      window.location.reload();
+    });
+
+
+    // --- SCRIPT ORIGINAL DE TU PANEL INTERNO ---
     const TOTAL_FOUNDERS = 30;
 
     const founderInput = document.getElementById("founderInput");
@@ -685,10 +867,10 @@
 
       localStorage.setItem("kauzeFounderCount", String(count));
 
-      founderInput.value = count;
-      founderMetric.textContent = count;
-      founderText.textContent = `${count} de ${TOTAL_FOUNDERS}`;
-      founderProgress.style.width = `${(count / TOTAL_FOUNDERS) * 100}%`;
+      if(founderInput) founderInput.value = count;
+      if(founderMetric) founderMetric.textContent = count;
+      if(founderText) founderText.textContent = `${count} de ${TOTAL_FOUNDERS}`;
+      if(founderProgress) founderProgress.style.width = `${(count / TOTAL_FOUNDERS) * 100}%`;
     }
 
     const savedFounderCount = localStorage.getItem("kauzeFounderCount");
