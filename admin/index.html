@@ -152,6 +152,21 @@
       box-shadow: 0 8px 20px rgba(37,99,235,.15);
     }
 
+    /* Botón Regresar al Landing desde Login */
+    .btn-back-landing {
+      display: inline-block;
+      margin-top: 20px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .btn-back-landing:hover {
+      color: var(--text);
+    }
+
     .error-message {
       color: var(--danger);
       font-size: 13px;
@@ -164,7 +179,7 @@
     .shell {
       max-width: 1180px;
       margin: 0 auto;
-      display: none; /* Se activa dinámicamente si la clave es correcta */
+      display: none; /* Bloqueado por defecto */
     }
 
     .topbar {
@@ -578,6 +593,8 @@
         <button type="submit" class="btn-login">Verificar Identidad</button>
         <div class="error-message" id="errorMessage">⚠️ Credenciales incorrectas o sin autorización.</div>
       </form>
+
+      <a href="/" class="btn-back-landing">← Regresar al inicio</a>
     </div>
   </div>
 
@@ -835,7 +852,6 @@
         sessionStorage.setItem("kauzeAdminAuth", "true");
         errorMessage.style.display = "none";
         
-        // Desvanecer el bloqueo y mostrar el panel
         authOverlay.style.display = "none";
         mainContent.style.display = "block";
       } else {
@@ -843,10 +859,10 @@
       }
     });
 
-    // Evento de Logout
+    // Evento de Logout (Elimina credenciales y expulsa al landing principal)
     logoutBtn.addEventListener("click", () => {
       sessionStorage.removeItem("kauzeAdminAuth");
-      window.location.reload();
+      window.location.href = "/";
     });
 
 
