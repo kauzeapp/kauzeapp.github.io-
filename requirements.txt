@@ -1,0 +1,2 @@
+# Este archivo está intencionalmente vacío porque server.py solo utiliza la librería estándar de Python.
+# Railway lo detectará para saber que es un entorno Python.
