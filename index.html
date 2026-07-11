@@ -7,9 +7,9 @@
     <!-- Importamos las tipografías oficiales de tu marca desde Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Sora:wght@700;800&display=swap" rel="sheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Sora:wght@700;800&display=swap" rel="stylesheet">
     
-    <>
+    <style>
         /* Variables basadas estrictamente en la paleta de tu imagen */
         :root {
             --bg-color: #ffffff; /* Fondo blanco limpio de Kauze */
@@ -499,7 +499,7 @@
         <!-- 4. PROGRAMA FUNDADORES Y CONTADOR REAL -->
         <div class="section">
             <h2>Programa Fundadores</h2>
-            <p ="color: var(--text-muted); margin-bottom: 20px;">Buscamos solo a los primeros 30 emprendedores visionarios en Chile para unirse de forma exclusiva. Los seleccionados obtendrán una tarifa preferencial de por vida.</p>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Buscamos solo a los primeros 30 emprendedores visionarios en Chile para unirse de forma exclusiva. Los seleccionados obtendrán una tarifa preferencial de por vida.</p>
             
             <div class="counter-container">
                 <div class="counter-title">Cupos Oficiales Aprobados</div>
@@ -513,7 +513,7 @@
         <!-- 5. FORMULARIO CONECTADO A GOOGLE FORMS -->
         <div class="section">
             <h2>Postula aquí</h2>
-            <p ="margin-bottom: 24px; color: var(--text-muted);">Completa tus datos a continuación. Revisaremos tu postulación y, si tu negocio califica, te contactaremos directamente.</p>
+            <p style="margin-bottom: 24px; color: var(--text-muted);">Completa tus datos a continuación. Revisaremos tu postulación y, si tu negocio califica, te contactaremos directamente.</p>
             
             <div class="iframe-container">
                 <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSf4uF0gpSasdglJ4JDbvn06RGFI3IJ3-FC6rEJUHqgOzTeEmg/viewform?embedded=true">Cargando…</iframe>
@@ -523,7 +523,7 @@
         <!-- 6. CIERRE -->
         <div class="footer">
             <p>El futuro de los negocios de servicios se está creando ahora.</p>
-            <p ="margin-top: 12px; font-size: 11px; color: #94a3b8;">© 2026 Kauze.cl - Todos los derechos reservados.</p>
+            <p style="margin-top: 12px; font-size: 11px; color: #94a3b8;">© 2026 Kauze.cl - Todos los derechos reservados.</p>
         </div>
 
     </div>
@@ -540,7 +540,7 @@
             
             // Animación suave de la barra de progreso
             setTimeout(() => {
-                progressFill..width = `${targetPercentage}%`;
+               progressFill.style.width = `${targetPercentage}%`;
             }, 300);
             
             // Animación del número contando hacia arriba en milisegundos
