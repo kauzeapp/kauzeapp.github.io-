@@ -568,7 +568,208 @@
         flex-direction: column;
       }
     }
+
+    /* SYNCHRONIZATION CONTROLS */
+    .sync-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .sync-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+    }
+    
+    .sync-badge.online {
+      background: rgba(16, 185, 129, 0.08);
+      color: var(--teal);
+      border-color: rgba(16, 185, 129, 0.22);
+    }
+    
+    .sync-badge.saving {
+      background: rgba(217, 119, 6, 0.08);
+      color: var(--amber);
+      border-color: rgba(217, 119, 6, 0.22);
+    }
+    
+    .sync-badge.offline {
+      background: rgba(100, 116, 139, 0.08);
+      color: var(--muted);
+      border-color: rgba(100, 116, 139, 0.22);
+    }
+
+    /* ACCORDION ROADMAP */
+    .phase-accordion {
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--card);
+      margin-bottom: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 18px rgba(15, 23, 42, .02);
+      transition: all 0.25s ease;
+    }
+    
+    .phase-accordion:hover {
+      border-color: rgba(99, 102, 241, 0.25);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, .045);
+    }
+    
+    .phase-header {
+      width: 100%;
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      font-family: 'Sora', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--dark);
+      transition: background 0.2s ease;
+    }
+    
+    .phase-header:hover {
+      background: rgba(99, 102, 241, 0.015);
+    }
+    
+    .phase-header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    
+    .phase-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(37,99,235,.06);
+      color: var(--blue);
+      border: 1px solid rgba(37,99,235,.12);
+      letter-spacing: 0.5px;
+    }
+    
+    .phase-chevron {
+      font-size: 18px;
+      color: var(--muted);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .phase-accordion.open .phase-chevron {
+      transform: rotate(180deg);
+    }
+    
+    .phase-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border-top: 1px solid transparent;
+      padding: 0 24px;
+    }
+    
+    .phase-accordion.open .phase-content {
+      max-height: 3000px;
+      border-top-color: var(--border);
+      padding: 24px;
+    }
+    
+    .objective-block {
+      margin-bottom: 28px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 22px;
+    }
+    
+    .objective-block:last-child {
+      margin-bottom: 0;
+    }
+    
+    .objective-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .objective-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--dark);
+      margin: 0;
+    }
+    
+    .objective-stats {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      background: var(--card);
+      padding: 2px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    
+    .tasks-grid {
+      display: grid;
+      gap: 10px;
+    }
+    
+    .task-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    
+    .task-item:hover {
+      border-color: rgba(99, 102, 241, 0.2);
+      transform: translateX(2px);
+    }
+    
+    .task-item input[type="checkbox"] {
+      margin-top: 2px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--blue);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    
+    .task-item span {
+      font-size: 13.5px;
+      line-height: 1.5;
+      color: var(--text);
+      transition: color 0.2s ease;
+    }
+    
+    .task-item input:checked + span {
+      color: var(--muted);
+      text-decoration: line-through;
+    }
   </style>
+
 </head>
 
 <body>
@@ -655,9 +856,9 @@
       </article>
 
       <article class="card metric border-teal">
-        <div class="label">Seguridad</div>
-        <div class="value">Activa</div>
-        <div class="hint">Bloqueo local frontend activo.</div>
+        <div class="label">Progreso Core</div>
+        <div class="value" id="globalProgressPercent">0%</div>
+        <div class="hint" id="globalProgressHint">0 de 125 tareas completadas.</div>
       </article>
     </section>
 
@@ -704,45 +905,36 @@
 
     <div class="section-title">
       <div>
-        <h2>Tareas pendientes</h2>
-        <p>Estas marcas se guardan solo en este navegador.</p>
+        <h2>Tareas del Proyecto (125 pasos)</h2>
+        <p>Control del roadmap estratégico de Kauze.</p>
       </div>
-      <button class="button danger" id="resetTasks">Reiniciar tareas</button>
+      <div class="sync-controls">
+        <span id="syncStatus" class="sync-badge offline">🔴 Modo local</span>
+        <button class="button" id="toggleSyncSettingsBtn" style="min-height:36px; padding: 4px 10px; font-size:13px; margin-left: 8px;">⚙️</button>
+        <button class="button" id="syncNowBtn" style="min-height:36px; padding: 4px 14px; font-size:13px; margin-left: 8px;">Sincronizar</button>
+        <button class="button danger" id="resetTasks" style="min-height:36px; padding: 4px 14px; font-size:13px; margin-left: 8px;">Reiniciar</button>
+      </div>
     </div>
 
-    <section class="card">
-      <div class="task-list">
-        <label class="task">
-          <input type="checkbox" data-task="task-1">
-          <span>Revisar respuestas del Google Form y detectar patrones de dolor.</span>
-        </label>
-
-        <label class="task">
-          <input type="checkbox" data-task="task-2">
-          <span>Definir el perfil exacto del cliente fundador ideal.</span>
-        </label>
-
-        <label class="task">
-          <input type="checkbox" data-task="task-3">
-          <span>Crear mensaje de contacto por WhatsApp para quienes postulen.</span>
-        </label>
-
-        <label class="task">
-          <input type="checkbox" data-task="task-4">
-          <span>Definir precio fundador y beneficios de por vida.</span>
-        </label>
-
-        <label class="task">
-          <input type="checkbox" data-task="task-5">
-          <span>Diseñar flujo mínimo de producto: reserva, confirmación, recordatorio y postventa.</span>
-        </label>
-
-        <label class="task">
-          <input type="checkbox" data-task="task-6">
-          <span>Configurar Cloudflare Access antes de subir datos internos reales.</span>
-        </label>
+    <!-- Card de configuración del servidor de sincronización -->
+    <div id="syncSettingsCard" class="card" style="display: none; margin-bottom: 20px;">
+      <h3 style="margin-bottom: 8px; font-size: 16px;">Configuración de Sincronización Online</h3>
+      <p style="font-size: 13px; margin-bottom: 14px; color: var(--muted);">
+        Ingresa la URL del servidor backend en Python (ej: <code>http://localhost:8000</code> o tu dirección de Render/Railway). 
+        Si lo dejas vacío, usará el mismo origen desde donde se carga la página o el almacenamiento local.
+      </p>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <input type="text" id="syncServerUrl" placeholder="Ej: http://localhost:8000" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border); font-size: 13px;">
+        <button class="button primary" id="saveSyncSettingsBtn" style="min-height: 38px; padding: 0 16px; font-size: 13px;">Guardar y Conectar</button>
+        <button class="button" id="closeSyncSettingsBtn" style="min-height: 38px; padding: 0 16px; font-size: 13px;">Cancelar</button>
       </div>
-    </section>
+      <div id="syncTestResult" style="margin-top: 10px; font-size: 13px; font-weight: 600; min-height: 18px;"></div>
+    </div>
+
+    <!-- Contenedor del acordeón de tareas -->
+    <div id="tasksAccordionContainer">
+      <!-- Se genera de forma dinámica con JavaScript -->
+    </div>
 
     <div class="section-title">
       <div>
@@ -896,53 +1088,989 @@
       updateFounderCount(founderInput.value);
     });
 
-    const taskInputs = document.querySelectorAll("[data-task]");
-
-    taskInputs.forEach((input) => {
-      const key = `kauze-${input.dataset.task}`;
-      input.checked = localStorage.getItem(key) === "true";
-
-      input.addEventListener("change", () => {
-        localStorage.setItem(key, input.checked ? "true" : "false");
-      });
+    // --- MOTOR DEL ACORDEÓN DE TAREAS Y SINCRONIZACIÓN ---
+    const KAUZE_TASKS_DATA = [
+  {
+    "title": "🏗️ FASE 1: Ingeniería del Core y Arquitectura Multi-Tenant (Backend en Python)",
+    "objectives": [
+      {
+        "title": "Objetivo 1.1: Modelar la Base de Datos Aislada y Escalable (PostgreSQL)",
+        "tasks": [
+          {
+            "id": 1,
+            "text": "Diseñar la estructura de la tabla Locales inyectando la columna categoria_id para discriminar lógicamente entre Barberías y Salones de Belleza."
+          },
+          {
+            "id": 2,
+            "text": "Establecer la tabla global de Usuarios implementando un control de acceso basado en roles (RBAC) para SuperAdmin (tú), Dueño de Local, Empleado/Barbero y Cliente Final."
+          },
+          {
+            "id": 3,
+            "text": "Crear el modelo relacional para Agendas y Servicios, permitiendo parametrizar tiempos estimados de duración, precios en CLP y asignación de profesionales."
+          },
+          {
+            "id": 4,
+            "text": "Desarrollar las políticas de seguridad a nivel de filas (Row-Level Security) para garantizar que los datos de un negocio jamás se mezclen con otro."
+          },
+          {
+            "id": 5,
+            "text": "Estructurar la tabla de Suscripciones_SaaS agregando la columna estado_factura (PENDIENTE, EMITIDA, EXENTA) para tu control tributario interno en el SuperAdmin."
+          }
+        ]
+      },
+      {
+        "title": "Objetivo 1.2: Desarrollar la API Lógica y Flujos de Registro \"Invisible\" (FastAPI / Django REST)",
+        "tasks": [
+          {
+            "id": 6,
+            "text": "Programar el endpoint crítico de lectura de disponibilidad de calendarios en tiempo real para el cliente final."
+          },
+          {
+            "id": 7,
+            "text": "Desarrollar el flujo de autenticación mediante Código OTP vía WhatsApp para el botón \"Ya tengo cita\", eliminando el uso de contraseñas tradicionales."
+          },
+          {
+            "id": 8,
+            "text": "Programar el motor lógico que crea automáticamente un perfil de usuario en segundo plano al capturar el Nombre, WhatsApp y Email en la primera reserva."
+          },
+          {
+            "id": 9,
+            "text": "Construir el controlador de estados del servicio (Comenzar, Terminar, No-Asistió) para cronometrar el rendimiento del profesional."
+          },
+          {
+            "id": 10,
+            "text": "Desarrollar la lógica condicional que exige el abono con tarjeta previo a la confirmación de la cita si el local así lo configuró."
+          }
+        ]
+      },
+      {
+        "title": "Objetivo 1.3: Construir el Motor de Tareas Async y Automatización (Celery + Redis)",
+        "tasks": [
+          {
+            "id": 11,
+            "text": "Configurar Celery y Redis en el entorno de Python para procesar colas de notificaciones en segundo plano sin ralentizar la navegación."
+          },
+          {
+            "id": 12,
+            "text": "Programar el planificador (Scheduler) para rastrear de forma automatizada las citas marcadas como completadas."
+          },
+          {
+            "id": 13,
+            "text": "Desarrollar el script matemático encargado de calcular las ventanas de inactividad (15 o 20 días) para gatillar las alertas de retención de clientes."
+          },
+          {
+            "id": 14,
+            "text": "Escribir la función modular abstracta de mensajería (enviar_notificacion) para enrutar de forma dinámica mensajes a través de Email, WhatsApp o Instagram."
+          },
+          {
+            "id": 15,
+            "text": "Implementar políticas de reintentos automáticos (Retry Logic) con retraso exponencial en caso de caídas en los servidores de Meta."
+          }
+        ]
+      },
+      {
+        "title": "Objetivo 1.4: Integrar Canales Oficiales de Comunicación (Meta Graph API & Email)",
+        "tasks": [
+          {
+            "id": 16,
+            "text": "Configurar el Webhook oficial en el portal de desarrolladores de Meta para recibir eventos e interacciones de Instagram y WhatsApp de forma centralizada."
+          },
+          {
+            "id": 17,
+            "text": "Desarrollar la integración con la API de Messenger para Instagram para despachar los DMs automáticos de postventa."
+          },
+          {
+            "id": 18,
+            "text": "Integrar la Cloud API de WhatsApp Business configurando las plantillas de confirmación y recordatorio de citas aprobadas por Meta."
+          },
+          {
+            "id": 19,
+            "text": "Conectar el SDK de correos electrónicos masivos (Resend o SendGrid) para despachar los respaldos en HTML con los datos de las reservas."
+          },
+          {
+            "id": 20,
+            "text": "Desarrollar el sistema de refresco automatizado de tokens OAuth para asegurar que las cuentas conectadas de los locales no se desvinculen de Meta."
+          }
+        ]
+      },
+      {
+        "title": "Objetivo 1.5: Desplegar Pasarelas de Recaudación y Control de Pagos (Stripe / Mercado Pago)",
+        "tasks": [
+          {
+            "id": 21,
+            "text": "Integrar las API keys de la cuenta corporativa de Kauze para procesar los cobros recurrentes de tus suscripciones SaaS de $19.990, $34.990 y $59.990 CLP."
+          },
+          {
+            "id": 22,
+            "text": "Desarrollar la lógica que permite a cada local conectar sus propias pasarelas mediante OAuth en 2 clics para recibir los abonos de sus clientes directos."
+          },
+          {
+            "id": 23,
+            "text": "Programar el Webhook de respaldo para actualizar instantáneamente el estado del calendario cuando un cliente final realiza una transferencia bancaria manual."
+          },
+          {
+            "id": 24,
+            "text": "Implementar el validador antifraude en Python que realiza una pre-autorización con retención de monto en la tarjeta del local al iniciar los 14 días de prueba gratis."
+          },
+          {
+            "id": 25,
+            "text": "Programar el motor automatizado de reembolsos y devoluciones que se ejecuta en el backend bajo las políticas de cancelación de cada establecimiento."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "🎨 FASE 2: Diseño Adaptativo y Desarrollo de Experiencia de Usuario (Frontend & UI/UX)",
+    "objectives": [
+      {
+        "title": "Objetivo 2.1: Implementar el Sistema de Diseño Inyectable Dinámicamente",
+        "tasks": [
+          {
+            "id": 26,
+            "text": "Codificar los tokens de diseño (colores, márgenes, tipografías Sora Bold e Inter Regular) en componentes reutilizables."
+          },
+          {
+            "id": 27,
+            "text": "Desarrollar la arquitectura de renderizado que lee la base de datos de Python e inyecta la interfaz visual según la categoría seleccionada por el local."
+          },
+          {
+            "id": 28,
+            "text": "Maquetar la interfaz en Modo Oscuro (Azul Profundo) con iconografía de postes de barbería y navajas activada tras presionar \"Barbería\"."
+          },
+          {
+            "id": 29,
+            "text": "Maquetar la interfaz en Modo Claro / Aesthetic (Fondo Limpio, acentos Lila y Turquesa) con iconos de flor de loto y cuidado de uñas para salones de belleza."
+          },
+          {
+            "id": 30,
+            "text": "Diseñar animaciones y transiciones de carga fluidas para mantener la sensación de velocidad y modernidad en dispositivos móviles."
+          }
+        ]
+      },
+      {
+        "title": "Objetivo 2.2: Construir los Portales del Cliente Final (Flujos de Agendamiento y Autogestión)",
+        "tasks": [
+          {
+            "id": 31,
+            "text": "Crear la Landing Page móvil adaptativa por local (kauze.cl/nombre-local) con accesos limpios a los botones primarios."
+          },
+          {
+            "id": 32,
+            "text": "Desarrollar la interfaz del asistente de reserva en 3 pasos: Filtro de Servicios ➔ Tarjeta de Profesional ➔ Grilla de Horas Libres."
+          },
+          {
+            "id": 33,
+            "text": "Diseñar la pantalla de checkout integrado que unifica el formulario de datos mínimos con la pasarela de pagos."
+          },
+          {
+            "id": 34,
+            "text": "Crear el Dashboard \"Ya tengo cita\" donde el usuario visualiza sus tarjetas de reservas activas tras ingresar su código de acceso OTP."
+          },
+          {
+            "id": 35,
+            "text": "Diseñar la interfaz interactiva de evaluación postventa con selector de estrellas y comentarios, integrando la acumulación de \"Puntos Kauze\"."
+          }
+        ]
+      },
+      {
+        "title": "Objetivo 2.3: Desarrollar la Interfaz Operativa del Barbero/Estilista (El Panel Diario)",
+        "tasks": [
+          {
+            "id": 36,
+            "text": "Crear la pantalla de inicio del operario con el switch superior de gran tamaño [ 🔴 Agenda Cerrada / 🟢 Kauze Activo ]."
+          },
+          {
+            "id": 37,
+            "text": "Diseñar la botonera de acción en tiempo real para el sillón de trabajo: [ Recibir Cliente Walk-in ], [ Comenzar Servicio ] y [ Terminar Servicio ]."
+          },
+          {
+            "id": 38,
+            "text": "Desarrollar el sub-panel de \"Mis Ganancias\" que desglosa de manera transparente el cálculo de comisiones del empleado en tiempo real."
+          },
+          {
+            "id": 39,
+            "text": "Programar el botón de [ Solicitar Cierre de Jornada ] que congela la pantalla del empleado y despacha el reporte al dueño del negocio."
+          },
+          {
+            "id": 40,
+            "text": "Integrar la alerta visual y selector de estrellas rápido para \"Evaluar Cliente\" antes de cerrar la pantalla del servicio completado."
+          }
+        ]
+      },
+      {
+        "title": "Objetivo 2.4: Construir el Panel Administrativo del Dueño del Local",
+        "tasks": [
+          {
+            "id": 41,
+            "text": "Diseñar las vistas gráficas del Dashboard con el resumen de la jornada y las pestañas de planificación [ Hoy ], [ Semanal ] y [ Mensual ]."
+          },
+          {
+            "id": 42,
+            "text": "Desarrollar el módulo de configuración del negocio para subir el logo, configurar el staff, horarios de turnos y porcentajes de comisiones."
+          },
+          {
+            "id": 43,
+            "text": "Crear la pantalla de \"Privacidad y Descubrimiento\" con el interruptor para elegir entre el modelo \"Solo Link Directo\" o \"Aparecer en el Buscador Global de Kauze\"."
+          },
+          {
+            "id": 44,
+            "text": "Diseñar la sección de \"Conexión de Redes\" con botones rápidos para vincular las cuentas públicas de Instagram y WhatsApp."
+          },
+          {
+            "id": 45,
+            "text": "Construir el \"Centro de Validación y Cierre de Caja\" donde el dueño aprueba o edita las comisiones solicitadas por sus empleados al final del día."
+          }
+        ]
+      },
+      {
+        "title": "Objetivo 2.5: Crear el Centro de Mensajería ante Contingencias (Fuerza Mayor)",
+        "tasks": [
+          {
+            "id": 46,
+            "text": "Diseñar en el panel del local el botón de emergencia masiva [ ⚠️ Notificar Contingencia ]."
+          },
+          {
+            "id": 47,
+            "text": "Crear la interfaz de selección de rango de horas afectadas y el selector de motivos (corte de luz, emergencias médicas, etc.)."
+          },
+          {
+            "id": 48,
+            "text": "Diseñar la interfaz móvil especial que recibe el cliente final afectado al abrir el link de contingencia enviado por el sistema."
+          },
+          {
+            "id": 49,
+            "text": "Maquetar los dos botones de resolución del cliente: [ Aceptar Nueva Hora Sugerida ] y [ Rechazar y Solicitar Devolución sin Cargo ]."
+          },
+          {
+            "id": 50,
+            "text": "Programar la actualización instantánea del calendario del local eliminando las horas rechazadas de forma automática."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "🔬 FASE 3: Cabina de Control del SuperAdmin y Optimización Operativa (Tu Panel)",
+    "objectives": [
+      {
+        "title": "Objetivo 3.1: Desarrollar la Central de Inteligencia Financiera y Costos del SaaS",
+        "tasks": [
+          {
+            "id": 51,
+            "text": "Maquetar las tarjetas de métricas críticas globales de Kauze: Ingresos Mensuales Recurrentes (MRR) y Tasa de Churn."
+          },
+          {
+            "id": 52,
+            "text": "Desarrollar la funcionalidad interactiva en la Tasa de Churn para hacer clic y desplegar la lista de locales desertores con el botón [ 📞 Iniciar Gestión de Retención ]."
+          },
+          {
+            "id": 53,
+            "text": "Integrar la API de Google Ads para inyectar en el módulo de costos los montos reales gastados en publicidad digital."
+          },
+          {
+            "id": 54,
+            "text": "Desarrollar el calculador automatizado que cruza los gastos de Google Ads, servidores de Python y mensajería de Meta para mostrarte tu CAC y tu margen neto."
+          },
+          {
+            "id": 55,
+            "text": "Diseñar el visualizador de estados de conexión de servicios con el indicador de salud [ 🟢 Meta API Online ]."
+          }
+        ]
+      },
+      {
+        "title": "Objetivo 3.2: Construir el Módulo de Validación Antifraude y Gestión de Inquilinos",
+        "tasks": [
+          {
+            "id": 56,
+            "text": "Crear el panel de moderación de \"Locales Nuevos Pendientes\" que lista las solicitudes entrantes de las barberías y salones de Chile."
+          },
+          {
+            "id": 57,
+            "text": "Programar el indicador visual que confirma si el backend en Python logró realizar con éxito la pre-autorización de la tarjeta del negocio antes de habilitar el botón de aprobación."
+          },
+          {
+            "id": 58,
+            "text": "Diseñar el botón de acción definitiva [ ✅ Aprobar Creación ] para activar el subdominio público del comercio."
+          },
+          {
+            "id": 59,
+            "text": "Desarrollar la Lista Maestra de Barberías y Salones con buscadores avanzados por región y volumen operativo."
+          },
+          {
+            "id": 60,
+            "text": "Integrar el botón rápido [ 💬 Contactar Dueño ] que te comunica directamente mediante WhatsApp o correo con los administradores de los locales."
+          }
+        ]
+      },
+      {
+        "title": "Objetivo 3.3: Implementar la Central de Arbitraje y Resolución Salomónica",
+        "tasks": [
+          {
+            "id": 61,
+            "text": "Crear la bandeja de entrada para apelaciones de reseñas destructivas reportadas por los dueños y reclamos de clientes finales."
+          },
+          {
+            "id": 62,
+            "text": "Diseñar la visualización de auditoría que te muestra los logs históricos de la cita guardados en Python (clics, horas, registros de asistencia)."
+          },
+          {
+            "id": 63,
+            "text": "Desarrollar el botón táctico [ 🤝 Enviar Propuesta Salomónica ] que gatilla las alertas automáticas de negociación bilateral entre el local y el cliente."
+          },
+          {
+            "id": 64,
+            "text": "Diseñar el botón de resolución final del SuperAdmin [ ❌ Mantener Reseña / Rechazar Apelación ] en caso de fallar a favor del cliente."
+          },
+          {
+            "id": 65,
+            "text": "Diseñar el botón de resolución final [ 🛠️ Eliminar Reseña Injusta / Reembolsar Abono ] para limpiar la reputación del comercio en el buscador si el cliente actuó de mala fe."
+          }
+        ]
+      },
+      {
+        "title": "Objetivo 3.4: Desarrollar la Gestión del Consumidor Final y el Embudo de Ventas B2B",
+        "tasks": [
+          {
+            "id": 66,
+            "text": "Crear la Lista Maestra de Clientes Finales para auditar las evaluaciones cruzadas e identificar números telefónicos conflictivos o abusivos."
+          },
+          {
+            "id": 67,
+            "text": "Maquetar el buzón centralizado de Reclamos, Sugerencias y Disclaimers Legales de la plataforma para los usuarios del sistema."
+          },
+          {
+            "id": 68,
+            "text": "Diseñar el gráfico visual del \"Embudo de Registro B2B\" dividiendo las etapas del Onboarding de los locales (Visita ➔ Datos Básicos ➔ Ingreso de Tarjeta)."
+          },
+          {
+            "id": 69,
+            "text": "Implementar el botón de rescate comercial [ ⚡ Rescatar Registro Abandonado ] para contactar de forma directa a las barberías que no finalizaron su inscripción."
+          },
+          {
+            "id": 70,
+            "text": "Construir el panel de Alertas Preventivas de Inactividad que te avisa de forma prioritario si un local activo lleva más de 5 días sin usar el software."
+          }
+        ]
+      },
+      {
+        "title": "Objetivo 3.5: Implementar el Control de Facturación Propia y Conexiones ERP",
+        "tasks": [
+          {
+            "id": 71,
+            "text": "Diseñar la sección \"Pendientes de Facturación\" que lista cronológicamente a los locales que ya fueron cobrados exitosamente por tu pasarela."
+          },
+          {
+            "id": 72,
+            "text": "Desarrollar el botón [ 📑 Emitir Factura vía ERP ] para conectar mediante API con softwares chilenos de facturación (Maxxa/Haulmer) y automatizar el timbrado en el SII."
+          },
+          {
+            "id": 73,
+            "text": "Crear el botón manual de respaldo [ ✓ Marcar como Emitida Manual ] para los documentos tributarios que proceses de forma externa en el portal del SII."
+          },
+          {
+            "id": 74,
+            "text": "Diseñar la vista \"Historial de Emitidas\" que permite buscar, organizar y exportar la data contable por mes o RUT para tu contador."
+          },
+          {
+            "id": 75,
+            "text": "Habilitar la sección de descarga directa de los archivos PDF de las facturas generadas por el sistema."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "🧪 FASE 4: QA Técnico, Optimización y Marcha Blanca (Pruebas y Estabilidad)",
+    "objectives": [
+      {
+        "title": "Objetivo 4.1: Ejecutar Pruebas de Estrés y Concurrencia en Python",
+        "tasks": [
+          {
+            "id": 76,
+            "text": "Desarrollar scripts automatizados de testing en Python que simulen miles de peticiones simultáneas sobre el calendario de un mismo local para erradicar la duplicidad de citas."
+          },
+          {
+            "id": 77,
+            "text": "Validar la velocidad de actualización de los bloqueos de horarios en tiempo real (bloques horarios que se inhabilitan al instante en la web)."
+          },
+          {
+            "id": 78,
+            "text": "Auditar el comportamiento del cálculo de bloques horarios cuando se cruzan los tiempos estimados reales frente a las pausas de almuerzo del staff."
+          },
+          {
+            "id": 79,
+            "text": "Verificar la correcta sincronización de las zonas horarias y respuestas del servidor en las distintas regiones del país."
+          },
+          {
+            "id": 80,
+            "text": "Monitorear el consumo de recursos de la base de datos PostgreSQL, optimizando los índices de búsqueda para garantizar respuestas bajo los 200 ms."
+          }
+        ]
+      },
+      {
+        "title": "Objetivo 4.2: Certificar las Conexiones e Integraciones de Mensajería con Meta",
+        "tasks": [
+          {
+            "id": 81,
+            "text": "Realizar auditorías de envío de DMs en cuentas de Instagram de prueba, forzando escenarios dentro y fuera de la ventana de interacción de 24 horas."
+          },
+          {
+            "id": 82,
+            "text": "Validar en el panel de Meta for Developers la aprobación de las plantillas estructuradas de WhatsApp para evitar bloqueos por spam."
+          },
+          {
+            "id": 83,
+            "text": "Simular caídas de red para corroborar que la cola de tareas en Celery guarde los mensajes en tránsito y los despache de forma segura al restablecerse el servicio."
+          },
+          {
+            "id": 84,
+            "text": "Comprobar que los mecanismos de rotación de claves criptográficas y refresco de tokens OAuth funcionen de manera transparente para los locales."
+          },
+          {
+            "id": 85,
+            "text": "Auditar mediante pruebas cruzadas que las notificaciones salgan estrictamente con los tokens de la marca correspondiente, blindando el aislamiento de datos."
+          }
+        ]
+      },
+      {
+        "title": "Objetivo 4.3: Validar la Usabilidad con Usuarios Reales (QA de Campo)",
+        "tasks": [
+          {
+            "id": 86,
+            "text": "Someter el asistente de reserva sin inicio de sesión a pruebas con usuarios de distintas edades para medir la velocidad del flujo."
+          },
+          {
+            "id": 87,
+            "text": "Evaluar la tasa de éxito del inicio de sesión mediante códigos OTP por WhatsApp en zonas con conectividad móvil variable."
+          },
+          {
+            "id": 88,
+            "text": "Medir el tiempo de aprendizaje de barberos y estilistas reales utilizando los botones de control de citas directamente en sus estaciones de trabajo."
+          },
+          {
+            "id": 89,
+            "text": "Monitorear la tasa de clics y respuesta de los clientes finales ante el sistema de encuestas postventa recibido en su Instagram."
+          },
+          {
+            "id": 90,
+            "text": "Ajustar los tamaños de botones, contrastes de colores y textos explicativos basándose en las fricciones detectadas en las pruebas de campo."
+          }
+        ]
+      },
+      {
+        "title": "Objetivo 4.4: Desplegar el Programa Piloto Funcional (Marcha Blanca)",
+        "tasks": [
+          {
+            "id": 91,
+            "text": "Seleccionar e incorporar a la plataforma a 3 barberías y 3 salones de belleza representativos para operar bajo un régimen gratuito de 3 meses."
+          },
+          {
+            "id": 92,
+            "text": "Configurar presencialmente los perfiles de los locales piloto, entrenando al personal en el uso del cronómetro operativo diario."
+          },
+          {
+            "id": 93,
+            "text": "Auditar diariamente la consistencia de los datos financieros recopilados en los cierres de caja y aprobaciones de comisiones de los comercios piloto."
+          },
+          {
+            "id": 94,
+            "text": "Monitorear la efectividad del rastreador automático de \"Tiempos Muertos\" y la respuesta del público ante los cupones dinámicos disparados por Python."
+          },
+          {
+            "id": 95,
+            "text": "Solucionar en caliente (Hotfixes) los errores de interfaz y código reportados por el grupo piloto durante las primeras 4 semanas de uso continuo."
+          }
+        ]
+      },
+      {
+        "title": "Objetivo 4.5: Congelar la Versión de Producción y Establecer Políticas de Seguridad",
+        "tasks": [
+          {
+            "id": 96,
+            "text": "Programar los respaldos automatizados e incrementales diarios de la base de datos de producción con almacenamiento en la nube encriptado."
+          },
+          {
+            "id": 97,
+            "text": "Redactar y publicar los Términos y Condiciones, Políticas de Privacidad y Avisos de Deslinde de Responsabilidad exigidos formalmente por Meta y las pasarelas."
+          },
+          {
+            "id": 98,
+            "text": "Configurar las herramientas de monitoreo de excepciones (como Sentry) para despacharte alertas críticas si el backend de Python detecta un fallo en vivo."
+          },
+          {
+            "id": 99,
+            "text": "Implementar límites de peticiones (Rate Limiting) en las APIs públicas para blindar el software contra ataques maliciosos o de denegación de servicio."
+          },
+          {
+            "id": 100,
+            "text": "Congelar la versión stable del código (Release v1.0) y preparar los vídeos tutoriales de onboarding de 1 minuto para los futuros clientes autónomos."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "🚀 FASE 5: Estrategia de Lanzamiento, Tracción B2B y Posicionamiento de Mercado",
+    "objectives": [
+      {
+        "title": "1. Construir el Arsenal de Ventas Corporativo de Kauze",
+        "tasks": [
+          {
+            "id": 101,
+            "text": "Maquetar la presentación comercial digital e impresa utilizando los prototipos de alta fidelidad de 1000248667.png y watermarked_img_10842127270057798388.png."
+          },
+          {
+            "id": 102,
+            "text": "Estructurar el guion de venta comercial enfocado en el retorno de inversión inmediato: \"Kauze no es un gasto, es la herramienta que automatiza tu Instagram para asegurar tus ingresos mensuales\"."
+          },
+          {
+            "id": 103,
+            "text": "Configurar una versión demo interactiva y completamente funcional en un teléfono de pruebas para demostraciones rápidas de 30 segundos en terreno."
+          },
+          {
+            "id": 104,
+            "text": "Diseñar el kit físico de bienvenida para los locales (stickers con códigos QR de alta durabilidad para los espejos y vitrinas: \"Agenda tu próxima hora aquí\")."
+          },
+          {
+            "id": 105,
+            "text": "Habilitar el embudo automatizado de registro en la página web principal de Kauze para captar las solicitudes orgánicas."
+          }
+        ]
+      },
+      {
+        "title": "2. Ejecutar la Campaña de Lanzamiento y Marketing de Atracción (Inbound)",
+        "tasks": [
+          {
+            "id": 106,
+            "text": "Activar campañas de anuncios pagados en Meta Ads segmentando de forma milimétrica a dueños de salones, estilistas, manicuristas y barberos en Chile."
+          },
+          {
+            "id": 107,
+            "text": "Lanzar la carnada comercial de atracción: \"Prueba Kauze gratis por 14 días y activa hoy la automatización de Instagram DMs en tu local\"."
+          },
+          {
+            "id": 108,
+            "text": "Publicar en formato de vídeo digital los testimonios y métricas de éxito recopiladas durante la marcha blanca con los locales piloto."
+          },
+          {
+            "id": 109,
+            "text": "Desarrollar artículos y contenido educativo enfocado en optimizar las \"zonas frías\" de las agendas y mitigar los \"No-Show\" en el rubro estético."
+          },
+          {
+            "id": 110,
+            "text": "Ofrecer seminarios web rápidos o asesorías virtuales gratuitas sobre cómo transformar seguidores de Instagram en clientes con reservas activas."
+          }
+        ]
+      },
+      {
+        "title": "3. Implementar el Monitoreo Activo de la Conversión y la Salud del SaaS",
+        "tasks": [
+          {
+            "id": 111,
+            "text": "Analizar semanalmente las métricas del \"Embudo de Registro B2B\" en tu SuperAdmin para detectar abandonos en la pantalla de ingreso de tarjetas."
+          },
+          {
+            "id": 112,
+            "text": "Ejecutar de forma inmediata los flujos de rescate comercial enviando mensajes de soporte personalizados a los leads estancados en el onboarding."
+          },
+          {
+            "id": 113,
+            "text": "Revisar las alertas de inactividad de forma diaria para intervenir proactivamente ante locales que demuestren un bajo uso de la aplicación."
+          },
+          {
+            "id": 114,
+            "text": "Auditar los costos variables de la API de WhatsApp frente a los ingresos percibidos por suscripciones para calibrar los márgenes de ganancia neta de tu negocio."
+          },
+          {
+            "id": 115,
+            "text": "Implementar encuestas automatizadas breves de salida (Exit Surveys) para comprender con exactitud las razones si un local decide dar de baja su membresía."
+          }
+        ]
+      },
+      {
+        "title": "4. Consolidar la Postventa y el Soporte B2B Automatizado",
+        "tasks": [
+          {
+            "id": 116,
+            "text": "Activar un centro de ayuda con respuestas automáticas estructuradas basadas en las preguntas más frecuentes de los barberos y estilistas."
+          },
+          {
+            "id": 117,
+            "text": "Establecer canales de comunicación preferentes vía WhatsApp para dar soporte técnico rápido a los dueños de locales del plan premium."
+          },
+          {
+            "id": 118,
+            "text": "Lanzar trimestralmente actualizaciones menores de software basadas exclusivamente en las solicitudes recopiladas en la bandeja de sugerencias de los clientes."
+          },
+          {
+            "id": 119,
+            "text": "Monitorear el correcto funcionamiento del módulo de arbitraje y disputas de reseñas para garantizar un ambiente justo y transparente entre comercios y usuarios."
+          },
+          {
+            "id": 120,
+            "text": "Enviar reportes de desempeño automatizados mensuales a los dueños (ej: \"Este mes recuperaste $X gracias a las promociones de tus horas muertas\"), recordándoles de forma tangible el valor de pagar su suscripción de Kauze."
+          }
+        ]
+      },
+      {
+        "title": "5. Preparar la Infraestructura para la Expansión (Fase 2 Comercial)",
+        "tasks": [
+          {
+            "id": 121,
+            "text": "Diseñar la arquitectura del módulo de comisionistas (congelado temporalmente) dejando las variables listas en la base de datos para registrar vendedores por código geográfico."
+          },
+          {
+            "id": 122,
+            "text": "Establecer contacto con los primeros candidatos a representantes de marca en regiones estratégicas de Chile para sondear el terreno comercial presencial."
+          },
+          {
+            "id": 123,
+            "text": "Estructurar el borrador legal de los contratos de corretaje y comisiones recurrentes (100% del primer mes + 15% mensual de retención) para la fuerza de ventas externa."
+          },
+          {
+            "id": 124,
+            "text": "Evaluar la viabilidad técnica de expandir la inyección de estilos adaptativos hacia rubros hermanos como centros de tatuajes, spas de relajación o clínicas de estética médica."
+          },
+          {
+            "id": 125,
+            "text": "Consolidar el flujo de caja operativo de Kauze para asegurar que el negocio sea financieramente autónomo, altamente rentable y listo para escalar a nivel nacional."
+          }
+        ]
+      },
+      {
+        "title": "1. Dominio de kauze.cl",
+        "tasks": []
+      },
+      {
+        "title": "2. Cuenta de Correo de kauze.cl (Email Corporativo)",
+        "tasks": []
+      },
+      {
+        "title": "3. El Host (Servidores y Base de Datos)",
+        "tasks": []
+      },
+      {
+        "title": "4. Plan de Teléfono y Número de Teléfono Corporativo",
+        "tasks": []
+      }
+    ]
+  }
+];
+   
+    let checkedTasks = [];
+    let syncServer = localStorage.getItem("kauzeSyncServerUrl") || "";
+    let isOnline = false;
+   
+    const syncStatusEl = document.getElementById("syncStatus");
+    const syncServerUrlEl = document.getElementById("syncServerUrl");
+    const syncTestResultEl = document.getElementById("syncTestResult");
+    const syncSettingsCardEl = document.getElementById("syncSettingsCard");
+    const tasksAccordionContainer = document.getElementById("tasksAccordionContainer");
+    const globalProgressPercentEl = document.getElementById("globalProgressPercent");
+    const globalProgressHintEl = document.getElementById("globalProgressHint");
+   
+    if (syncServerUrlEl) syncServerUrlEl.value = syncServer;
+   
+    function getApiUrl() {
+        if (syncServer) {
+            return syncServer.endsWith('/') ? `${syncServer}api/tasks` : `${syncServer}/api/tasks`;
+        }
+        if (window.location.protocol.startsWith('http')) {
+            return "/api/tasks";
+        }
+        return "";
+    }
+   
+    async function testAndConnect(url, showFeedback = false) {
+        if (!url) {
+            isOnline = false;
+            updateSyncBadge("offline", "🔴 Modo local");
+            if (showFeedback) syncTestResultEl.innerHTML = "<span style='color:var(--muted);'>Modo local activado.</span>";
+            return false;
+        }
+        
+        const apiUrl = url.endsWith('/') ? `${url}api/tasks` : `${url}/api/tasks`;
+        try {
+            updateSyncBadge("saving", "🔄 Probando...");
+            const res = await fetch(apiUrl, { method: "GET" });
+            if (res.ok) {
+                isOnline = true;
+                syncServer = url;
+                localStorage.setItem("kauzeSyncServerUrl", url);
+                updateSyncBadge("online", "🟢 En línea");
+                if (showFeedback) syncTestResultEl.innerHTML = "<span style='color:var(--teal);'>¡Conectado con éxito! Sincronizando datos...</span>";
+                return true;
+            }
+        } catch (err) {
+            console.error("Error al conectar con el servidor:", err);
+        }
+        
+        isOnline = false;
+        updateSyncBadge("offline", "🔴 Error de conexión");
+        if (showFeedback) {
+            syncTestResultEl.innerHTML = "<span style='color:var(--danger);'>Error: No se pudo conectar al servidor.</span>";
+        }
+        return false;
+    }
+   
+    function updateSyncBadge(status, text) {
+        syncStatusEl.className = `sync-badge ${status}`;
+        syncStatusEl.textContent = text;
+    }
+   
+    async function loadTasks() {
+        const apiUrl = getApiUrl();
+        if (apiUrl) {
+            try {
+                updateSyncBadge("saving", "🔄 Cargando...");
+                const res = await fetch(apiUrl);
+                if (res.ok) {
+                    const data = await res.json();
+                    checkedTasks = data.checked_tasks || [];
+                    isOnline = true;
+                    updateSyncBadge("online", "🟢 En línea");
+                    renderAccordion();
+                    updateProgress();
+                    return;
+                }
+            } catch (err) {
+                console.error("Error cargando tareas del servidor, cayendo a local:", err);
+            }
+        }
+        
+        isOnline = false;
+        updateSyncBadge("offline", "🔴 Modo local");
+        const local = localStorage.getItem("kauzeCheckedTasks");
+        checkedTasks = local ? JSON.parse(local) : [];
+        renderAccordion();
+        updateProgress();
+    }
+   
+    async function saveTasks() {
+        updateProgress();
+        if (isOnline) {
+            const apiUrl = getApiUrl();
+            if (apiUrl) {
+                try {
+                    updateSyncBadge("saving", "💾 Guardando...");
+                    const res = await fetch(apiUrl, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ checked_tasks: checkedTasks })
+                    });
+                    if (res.ok) {
+                        updateSyncBadge("online", "🟢 En línea");
+                        return;
+                    }
+                } catch (err) {
+                    console.error("Error guardando tareas en el servidor:", err);
+                }
+            }
+        }
+        
+        localStorage.setItem("kauzeCheckedTasks", JSON.stringify(checkedTasks));
+        updateSyncBadge("offline", "🔴 Modo local (Guardado)");
+    }
+   
+    function renderAccordion() {
+        tasksAccordionContainer.innerHTML = "";
+        
+        KAUZE_TASKS_DATA.forEach((phase, pIdx) => {
+            const phaseId = `phase-${pIdx}`;
+            
+            let totalPhaseTasks = 0;
+            let completedPhaseTasks = 0;
+            
+            phase.objectives.forEach(obj => {
+                totalPhaseTasks += obj.tasks.length;
+                obj.tasks.forEach(task => {
+                    if (checkedTasks.includes(task.id)) {
+                        completedPhaseTasks++;
+                    }
+                });
+            });
+            
+            const phasePercent = totalPhaseTasks > 0 ? Math.round((completedPhaseTasks / totalPhaseTasks) * 100) : 0;
+            
+            const accordion = document.createElement("div");
+            accordion.className = "phase-accordion";
+            accordion.id = phaseId;
+            
+            const isOpen = localStorage.getItem(`accordion-open-${phaseId}`) === "true";
+            if (isOpen) accordion.classList.add("open");
+            
+            const header = document.createElement("button");
+            header.className = "phase-header";
+            
+            const headerLeft = document.createElement("div");
+            headerLeft.className = "phase-header-left";
+            headerLeft.innerHTML = `
+                <span class="phase-badge">Fase ${pIdx + 1}</span>
+                <span>${phase.title}</span>
+                <span class="phase-progress-badge" id="prog-badge-${phaseId}">${phasePercent}%</span>
+            `;
+            
+            const chevron = document.createElement("span");
+            chevron.className = "phase-chevron";
+            chevron.textContent = "▼";
+            
+            header.appendChild(headerLeft);
+            header.appendChild(chevron);
+            accordion.appendChild(header);
+            
+            const content = document.createElement("div");
+            content.className = "phase-content";
+            
+            phase.objectives.forEach((obj, oIdx) => {
+                const block = document.createElement("div");
+                block.className = "objective-block";
+                
+                let totalObjTasks = obj.tasks.length;
+                let completedObjTasks = obj.tasks.filter(t => checkedTasks.includes(t.id)).length;
+                
+                const blockHeader = document.createElement("div");
+                blockHeader.className = "objective-header";
+                blockHeader.innerHTML = `
+                    <h4 class="objective-title">${obj.title}</h4>
+                    <span class="objective-stats" id="obj-stat-${pIdx}-${oIdx}">${completedObjTasks}/${totalObjTasks}</span>
+                `;
+                block.appendChild(blockHeader);
+                
+                const tasksGrid = document.createElement("div");
+                tasksGrid.className = "tasks-grid";
+                
+                obj.tasks.forEach(task => {
+                    const isChecked = checkedTasks.includes(task.id);
+                    
+                    const label = document.createElement("label");
+                    label.className = "task-item";
+                    
+                    const checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.checked = isChecked;
+                    checkbox.dataset.taskId = task.id;
+                    
+                    checkbox.addEventListener("change", () => {
+                        if (checkbox.checked) {
+                            if (!checkedTasks.includes(task.id)) checkedTasks.push(task.id);
+                        } else {
+                            checkedTasks = checkedTasks.filter(id => id !== task.id);
+                        }
+                        
+                        const currentChecked = obj.tasks.filter(t => checkedTasks.includes(t.id)).length;
+                        document.getElementById(`obj-stat-${pIdx}-${oIdx}`).textContent = `${currentChecked}/${totalObjTasks}`;
+                        
+                        let currentPhaseChecked = 0;
+                        phase.objectives.forEach(o => {
+                            currentPhaseChecked += o.tasks.filter(t => checkedTasks.includes(t.id)).length;
+                        });
+                        const newPhasePercent = Math.round((currentPhaseChecked / totalPhaseTasks) * 100);
+                        document.getElementById(`prog-badge-${phaseId}`).textContent = `${newPhasePercent}%`;
+                        
+                        saveTasks();
+                    });
+                    
+                    const span = document.createElement("span");
+                    span.innerHTML = `<strong>Paso ${task.id}:</strong> ${task.text}`;
+                    
+                    label.appendChild(checkbox);
+                    label.appendChild(span);
+                    tasksGrid.appendChild(label);
+                });
+                
+                block.appendChild(tasksGrid);
+                content.appendChild(block);
+            });
+            
+            accordion.appendChild(content);
+            tasksAccordionContainer.appendChild(accordion);
+            
+            header.addEventListener("click", () => {
+                const isOpenNow = accordion.classList.toggle("open");
+                localStorage.setItem(`accordion-open-${phaseId}`, isOpenNow ? "true" : "false");
+            });
+        });
+    }
+   
+    function updateProgress() {
+        const totalTasks = 125;
+        const completed = checkedTasks.length;
+        const percent = totalTasks > 0 ? Math.round((completed / totalTasks) * 100) : 0;
+        
+        if (globalProgressPercentEl) globalProgressPercentEl.textContent = `${percent}%`;
+        if (globalProgressHintEl) globalProgressHintEl.textContent = `${completed} de ${totalTasks} tareas completadas.`;
+    }
+   
+    document.getElementById("syncNowBtn").addEventListener("click", async () => {
+        await loadTasks();
     });
-
-    document.getElementById("resetTasks").addEventListener("click", () => {
-      const confirmReset = confirm("¿Seguro que quieres reiniciar las tareas?");
-      if (!confirmReset) return;
-
-      taskInputs.forEach((input) => {
-        input.checked = false;
-        localStorage.removeItem(`kauze-${input.dataset.task}`);
-      });
+   
+    document.getElementById("toggleSyncSettingsBtn").addEventListener("click", () => {
+        const isVisible = syncSettingsCardEl.style.display === "block";
+        syncSettingsCardEl.style.display = isVisible ? "none" : "block";
+        syncTestResultEl.textContent = "";
     });
-
+   
+    document.getElementById("closeSyncSettingsBtn").addEventListener("click", () => {
+        syncSettingsCardEl.style.display = "none";
+    });
+   
+    document.getElementById("saveSyncSettingsBtn").addEventListener("click", async () => {
+        const url = syncServerUrlEl.value.trim();
+        const connected = await testAndConnect(url, true);
+        if (connected || !url) {
+            setTimeout(() => {
+                syncSettingsCardEl.style.display = "none";
+                loadTasks();
+            }, 1000);
+        }
+    });
+   
+    document.getElementById("resetTasks").addEventListener("click", async () => {
+        const confirmReset = confirm("¿Seguro que quieres reiniciar las 125 tareas? Esto limpiará la base de datos o el almacenamiento local.");
+        if (!confirmReset) return;
+        
+        checkedTasks = [];
+        await saveTasks();
+        renderAccordion();
+    });
+   
+    (async function init() {
+        if (syncServer) {
+            await testAndConnect(syncServer);
+        } else if (window.location.protocol.startsWith('http')) {
+            const localOrigin = window.location.origin;
+            await testAndConnect(localOrigin);
+        }
+        await loadTasks();
+    })();
+   
+    // --- NOTAS INTERNAS ORIGINALES (Preservadas) ---
     const notes = document.getElementById("notes");
     const saveStatus = document.getElementById("saveStatus");
-
+   
     notes.value = localStorage.getItem("kauzeAdminNotes") || "";
-
+   
     let saveTimer;
-
+   
     notes.addEventListener("input", () => {
-      localStorage.setItem("kauzeAdminNotes", notes.value);
-
-      saveStatus.textContent = "Notas guardadas localmente.";
-
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(() => {
-        saveStatus.textContent = "";
-      }, 1800);
+        localStorage.setItem("kauzeAdminNotes", notes.value);
+        saveStatus.textContent = "Notas guardadas localmente.";
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+            saveStatus.textContent = "";
+        }, 1800);
     });
-
+   
     document.getElementById("clearNotes").addEventListener("click", () => {
-      const confirmClear = confirm("¿Seguro que quieres borrar las notas locales?");
-      if (!confirmClear) return;
-
-      notes.value = "";
-      localStorage.removeItem("kauzeAdminNotes");
-      saveStatus.textContent = "Notas borradas.";
-      setTimeout(() => saveStatus.textContent = "", 1800);
+        const confirmClear = confirm("¿Seguro que quieres borrar las notas locales?");
+        if (!confirmClear) return;
+        
+        notes.value = "";
+        localStorage.removeItem("kauzeAdminNotes");
+        saveStatus.textContent = "Notas borradas.";
+        setTimeout(() => saveStatus.textContent = "", 1800);
     });
   </script>
 </body>
