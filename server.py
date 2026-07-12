@@ -39,6 +39,11 @@ class KauzeAdminHandler(http.server.SimpleHTTPRequestHandler):
             
 
             
+        # Si se accede al subdominio admin.kauze.cl, servir el panel de administración en la raíz
+        host = self.headers.get('Host', '')
+        if host.startswith('admin') and (self.path == "/" or self.path == "/index.html"):
+            self.path = "/admin/index.html"
+            
         # Servir archivos estáticos del proyecto de forma tradicional
         super().do_GET()
 
