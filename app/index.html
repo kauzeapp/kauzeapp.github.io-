@@ -168,6 +168,17 @@
     .appointment-created{color:var(--teal);font-weight:900;font-size:13px;margin-top:10px;display:none}
     @media(max-width:650px){.form-grid{grid-template-columns:1fr}.modal-card{padding:22px;border-radius:24px}.modal-actions .btn{width:100%}.row-actions{width:100%}.mini-btn{flex:1}}
 
+
+    .integration-card{position:relative;overflow:hidden}
+    .integration-card:after{content:"";position:absolute;right:-38px;top:-38px;width:120px;height:120px;border-radius:50%;background:rgba(37,99,235,.07)}
+    .integration-status{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;font-size:12px;font-weight:900;background:rgba(245,158,11,.12);color:#92400E;margin:10px 0 12px}
+    .integration-status.ready{background:rgba(16,185,129,.12);color:#047857}
+    .integration-status.off{background:#FEF2F2;color:#991B1B}
+    .checklist{display:grid;gap:9px;margin-top:12px}
+    .check-item{display:flex;gap:9px;align-items:flex-start;font-size:13px;color:var(--muted);line-height:1.45}
+    .check-dot{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:var(--soft-blue);color:var(--blue);font-size:11px;font-weight:900;flex:0 0 auto;margin-top:1px}
+    .muted-small{color:var(--muted);font-size:12px;line-height:1.55;margin-top:8px}
+
   </style>
 </head>
 <body>
@@ -239,8 +250,8 @@
       <section class="view" id="view-agenda"><div class="section-head"><div><h2>Agenda</h2><p>Reservas, horarios y estados.</p></div><button type="button" class="btn primary" id="openAppointmentFromAgenda" style="width:auto">Crear cita</button></div><article class="card table-wrap"><table><thead><tr><th>Hora</th><th>Cliente</th><th>Servicio</th><th>Profesional</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="agendaTable"></tbody></table></article></section>
       <section class="view" id="view-clientes"><div class="section-head"><div><h2>Clientes</h2><p>Historial, valor y próxima acción.</p></div><button type="button" class="btn primary" style="width:auto">Agregar cliente</button></div><article class="card table-wrap"><table><thead><tr><th>Cliente</th><th>Último servicio</th><th>Próxima acción</th><th>Valor</th></tr></thead><tbody id="clientsTable"></tbody></table></article></section>
       <section class="view" id="view-servicios"><div class="section-head"><div><h2>Servicios</h2><p>Catálogo de servicios del negocio.</p></div><button type="button" class="btn primary" style="width:auto">Nuevo servicio</button></div><div class="grid-3" id="servicesGrid"></div></section>
-      <section class="view" id="view-profesionales"><div class="section-head"><div><h2 id="professionalsTitle">Profesionales</h2><p>Equipo, disponibilidad y desempeño.</p></div><button type="button" class="btn primary" id="newProfessionalBtn" style="width:auto">Agregar profesional</button></div><div class="grid-3" id="professionalsGrid"></div></section>
-      <section class="view" id="view-marketing"><div class="section-head"><div><h2>Marketing</h2><p>Promociones, fidelización y recuperación.</p></div><button type="button" class="btn primary" style="width:auto">Crear campaña</button></div><div class="grid-3" id="marketingGrid"></div></section>
+      <section class="view" id="view-profesionales"><div class="section-head"><div><h2 id="professionalsTitle">Profesionales</h2><p>Equipo, disponibilidad y desempeño.</p></div><button type="button" class="btn primary" id="newProfessionalBtn" style="width:auto">Agregar profesional</button></div><div class="grid-3" id="professionalsGrid"></div><div class="notice" style="margin-top:14px">Los profesionales se guardan localmente en este navegador. Si asignas citas a un profesional y luego lo eliminas, las citas antiguas se mantienen como registro.</div></section>
+      <section class="view" id="view-marketing"><div class="section-head"><div><h2>Marketing</h2><p>Promociones, fidelización y recuperación.</p></div><button type="button" class="btn primary" id="newCampaignBtn" style="width:auto">Crear campaña</button></div><div class="grid-3" id="marketingGrid"></div><div class="section-head"><div><h2>Análisis de integraciones</h2><p>Vista comercial para explicar cómo Kauze conectará WhatsApp e Instagram.</p></div></div><div class="grid-3" id="integrationGrid"></div><article class="card" style="margin-top:14px"><h3 style="font-family:Sora,sans-serif;font-size:18px;color:var(--navy);margin-bottom:8px">Checklist antes de conectar Meta</h3><div class="checklist"><div class="check-item"><span class="check-dot">1</span><span>Número de WhatsApp corporativo libre, sin WhatsApp normal activo en celular.</span></div><div class="check-item"><span class="check-dot">2</span><span>Cuenta de Meta Business verificada y permisos para WhatsApp Business Cloud API.</span></div><div class="check-item"><span class="check-dot">3</span><span>Plantillas de confirmación, recordatorio, reactivación y postventa aprobadas por Meta.</span></div><div class="check-item"><span class="check-dot">4</span><span>Instagram conectado para automatizar respuestas, seguimiento y recuperación de clientes.</span></div></div></article></section>
       <section class="view" id="view-facturacion"><div class="section-head"><div><h2>Facturación</h2><p>Ingresos, métodos de pago y movimientos.</p></div><button type="button" class="btn primary" style="width:auto">Registrar pago</button></div><div class="grid-4"><article class="card metric"><div class="label">Ventas del día</div><div class="value" id="billingToday">$0</div><div class="trend">Registradas</div></article><article class="card metric"><div class="label">Ticket promedio</div><div class="value" id="billingAvg">$0</div><div class="trend">Por atención</div></article><article class="card metric"><div class="label">Pagos pendientes</div><div class="value">2</div><div class="trend warn">Revisar hoy</div></article><article class="card metric"><div class="label">Método principal</div><div class="value">Débito</div><div class="trend">Mayor uso</div></article></div><div class="section-head"><div><h2>Últimos pagos</h2><p>Movimiento temporal para demo.</p></div></div><article class="card table-wrap"><table><thead><tr><th>Cliente</th><th>Servicio</th><th>Método</th><th>Monto</th></tr></thead><tbody id="billingTable"></tbody></table></article></section>
       <section class="view" id="view-ajustes"><div class="section-head"><div><h2>Ajustes</h2><p>Configuración local de la demo.</p></div></div><div class="grid-2"><article class="card"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Datos del negocio</h2><div class="field-group"><label>Nombre del negocio</label><input class="field" id="settingsBusiness" type="text"></div><div class="field-group"><label>Tipo de negocio</label><select class="field" id="settingsType"></select></div><button type="button" class="btn primary" id="saveSettings">Guardar cambios locales</button><div class="save-msg" id="saveMsg">Cambios guardados en este navegador.</div></article><article class="card"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Próxima etapa real</h2><p style="color:var(--muted);line-height:1.75">Esta interfaz sirve para presentar Kauze y definir pantallas. Para usuarios reales, cada negocio necesita autenticación, base de datos y permisos por rol.</p><div class="notice" style="margin-top:16px">Arquitectura futura recomendada: Supabase Auth + tablas de negocios, usuarios, clientes, servicios, profesionales, reservas, campañas y pagos.</div></article></div></section>
     </main>
@@ -306,10 +317,98 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="professionalModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="professionalModalTitle">
+      <div class="modal-head">
+        <div>
+          <h2 id="professionalModalTitle">Agregar profesional</h2>
+          <p>Agrega o edita miembros del equipo. En barbería se verán como barberos; en otros rubros como técnicas, lashistas, esteticistas o estilistas.</p>
+        </div>
+        <button class="close-modal" type="button" id="closeProfessionalModal">×</button>
+      </div>
+      <form id="professionalForm" onsubmit="return false;">
+        <div class="form-grid">
+          <div class="field-group full">
+            <label for="proName">Nombre</label>
+            <input class="field" id="proName" type="text" placeholder="Ej: Carlos Ríos" required>
+          </div>
+          <div class="field-group full">
+            <label for="proRole">Cargo / especialidad</label>
+            <input class="field" id="proRole" type="text" placeholder="Ej: Barbero senior" required>
+          </div>
+          <div class="field-group full">
+            <label for="proNote">Nota visible</label>
+            <input class="field" id="proNote" type="text" placeholder="Ej: Especialista en cortes degradados">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn outline" type="button" id="cancelProfessionalForm">Cancelar</button>
+          <button class="btn primary" type="button" style="width:auto" id="saveProfessionalBtn">Guardar profesional</button>
+        </div>
+        <div class="appointment-created" id="professionalSavedMsg">Profesional guardado correctamente.</div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="campaignModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="campaignModalTitle">
+      <div class="modal-head">
+        <div>
+          <h2 id="campaignModalTitle">Crear campaña</h2>
+          <p>Edita promociones, fidelización y recuperación de clientes. Esta parte nos servirá para presentar el valor de WhatsApp e Instagram.</p>
+        </div>
+        <button class="close-modal" type="button" id="closeCampaignModal">×</button>
+      </div>
+      <form id="campaignForm" onsubmit="return false;">
+        <div class="form-grid">
+          <div class="field-group">
+            <label for="campaignType">Tipo</label>
+            <select class="field" id="campaignType" required>
+              <option value="campaign">Promoción</option>
+              <option value="campaign teal">Fidelización</option>
+              <option value="campaign amber">Recuperación</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="campaignStatus">Estado</label>
+            <select class="field" id="campaignStatus" required>
+              <option value="Activa">Activa</option>
+              <option value="Borrador">Borrador</option>
+              <option value="Pausada">Pausada</option>
+            </select>
+          </div>
+          <div class="field-group full">
+            <label for="campaignTitle">Título</label>
+            <input class="field" id="campaignTitle" type="text" placeholder="Ej: Promoción horas bajas" required>
+          </div>
+          <div class="field-group full">
+            <label for="campaignDescription">Mensaje / descripción</label>
+            <input class="field" id="campaignDescription" type="text" placeholder="Ej: 20% OFF para clientes sin reserva hace 30 días" required>
+          </div>
+          <div class="field-group full">
+            <label for="campaignChannel">Canal sugerido</label>
+            <select class="field" id="campaignChannel" required>
+              <option value="WhatsApp">WhatsApp</option>
+              <option value="Instagram DM">Instagram DM</option>
+              <option value="WhatsApp + Instagram">WhatsApp + Instagram</option>
+              <option value="Manual">Manual</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn outline" type="button" id="cancelCampaignForm">Cancelar</button>
+          <button class="btn primary" type="button" style="width:auto" id="saveCampaignBtn">Guardar campaña</button>
+        </div>
+        <div class="appointment-created" id="campaignSavedMsg">Campaña guardada correctamente.</div>
+      </form>
+    </div>
+  </div>
+
+
   <script>
     const LOGIN_EMAIL = 'demo@kauze.cl';
     const LOGIN_PASSWORD = 'KauzeDemo2026';
-    const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', appointments:{} };
+    const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', appointments:{}, professionals:{}, campaigns:{} };
     const profiles = {
       barberia: { label:'Barbería', emoji:'💈', business:'Kauze Demo Barbería', proPlural:'Barberos', newPro:'Agregar barbero', citas:24, ingresos:3580000, clientes:12, cats:['Corte','Barba','Corte + barba','Premium'], services:[['Corte clásico','45 min',12000],['Corte + barba','60 min',18000],['Perfilado de barba','25 min',8000],['Corte premium','75 min',24000],['Ritual barba','45 min',15000],['Niños','35 min',10000]], pros:[['Juan Pérez','Barbero senior','8 citas hoy'],['Carlos Ríos','Barbero','7 citas hoy'],['Pedro Ramírez','Barbero','5 citas hoy']], agenda:[['10:00','Juan Pérez','Corte clásico','Carlos Ríos','Confirmada'],['11:30','Mario López','Corte + barba','Juan Pérez','Pendiente'],['14:00','Camilo Torres','Perfilado de barba','Pedro Ramírez','Confirmada'],['15:30','Felipe Araya','Corte premium','Carlos Ríos','Confirmada']], clients:[['Juan Pérez','Corte clásico','Enviar recordatorio en 21 días',12000],['Mario López','Corte + barba','Pedir reseña',18000],['Felipe Araya','Corte premium','Promoción fidelización',24000]] },
       manicure: { label:'Manicure', emoji:'💅', business:'Studio Nails Demo', proPlural:'Técnicas', newPro:'Agregar técnica', citas:18, ingresos:2860000, clientes:9, cats:['Manicure','Permanente','Soft gel','Diseños'], services:[['Manicure tradicional','45 min',12000],['Esmaltado permanente','60 min',18000],['Soft gel','90 min',28000],['Retiro + limpieza','30 min',9000],['Diseño simple','20 min',5000],['Nivelación','75 min',24000]], pros:[['Valentina Mora','Técnica senior','7 citas hoy'],['Antonia Ruiz','Técnica','5 citas hoy'],['Sofía Muñoz','Técnica','4 citas hoy']], agenda:[['10:30','Paula Díaz','Esmaltado permanente','Valentina Mora','Confirmada'],['12:00','Fernanda Rojas','Soft gel','Antonia Ruiz','Pendiente'],['15:00','Daniela Vega','Manicure tradicional','Sofía Muñoz','Confirmada'],['17:00','Camila Ríos','Nivelación','Valentina Mora','Confirmada']], clients:[['Paula Díaz','Esmaltado permanente','Recordar mantenimiento',18000],['Fernanda Rojas','Soft gel','Enviar cuidado post-servicio',28000],['Daniela Vega','Manicure tradicional','Ofrecer permanente',12000]] },
@@ -374,6 +473,32 @@
     const apptStatus = document.getElementById('apptStatus');
     const pageTitle = document.getElementById('pageTitle');
     const pageSubtitle = document.getElementById('pageSubtitle');
+    const professionalModal = document.getElementById('professionalModal');
+    const professionalModalTitle = document.getElementById('professionalModalTitle');
+    const closeProfessionalModalBtn = document.getElementById('closeProfessionalModal');
+    const cancelProfessionalForm = document.getElementById('cancelProfessionalForm');
+    const professionalForm = document.getElementById('professionalForm');
+    const saveProfessionalBtn = document.getElementById('saveProfessionalBtn');
+    const professionalSavedMsg = document.getElementById('professionalSavedMsg');
+    const proName = document.getElementById('proName');
+    const proRole = document.getElementById('proRole');
+    const proNote = document.getElementById('proNote');
+    const newCampaignBtn = document.getElementById('newCampaignBtn');
+    const campaignModal = document.getElementById('campaignModal');
+    const campaignModalTitle = document.getElementById('campaignModalTitle');
+    const closeCampaignModalBtn = document.getElementById('closeCampaignModal');
+    const cancelCampaignForm = document.getElementById('cancelCampaignForm');
+    const campaignForm = document.getElementById('campaignForm');
+    const saveCampaignBtn = document.getElementById('saveCampaignBtn');
+    const campaignSavedMsg = document.getElementById('campaignSavedMsg');
+    const campaignType = document.getElementById('campaignType');
+    const campaignStatus = document.getElementById('campaignStatus');
+    const campaignTitle = document.getElementById('campaignTitle');
+    const campaignDescription = document.getElementById('campaignDescription');
+    const campaignChannel = document.getElementById('campaignChannel');
+    const integrationGrid = document.getElementById('integrationGrid');
+    let editingProfessionalId = null;
+    let editingCampaignId = null;
 
     function fillTypeSelects(){
       const opts = Object.entries(profiles).map(([k,p])=>`<option value="${k}">${p.emoji} ${p.label}</option>`).join('');
@@ -404,6 +529,48 @@
 
     function saveState(){ localStorage.setItem('kauzeAppV3State', JSON.stringify(state)); }
 
+    function normalizeProfessional(row){
+      return { id: uid(), name: row[0], role: row[1], note: row[2] || '' };
+    }
+
+    function getProfessionals(){
+      if (!state.professionals) state.professionals = {};
+      if (!state.professionals[state.type]) {
+        state.professionals[state.type] = currentProfile().pros.map(normalizeProfessional);
+        saveState();
+      }
+      return state.professionals[state.type];
+    }
+
+    function setProfessionals(list){
+      if (!state.professionals) state.professionals = {};
+      state.professionals[state.type] = list;
+      saveState();
+    }
+
+    function defaultCampaigns(){
+      return [
+        { id: uid(), title:'Promoción del mes', description:'Oferta destacada según el rubro para mover horas bajas.', type:'campaign', status:'Activa', channel:'WhatsApp' },
+        { id: uid(), title:'Fidelización', description:'Beneficio automático para clientes frecuentes.', type:'campaign teal', status:'Borrador', channel:'WhatsApp + Instagram' },
+        { id: uid(), title:'Recuperación', description:'Mensaje para clientes sin reserva reciente.', type:'campaign amber', status:'Borrador', channel:'Instagram DM' }
+      ];
+    }
+
+    function getCampaigns(){
+      if (!state.campaigns) state.campaigns = {};
+      if (!state.campaigns[state.type]) {
+        state.campaigns[state.type] = defaultCampaigns();
+        saveState();
+      }
+      return state.campaigns[state.type];
+    }
+
+    function setCampaigns(list){
+      if (!state.campaigns) state.campaigns = {};
+      state.campaigns[state.type] = list;
+      saveState();
+    }
+
     function servicePrice(serviceName){
       const service = currentProfile().services.find(s => s[0] === serviceName);
       return service ? Number(service[2]) : 0;
@@ -421,6 +588,8 @@
       const p=currentProfile();
       const name = state.name || p.business;
       const appointments = getAppointments().slice().sort((a,b)=>(a.date + a.time).localeCompare(b.date + b.time));
+      const professionals = getProfessionals();
+      const campaigns = getCampaigns();
       const active = appointments.filter(a => a.status !== 'Cancelada' && a.status !== 'No asistió');
       const pendingCount = appointments.filter(a => a.status === 'Pendiente').length;
       const uniqueClients = new Set(active.map(a => a.client.trim().toLowerCase()).filter(Boolean)).size;
@@ -455,10 +624,13 @@
       clientsTable.innerHTML=clientRows.map(c=>`<tr><td><strong>${c[0]}</strong></td><td>${c[1]}</td><td>${c[2]}</td><td>${fmt(c[3])}</td></tr>`).join('');
 
       servicesGrid.innerHTML=p.services.map(s=>`<article class="card service-card"><h3>${s[0]}</h3><p>Duración estimada: ${s[1]}</p><div class="price">${fmt(s[2])}</div></article>`).join('');
-      professionalsGrid.innerHTML=p.pros.map(x=>`<article class="card pro-card"><div class="avatar">${x[0][0]}</div><h3>${x[0]}</h3><p>${x[1]}</p><span class="status" style="margin-top:12px">${countAppointmentsForProfessional(x[0])} cita(s) hoy</span></article>`).join('');
-      marketingGrid.innerHTML=[['Promoción del mes','Oferta destacada según el rubro para mover horas bajas.','campaign'],['Fidelización','Beneficio automático para clientes frecuentes.','campaign teal'],['Recuperación','Mensaje para clientes sin reserva reciente.','campaign amber']].map(x=>`<article class="card ${x[2]}"><h3>${x[0]}</h3><p>${x[1]}</p></article>`).join('');
+      professionalsGrid.innerHTML=professionals.length ? professionals.map(x=>`<article class="card pro-card"><div class="avatar">${x.name.charAt(0)}</div><h3>${x.name}</h3><p>${x.role}</p><p class="muted-small">${x.note || 'Sin nota adicional.'}</p><span class="status" style="margin-top:12px">${countAppointmentsForProfessional(x.name)} cita(s) hoy</span><div class="row-actions" style="margin-top:14px"><button class="mini-btn" data-edit-pro="${x.id}">Editar</button><button class="mini-btn danger" data-delete-pro="${x.id}">Eliminar</button></div></article>`).join('') : `<div class="empty-state">Aún no hay profesionales. Agrega el primero para poder asignarlo a la agenda.</div>`;
+      marketingGrid.innerHTML=campaigns.length ? campaigns.map(c=>`<article class="card ${c.type}"><h3>${c.title}</h3><p>${c.description}</p><div class="muted-small"><strong>Canal:</strong> ${c.channel} · <strong>Estado:</strong> ${c.status}</div><div class="row-actions" style="margin-top:14px"><button class="mini-btn" data-edit-campaign="${c.id}">Editar</button><button class="mini-btn danger" data-delete-campaign="${c.id}">Eliminar</button></div></article>`).join('') : `<div class="empty-state">Aún no hay campañas. Crea una promoción, fidelización o recuperación.</div>`;
+      renderIntegrationAnalysis(pendingCount, campaigns);
       billingTable.innerHTML=active.map((a,i)=>`<tr><td>${a.client}</td><td>${a.service}</td><td>${i%2?'Transferencia':'Débito'}</td><td><strong>${fmt(servicePrice(a.service))}</strong></td></tr>`).join('') || `<tr><td colspan="4"><div class="empty-state">Sin movimientos todavía.</div></td></tr>`;
       bindAppointmentRowActions();
+      bindProfessionalActions();
+      bindCampaignActions();
     }
 
     function buildClientsFromAppointments(appointments, defaultClients){
@@ -484,10 +656,46 @@
       return getAppointments().filter(a => a.professional === name && a.status !== 'Cancelada').length;
     }
 
+
+    function renderIntegrationAnalysis(pendingCount, campaigns){
+      const activeCampaigns = campaigns.filter(c => c.status === 'Activa').length;
+      const recoveryCampaigns = campaigns.filter(c => c.type.includes('amber')).length;
+      integrationGrid.innerHTML = `
+        <article class="card integration-card">
+          <h3 style="font-family:Sora,sans-serif;font-size:18px;color:var(--navy);margin-bottom:6px">WhatsApp Business</h3>
+          <span class="integration-status off">No conectado aún</span>
+          <p style="color:var(--muted);line-height:1.65;font-size:14px">Ideal para confirmaciones, recordatorios, cambios de hora y recuperación de clientes inactivos.</p>
+          <div class="muted-small">Citas pendientes detectadas: <strong>${pendingCount}</strong></div>
+        </article>
+        <article class="card integration-card">
+          <h3 style="font-family:Sora,sans-serif;font-size:18px;color:var(--navy);margin-bottom:6px">Instagram DM</h3>
+          <span class="integration-status">Pendiente de API Meta</span>
+          <p style="color:var(--muted);line-height:1.65;font-size:14px">Pensado para responder consultas, empujar reservas desde seguidores y activar postventa por DM.</p>
+          <div class="muted-small">Campañas de recuperación: <strong>${recoveryCampaigns}</strong></div>
+        </article>
+        <article class="card integration-card">
+          <h3 style="font-family:Sora,sans-serif;font-size:18px;color:var(--navy);margin-bottom:6px">Automatización Kauze</h3>
+          <span class="integration-status ready">Simulación activa</span>
+          <p style="color:var(--muted);line-height:1.65;font-size:14px">Con backend real, estas reglas gatillarán mensajes según reserva, asistencia, no-show y días de inactividad.</p>
+          <div class="muted-small">Campañas activas: <strong>${activeCampaigns}</strong></div>
+        </article>
+      `;
+    }
+
+    function bindProfessionalActions(){
+      document.querySelectorAll('[data-edit-pro]').forEach(btn => btn.addEventListener('click', () => openProfessionalModal(btn.dataset.editPro)));
+      document.querySelectorAll('[data-delete-pro]').forEach(btn => btn.addEventListener('click', () => deleteProfessional(btn.dataset.deletePro)));
+    }
+
+    function bindCampaignActions(){
+      document.querySelectorAll('[data-edit-campaign]').forEach(btn => btn.addEventListener('click', () => openCampaignModal(btn.dataset.editCampaign)));
+      document.querySelectorAll('[data-delete-campaign]').forEach(btn => btn.addEventListener('click', () => deleteCampaign(btn.dataset.deleteCampaign)));
+    }
+
     function fillAppointmentSelects(){
       const p = currentProfile();
       apptService.innerHTML = p.services.map(s => `<option value="${s[0]}">${s[0]} · ${fmt(s[2])}</option>`).join('');
-      apptProfessional.innerHTML = p.pros.map(pro => `<option value="${pro[0]}">${pro[0]} · ${pro[1]}</option>`).join('');
+      apptProfessional.innerHTML = getProfessionals().map(pro => `<option value="${pro.name}">${pro.name} · ${pro.role}</option>`).join('');
     }
 
     function openAppointmentModal(id=null){
@@ -502,7 +710,7 @@
       apptTime.value = appointment?.time || '10:00';
       apptClient.value = appointment?.client || '';
       apptService.value = appointment?.service || currentProfile().services[0][0];
-      apptProfessional.value = appointment?.professional || currentProfile().pros[0][0];
+      apptProfessional.value = appointment?.professional || (getProfessionals()[0]?.name || '');
       apptStatus.value = appointment?.status || 'Confirmada';
 
       appointmentModal.classList.add('open');
@@ -532,6 +740,93 @@
       render();
     }
 
+
+    function openProfessionalModal(id=null){
+      editingProfessionalId = id;
+      professionalModalTitle.textContent = id ? 'Editar profesional' : currentProfile().newPro;
+      professionalSavedMsg.style.display = 'none';
+      const pro = id ? getProfessionals().find(x => x.id === id) : null;
+      proName.value = pro?.name || '';
+      proRole.value = pro?.role || '';
+      proNote.value = pro?.note || '';
+      professionalModal.classList.add('open');
+      professionalModal.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+      setTimeout(()=>proName.focus(), 50);
+    }
+
+    function closeProfessionalModal(){
+      professionalModal.classList.remove('open');
+      professionalModal.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+      editingProfessionalId = null;
+      professionalForm.reset();
+    }
+
+    function saveProfessionalFromModal(){
+      const data = { id: editingProfessionalId || uid(), name: proName.value.trim(), role: proRole.value.trim(), note: proNote.value.trim() };
+      if (!data.name || !data.role) { (!data.name ? proName : proRole).focus(); return; }
+      let list = getProfessionals();
+      if (editingProfessionalId) list = list.map(x => x.id === editingProfessionalId ? data : x);
+      else list = [...list, data];
+      setProfessionals(list);
+      professionalSavedMsg.style.display = 'block';
+      render();
+      setTimeout(closeProfessionalModal, 550);
+    }
+
+    function deleteProfessional(id){
+      const pro = getProfessionals().find(x => x.id === id);
+      if (!pro) return;
+      if (!confirm(`¿Eliminar a ${pro.name} del equipo?`)) return;
+      setProfessionals(getProfessionals().filter(x => x.id !== id));
+      render();
+    }
+
+    function openCampaignModal(id=null){
+      editingCampaignId = id;
+      campaignModalTitle.textContent = id ? 'Editar campaña' : 'Crear campaña';
+      campaignSavedMsg.style.display = 'none';
+      const campaign = id ? getCampaigns().find(x => x.id === id) : null;
+      campaignType.value = campaign?.type || 'campaign';
+      campaignStatus.value = campaign?.status || 'Activa';
+      campaignTitle.value = campaign?.title || '';
+      campaignDescription.value = campaign?.description || '';
+      campaignChannel.value = campaign?.channel || 'WhatsApp';
+      campaignModal.classList.add('open');
+      campaignModal.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+      setTimeout(()=>campaignTitle.focus(), 50);
+    }
+
+    function closeCampaignModal(){
+      campaignModal.classList.remove('open');
+      campaignModal.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+      editingCampaignId = null;
+      campaignForm.reset();
+    }
+
+    function saveCampaignFromModal(){
+      const data = { id: editingCampaignId || uid(), type: campaignType.value, status: campaignStatus.value, title: campaignTitle.value.trim(), description: campaignDescription.value.trim(), channel: campaignChannel.value };
+      if (!data.title || !data.description) { (!data.title ? campaignTitle : campaignDescription).focus(); return; }
+      let list = getCampaigns();
+      if (editingCampaignId) list = list.map(x => x.id === editingCampaignId ? data : x);
+      else list = [...list, data];
+      setCampaigns(list);
+      campaignSavedMsg.style.display = 'block';
+      render();
+      setTimeout(closeCampaignModal, 550);
+    }
+
+    function deleteCampaign(id){
+      const campaign = getCampaigns().find(x => x.id === id);
+      if (!campaign) return;
+      if (!confirm(`¿Eliminar la campaña "${campaign.title}"?`)) return;
+      setCampaigns(getCampaigns().filter(x => x.id !== id));
+      render();
+    }
+
     function showApp(){ loginScreen.style.display='none'; app.style.display='grid'; render(); }
 
     loginForm.addEventListener('submit',e=>{
@@ -552,7 +847,12 @@
     closeAppointmentModalBtn.addEventListener('click', closeApptModal);
     cancelAppointmentForm.addEventListener('click', closeApptModal);
     appointmentModal.addEventListener('click', e => { if(e.target === appointmentModal) closeApptModal(); });
-    document.addEventListener('keydown', e => { if(e.key === 'Escape' && appointmentModal.classList.contains('open')) closeApptModal(); });
+    document.addEventListener('keydown', e => {
+      if(e.key !== 'Escape') return;
+      if(appointmentModal.classList.contains('open')) closeApptModal();
+      if(professionalModal.classList.contains('open')) closeProfessionalModal();
+      if(campaignModal.classList.contains('open')) closeCampaignModal();
+    });
 
     function saveAppointmentFromModal(){
       const data = {
@@ -583,6 +883,21 @@
     });
 
     saveAppointmentBtn.addEventListener('click', saveAppointmentFromModal);
+
+
+    newProfessionalBtn.addEventListener('click',()=>openProfessionalModal());
+    closeProfessionalModalBtn.addEventListener('click', closeProfessionalModal);
+    cancelProfessionalForm.addEventListener('click', closeProfessionalModal);
+    professionalModal.addEventListener('click', e => { if(e.target === professionalModal) closeProfessionalModal(); });
+    professionalForm.addEventListener('submit', e => { e.preventDefault(); saveProfessionalFromModal(); });
+    saveProfessionalBtn.addEventListener('click', saveProfessionalFromModal);
+
+    newCampaignBtn.addEventListener('click',()=>openCampaignModal());
+    closeCampaignModalBtn.addEventListener('click', closeCampaignModal);
+    cancelCampaignForm.addEventListener('click', closeCampaignModal);
+    campaignModal.addEventListener('click', e => { if(e.target === campaignModal) closeCampaignModal(); });
+    campaignForm.addEventListener('submit', e => { e.preventDefault(); saveCampaignFromModal(); });
+    saveCampaignBtn.addEventListener('click', saveCampaignFromModal);
 
     const viewsMeta={inicio:['Inicio','Resumen general del negocio.'],agenda:['Agenda','Reservas, horarios y confirmaciones.'],clientes:['Clientes','Historial, preferencias y seguimiento.'],servicios:['Servicios','Catálogo, duración y precios.'],profesionales:['Profesionales','Equipo, horarios y desempeño.'],marketing:['Marketing','Promociones, campañas y fidelización.'],facturacion:['Facturación','Ingresos, pagos y movimientos.'],ajustes:['Ajustes','Configuración local de la demo.']};
     document.querySelectorAll('#nav button').forEach(btn=>btn.addEventListener('click',()=>{
