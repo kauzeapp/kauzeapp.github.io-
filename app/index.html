@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kauze App | Demo presentación</title>
+  <title>Kauze App | Demo presentación V1.2</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@700;800&display=swap" rel="stylesheet">
@@ -184,19 +184,14 @@
     <main class="login-side">
       <div class="login-card">
         <h2>Ingresar a Kauze</h2>
-        <p>Usuario demo único para presentar la interfaz. Desde adentro puedes cambiar el tipo de negocio y ver cómo se adapta el panel.</p>
+        <p>Acceso privado de presentación. Ingresa con las credenciales internas de Kauze para revisar y editar la demo.</p>
         <form id="loginForm">
           <div class="field-group"><label for="email">Correo</label><input class="field" id="email" type="email" placeholder="correo@kauze.cl" required autocomplete="username"></div>
           <div class="field-group"><label for="password">Contraseña</label><input class="field" id="password" type="password" placeholder="••••••••" required autocomplete="current-password"></div>
           <button class="btn primary" type="submit">Entrar al panel</button>
           <div class="login-error" id="loginError">Credenciales incorrectas.</div>
         </form>
-        <div class="demo-login">
-          <h3>Acceso privado de presentación</h3>
-          <p class="note">Las credenciales se manejan de forma interna. Esta demo aún no reemplaza autenticación real ni base de datos.</p>
-        </div><button class="btn small" id="demoFill">Usar</button></div>
-          <p class="note">Esto es un prototipo estático, no seguridad real. No ingresar datos sensibles.</p>
-        </div>
+        <p class="note">Las credenciales no se muestran en pantalla. Mañana podemos dejar esta ruta detrás de Cloudflare Access.</p>
       </div>
     </main>
   </section>
@@ -206,21 +201,21 @@
       <div class="side-logo"><div class="side-mark">K</div><span>Kauze</span></div>
       <div class="business-mini"><strong id="sideBusiness">Negocio demo</strong><small id="sideType">Tipo de negocio</small></div>
       <nav class="nav" id="nav">
-        <button class="active" data-view="inicio">⌂ Inicio</button>
-        <button data-view="agenda">◷ Agenda</button>
-        <button data-view="clientes">♙ Clientes</button>
-        <button data-view="servicios">✦ Servicios</button>
-        <button data-view="profesionales" id="navProfessionals">☷ Profesionales</button>
-        <button data-view="marketing">✧ Marketing</button>
-        <button data-view="facturacion">$ Facturación</button>
-        <button data-view="ajustes">⚙ Ajustes</button>
+        <button type="button" class="active" data-view="inicio">⌂ Inicio</button>
+        <button type="button" data-view="agenda">◷ Agenda</button>
+        <button type="button" data-view="clientes">♙ Clientes</button>
+        <button type="button" data-view="servicios">✦ Servicios</button>
+        <button type="button" data-view="profesionales" id="navProfessionals">☷ Profesionales</button>
+        <button type="button" data-view="marketing">✧ Marketing</button>
+        <button type="button" data-view="facturacion">$ Facturación</button>
+        <button type="button" data-view="ajustes">⚙ Ajustes</button>
       </nav>
-      <div class="side-bottom"><a class="btn" href="/" target="_blank">Ver landing</a><button class="btn" id="logoutBtn">Cerrar sesión</button></div>
+      <div class="side-bottom"><a class="btn" href="/" target="_blank">Ver landing</a><button type="button" class="btn" id="logoutBtn">Cerrar sesión</button></div>
     </aside>
 
     <main class="main">
       <header class="topbar">
-        <button class="btn mobile-menu" id="mobileMenu">☰ Menú</button>
+        <button type="button" class="btn mobile-menu" id="mobileMenu">☰ Menú</button>
         <div class="title"><h1 id="pageTitle">Inicio</h1><p id="pageSubtitle">Resumen general del negocio.</p></div>
         <div class="top-right"><select class="type-switch" id="businessTypeSwitch"></select><div class="user-chip"><div class="avatar">S</div><div><strong>Sergio Molina</strong><small>Demo · Administrador</small></div></div></div>
       </header>
@@ -232,22 +227,22 @@
           <article class="card metric"><div class="label">Nuevos clientes</div><div class="value" id="mClientes">0</div><div class="trend">+3 últimos 7 días</div></article>
           <article class="card metric"><div class="label">Valoración promedio</div><div class="value">4.8</div><div class="trend">★★★★★</div></article>
         </div>
-        <div class="section-head"><div><h2>Operación de hoy</h2><p>Agenda, ingresos y acciones recomendadas.</p></div><button class="btn primary" id="openAppointmentFromHome" style="width:auto">+ Nueva reserva</button></div>
+        <div class="section-head"><div><h2>Operación de hoy</h2><p>Agenda, ingresos y acciones recomendadas.</p></div><button type="button" class="btn primary" id="openAppointmentFromHome" style="width:auto">+ Nueva reserva</button></div>
         <div class="dashboard-layout">
           <article class="card"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Agenda de hoy</h2><div class="list" id="todayList"></div></article>
           <article class="card chart"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:2px">Ingresos de la semana</h2><p style="color:var(--muted);font-size:13px">Proyección visual para presentación.</p><svg viewBox="0 0 420 190" preserveAspectRatio="none"><defs><linearGradient id="grad" x1="0" x2="1"><stop offset="0" stop-color="#2563EB"/><stop offset="1" stop-color="#6366F1"/></linearGradient><linearGradient id="area" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2563EB" stop-opacity=".20"/><stop offset="1" stop-color="#2563EB" stop-opacity="0"/></linearGradient></defs><path class="chart-grid" d="M0 35H420M0 80H420M0 125H420M0 170H420"/><path class="chart-fill" d="M0 145 C40 120,60 130,95 95 S155 70,190 82 S250 125,285 80 S350 30,420 48 L420 190 L0 190Z"/><path class="chart-line" d="M0 145 C40 120,60 130,95 95 S155 70,190 82 S250 125,285 80 S350 30,420 48"/></svg></article>
         </div>
         <div class="section-head"><div><h2>Vista móvil cliente</h2><p>Simulación de reserva desde celular.</p></div></div>
-        <div class="grid-2"><article class="card"><div class="phone-preview"><div class="phone-inner"><div class="phone-top"><strong>Kauze</strong><div class="phone-pill"></div></div><h3 style="font-family:Sora,sans-serif;color:var(--navy);margin-bottom:8px">¿Qué servicio necesitas?</h3><p style="color:var(--muted);font-size:12px;margin-bottom:14px">Categorías disponibles según el negocio.</p><div class="category-grid" id="phoneCats"></div><button class="btn primary" style="margin-top:18px;width:100%">Elegir fecha y hora</button></div></div></article><article class="card"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Acciones sugeridas</h2><div class="list" id="actionsList"></div></article></div>
+        <div class="grid-2"><article class="card"><div class="phone-preview"><div class="phone-inner"><div class="phone-top"><strong>Kauze</strong><div class="phone-pill"></div></div><h3 style="font-family:Sora,sans-serif;color:var(--navy);margin-bottom:8px">¿Qué servicio necesitas?</h3><p style="color:var(--muted);font-size:12px;margin-bottom:14px">Categorías disponibles según el negocio.</p><div class="category-grid" id="phoneCats"></div><button type="button" class="btn primary" style="margin-top:18px;width:100%">Elegir fecha y hora</button></div></div></article><article class="card"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Acciones sugeridas</h2><div class="list" id="actionsList"></div></article></div>
       </section>
 
-      <section class="view" id="view-agenda"><div class="section-head"><div><h2>Agenda</h2><p>Reservas, horarios y estados.</p></div><button class="btn primary" id="openAppointmentFromAgenda" style="width:auto">Crear cita</button></div><article class="card table-wrap"><table><thead><tr><th>Hora</th><th>Cliente</th><th>Servicio</th><th>Profesional</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="agendaTable"></tbody></table></article></section>
-      <section class="view" id="view-clientes"><div class="section-head"><div><h2>Clientes</h2><p>Historial, valor y próxima acción.</p></div><button class="btn primary" style="width:auto">Agregar cliente</button></div><article class="card table-wrap"><table><thead><tr><th>Cliente</th><th>Último servicio</th><th>Próxima acción</th><th>Valor</th></tr></thead><tbody id="clientsTable"></tbody></table></article></section>
-      <section class="view" id="view-servicios"><div class="section-head"><div><h2>Servicios</h2><p>Catálogo de servicios del negocio.</p></div><button class="btn primary" style="width:auto">Nuevo servicio</button></div><div class="grid-3" id="servicesGrid"></div></section>
-      <section class="view" id="view-profesionales"><div class="section-head"><div><h2 id="professionalsTitle">Profesionales</h2><p>Equipo, disponibilidad y desempeño.</p></div><button class="btn primary" id="newProfessionalBtn" style="width:auto">Agregar profesional</button></div><div class="grid-3" id="professionalsGrid"></div></section>
-      <section class="view" id="view-marketing"><div class="section-head"><div><h2>Marketing</h2><p>Promociones, fidelización y recuperación.</p></div><button class="btn primary" style="width:auto">Crear campaña</button></div><div class="grid-3" id="marketingGrid"></div></section>
-      <section class="view" id="view-facturacion"><div class="section-head"><div><h2>Facturación</h2><p>Ingresos, métodos de pago y movimientos.</p></div><button class="btn primary" style="width:auto">Registrar pago</button></div><div class="grid-4"><article class="card metric"><div class="label">Ventas del día</div><div class="value" id="billingToday">$0</div><div class="trend">Registradas</div></article><article class="card metric"><div class="label">Ticket promedio</div><div class="value" id="billingAvg">$0</div><div class="trend">Por atención</div></article><article class="card metric"><div class="label">Pagos pendientes</div><div class="value">2</div><div class="trend warn">Revisar hoy</div></article><article class="card metric"><div class="label">Método principal</div><div class="value">Débito</div><div class="trend">Mayor uso</div></article></div><div class="section-head"><div><h2>Últimos pagos</h2><p>Movimiento temporal para demo.</p></div></div><article class="card table-wrap"><table><thead><tr><th>Cliente</th><th>Servicio</th><th>Método</th><th>Monto</th></tr></thead><tbody id="billingTable"></tbody></table></article></section>
-      <section class="view" id="view-ajustes"><div class="section-head"><div><h2>Ajustes</h2><p>Configuración local de la demo.</p></div></div><div class="grid-2"><article class="card"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Datos del negocio</h2><div class="field-group"><label>Nombre del negocio</label><input class="field" id="settingsBusiness" type="text"></div><div class="field-group"><label>Tipo de negocio</label><select class="field" id="settingsType"></select></div><button class="btn primary" id="saveSettings">Guardar cambios locales</button><div class="save-msg" id="saveMsg">Cambios guardados en este navegador.</div></article><article class="card"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Próxima etapa real</h2><p style="color:var(--muted);line-height:1.75">Esta interfaz sirve para presentar Kauze y definir pantallas. Para usuarios reales, cada negocio necesita autenticación, base de datos y permisos por rol.</p><div class="notice" style="margin-top:16px">Arquitectura futura recomendada: Supabase Auth + tablas de negocios, usuarios, clientes, servicios, profesionales, reservas, campañas y pagos.</div></article></div></section>
+      <section class="view" id="view-agenda"><div class="section-head"><div><h2>Agenda</h2><p>Reservas, horarios y estados.</p></div><button type="button" class="btn primary" id="openAppointmentFromAgenda" style="width:auto">Crear cita</button></div><article class="card table-wrap"><table><thead><tr><th>Hora</th><th>Cliente</th><th>Servicio</th><th>Profesional</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="agendaTable"></tbody></table></article></section>
+      <section class="view" id="view-clientes"><div class="section-head"><div><h2>Clientes</h2><p>Historial, valor y próxima acción.</p></div><button type="button" class="btn primary" style="width:auto">Agregar cliente</button></div><article class="card table-wrap"><table><thead><tr><th>Cliente</th><th>Último servicio</th><th>Próxima acción</th><th>Valor</th></tr></thead><tbody id="clientsTable"></tbody></table></article></section>
+      <section class="view" id="view-servicios"><div class="section-head"><div><h2>Servicios</h2><p>Catálogo de servicios del negocio.</p></div><button type="button" class="btn primary" style="width:auto">Nuevo servicio</button></div><div class="grid-3" id="servicesGrid"></div></section>
+      <section class="view" id="view-profesionales"><div class="section-head"><div><h2 id="professionalsTitle">Profesionales</h2><p>Equipo, disponibilidad y desempeño.</p></div><button type="button" class="btn primary" id="newProfessionalBtn" style="width:auto">Agregar profesional</button></div><div class="grid-3" id="professionalsGrid"></div></section>
+      <section class="view" id="view-marketing"><div class="section-head"><div><h2>Marketing</h2><p>Promociones, fidelización y recuperación.</p></div><button type="button" class="btn primary" style="width:auto">Crear campaña</button></div><div class="grid-3" id="marketingGrid"></div></section>
+      <section class="view" id="view-facturacion"><div class="section-head"><div><h2>Facturación</h2><p>Ingresos, métodos de pago y movimientos.</p></div><button type="button" class="btn primary" style="width:auto">Registrar pago</button></div><div class="grid-4"><article class="card metric"><div class="label">Ventas del día</div><div class="value" id="billingToday">$0</div><div class="trend">Registradas</div></article><article class="card metric"><div class="label">Ticket promedio</div><div class="value" id="billingAvg">$0</div><div class="trend">Por atención</div></article><article class="card metric"><div class="label">Pagos pendientes</div><div class="value">2</div><div class="trend warn">Revisar hoy</div></article><article class="card metric"><div class="label">Método principal</div><div class="value">Débito</div><div class="trend">Mayor uso</div></article></div><div class="section-head"><div><h2>Últimos pagos</h2><p>Movimiento temporal para demo.</p></div></div><article class="card table-wrap"><table><thead><tr><th>Cliente</th><th>Servicio</th><th>Método</th><th>Monto</th></tr></thead><tbody id="billingTable"></tbody></table></article></section>
+      <section class="view" id="view-ajustes"><div class="section-head"><div><h2>Ajustes</h2><p>Configuración local de la demo.</p></div></div><div class="grid-2"><article class="card"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Datos del negocio</h2><div class="field-group"><label>Nombre del negocio</label><input class="field" id="settingsBusiness" type="text"></div><div class="field-group"><label>Tipo de negocio</label><select class="field" id="settingsType"></select></div><button type="button" class="btn primary" id="saveSettings">Guardar cambios locales</button><div class="save-msg" id="saveMsg">Cambios guardados en este navegador.</div></article><article class="card"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Próxima etapa real</h2><p style="color:var(--muted);line-height:1.75">Esta interfaz sirve para presentar Kauze y definir pantallas. Para usuarios reales, cada negocio necesita autenticación, base de datos y permisos por rol.</p><div class="notice" style="margin-top:16px">Arquitectura futura recomendada: Supabase Auth + tablas de negocios, usuarios, clientes, servicios, profesionales, reservas, campañas y pagos.</div></article></div></section>
     </main>
   </section>
 
@@ -263,7 +258,7 @@
         <button class="close-modal" type="button" id="closeAppointmentModal">×</button>
       </div>
 
-      <form id="appointmentForm">
+      <form id="appointmentForm" onsubmit="return false;">
         <div class="form-grid">
           <div class="field-group">
             <label for="apptDate">Fecha</label>
@@ -304,7 +299,7 @@
 
         <div class="modal-actions">
           <button class="btn outline" type="button" id="cancelAppointmentForm">Cancelar</button>
-          <button class="btn primary" type="submit" style="width:auto" id="saveAppointmentBtn">Guardar cita</button>
+          <button class="btn primary" type="button" style="width:auto" id="saveAppointmentBtn">Guardar cita</button>
         </div>
         <div class="appointment-created" id="appointmentSavedMsg">Cita guardada correctamente.</div>
       </form>
@@ -559,8 +554,7 @@
     appointmentModal.addEventListener('click', e => { if(e.target === appointmentModal) closeApptModal(); });
     document.addEventListener('keydown', e => { if(e.key === 'Escape' && appointmentModal.classList.contains('open')) closeApptModal(); });
 
-    appointmentForm.addEventListener('submit', e => {
-      e.preventDefault();
+    function saveAppointmentFromModal(){
       const data = {
         id: editingAppointmentId || uid(),
         date: apptDate.value,
@@ -570,7 +564,10 @@
         professional: apptProfessional.value,
         status: apptStatus.value
       };
-      if (!data.client) return;
+      if (!data.client) {
+        apptClient.focus();
+        return;
+      }
       let list = getAppointments();
       if (editingAppointmentId) list = list.map(a => a.id === editingAppointmentId ? data : a);
       else list = [...list, data];
@@ -578,7 +575,14 @@
       appointmentSavedMsg.style.display = 'block';
       render();
       setTimeout(closeApptModal, 550);
+    }
+
+    appointmentForm.addEventListener('submit', e => {
+      e.preventDefault();
+      saveAppointmentFromModal();
     });
+
+    saveAppointmentBtn.addEventListener('click', saveAppointmentFromModal);
 
     const viewsMeta={inicio:['Inicio','Resumen general del negocio.'],agenda:['Agenda','Reservas, horarios y confirmaciones.'],clientes:['Clientes','Historial, preferencias y seguimiento.'],servicios:['Servicios','Catálogo, duración y precios.'],profesionales:['Profesionales','Equipo, horarios y desempeño.'],marketing:['Marketing','Promociones, campañas y fidelización.'],facturacion:['Facturación','Ingresos, pagos y movimientos.'],ajustes:['Ajustes','Configuración local de la demo.']};
     document.querySelectorAll('#nav button').forEach(btn=>btn.addEventListener('click',()=>{
