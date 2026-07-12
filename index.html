@@ -263,6 +263,8 @@
     background: transparent;
     cursor: pointer;
     transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .kz-login-trigger:hover {
@@ -443,9 +445,9 @@
     
     <div class="logo" style="margin: 0 auto;">Kauze</div>
     
-    <button type="button" class="kz-login-trigger" id="kzOpenAccess">
+    <a href="https://admin.kauze.cl" class="kz-login-trigger" id="kzOpenAccess">
     Ingresar
-</button>
+</a>
         </div>
 
         <!-- 1. HERO (INTRIGA CON RUBROS REINCORPORADOS) -->
@@ -614,7 +616,7 @@
         document.body.style.overflow = "";
     }
 
-    kzOpenAccess.addEventListener("click", openKauzeAccessModal);
+    // kzOpenAccess.addEventListener("click", openKauzeAccessModal);
     kzCloseAccess.addEventListener("click", closeKauzeAccessModal);
     kzCloseAccessButton.addEventListener("click", closeKauzeAccessModal);
     kzCancelAccess.addEventListener("click", closeKauzeAccessModal);
