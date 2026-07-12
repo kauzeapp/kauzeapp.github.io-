@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kauze | Portal Cliente</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --navy:#0B1736;
+      --navy-2:#101F49;
+      --blue:#2563EB;
+      --purple:#6366F1;
+      --teal:#10B981;
+      --green:#00B894;
+      --amber:#F59E0B;
+      --red:#EF4444;
+      --bg:#F7F9FC;
+      --card:#FFFFFF;
+      --soft:#F1F5F9;
+      --soft-blue:#EEF4FF;
+      --text:#111827;
+      --muted:#64748B;
+      --border:#E2E8F0;
+      --shadow:0 18px 55px rgba(15,23,42,.08);
+      --shadow-soft:0 10px 28px rgba(15,23,42,.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,.12), transparent 28%),
+        radial-gradient(circle at top right, rgba(99,102,241,.12), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 44px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--navy);
+    }
+
+    .mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white;
+      display: grid;
+      place-items: center;
+      font-family: 'Sora', sans-serif;
+      font-weight: 900;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .brand span {
+      font-family: 'Sora', sans-serif;
+      font-size: 25px;
+      font-weight: 900;
+      letter-spacing: -1px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--navy);
+      min-height: 44px;
+      padding: 10px 15px;
+      border-radius: 999px;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: .18s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(15,23,42,.08);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border-color: transparent;
+      color: #fff;
+    }
+
+    .btn.full {
+      width: 100%;
+    }
+
+    .btn.ghost {
+      background: transparent;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    .hero-card {
+      background: rgba(255,255,255,.92);
+      border: 1px solid var(--border);
+      border-radius: 34px;
+      padding: 34px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -15% -35% 10%;
+      height: 46%;
+      background: repeating-radial-gradient(ellipse at center, rgba(37,99,235,.10) 0 1px, transparent 1px 18px);
+      opacity: .75;
+      pointer-events: none;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 13px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: white;
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 900;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(34px, 5vw, 60px);
+      line-height: .98;
+      letter-spacing: -2px;
+      color: var(--navy);
+      margin-bottom: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-card p {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.75;
+      max-width: 620px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .business-panel {
+      display: grid;
+      gap: 14px;
+    }
+
+    .business-card, .quick-card {
+      background: rgba(255,255,255,.92);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 24px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .business-card h2 {
+      font-family: 'Sora', sans-serif;
+      font-size: 25px;
+      letter-spacing: -1px;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+
+    .business-card p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .business-meta {
+      display: grid;
+      gap: 9px;
+    }
+
+    .meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid var(--border);
+      background: var(--soft);
+      padding: 12px 14px;
+      border-radius: 16px;
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .meta-row span:last-child {
+      color: var(--muted);
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .quick-card h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: 18px;
+      color: var(--navy);
+      margin-bottom: 10px;
+    }
+
+    .quick-card p {
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 14px;
+      margin-bottom: 14px;
+    }
+
+    .business-switch {
+      width: 100%;
+      min-height: 46px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--navy);
+      padding: 0 14px;
+      font-weight: 800;
+      outline: none;
+    }
+
+    .booking {
+      background: rgba(255,255,255,.94);
+      border: 1px solid var(--border);
+      border-radius: 34px;
+      box-shadow: var(--shadow);
+      padding: 26px;
+      margin-top: 18px;
+    }
+
+    .booking-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .booking-head h2 {
+      font-family: 'Sora', sans-serif;
+      color: var(--navy);
+      font-size: 28px;
+      letter-spacing: -1px;
+      margin-bottom: 5px;
+    }
+
+    .booking-head p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .step {
+      border: 1px solid var(--border);
+      background: var(--soft);
+      color: var(--muted);
+      padding: 12px;
+      border-radius: 18px;
+      font-size: 13px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .step.active {
+      background: var(--soft-blue);
+      color: var(--blue);
+      border-color: rgba(37,99,235,.28);
+    }
+
+    .booking-view {
+      display: none;
+    }
+
+    .booking-view.active {
+      display: block;
+      animation: fade .18s ease;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .option-card {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 22px;
+      padding: 18px;
+      text-align: left;
+      transition: .18s ease;
+      width: 100%;
+    }
+
+    .option-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-soft);
+      border-color: rgba(37,99,235,.28);
+    }
+
+    .option-card.selected {
+      border-color: rgba(37,99,235,.62);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.10);
+      background: #fff;
+    }
+
+    .option-card h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: 18px;
+      color: var(--navy);
+      margin-bottom: 7px;
+    }
+
+    .option-card p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    .price {
+      color: var(--blue);
+      font-weight: 900;
+    }
+
+    .pro-avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--soft-blue);
+      color: var(--blue);
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .slots {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .slot {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      min-height: 48px;
+      background: white;
+      font-weight: 900;
+      color: var(--navy);
+      transition: .18s ease;
+    }
+
+    .slot:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .slot.selected {
+      background: var(--blue);
+      color: white;
+      border-color: var(--blue);
+    }
+
+    .date-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .field-group {
+      display: grid;
+      gap: 7px;
+      margin-bottom: 14px;
+    }
+
+    .field-group label {
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .field {
+      width: 100%;
+      min-height: 50px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px 14px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+      transition: .18s;
+    }
+
+    .field:focus {
+      border-color: rgba(37,99,235,.55);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.09);
+    }
+
+    .summary {
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 18px;
+      background: var(--soft);
+      margin-bottom: 16px;
+    }
+
+    .summary h3 {
+      font-family: 'Sora', sans-serif;
+      color: var(--navy);
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .summary-row:last-child {
+      border-bottom: 0;
+    }
+
+    .summary-row span:first-child {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .summary-row span:last-child {
+      color: var(--navy);
+      font-weight: 900;
+      text-align: right;
+    }
+
+    .booking-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .success {
+      display: none;
+      border: 1px solid rgba(16,185,129,.25);
+      background: rgba(16,185,129,.08);
+      color: #047857;
+      border-radius: 22px;
+      padding: 20px;
+      margin-top: 18px;
+    }
+
+    .success.active {
+      display: block;
+      animation: fade .18s ease;
+    }
+
+    .success h3 {
+      font-family: 'Sora', sans-serif;
+      margin-bottom: 8px;
+    }
+
+    .portal-section {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .mini-panel {
+      background: rgba(255,255,255,.94);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 22px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .mini-panel h2 {
+      font-family: 'Sora', sans-serif;
+      color: var(--navy);
+      font-size: 22px;
+      letter-spacing: -.5px;
+      margin-bottom: 8px;
+    }
+
+    .mini-panel p {
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 14px;
+      margin-bottom: 14px;
+    }
+
+    .appointment-card {
+      border: 1px solid var(--border);
+      background: var(--soft);
+      border-radius: 18px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    .appointment-card strong {
+      display: block;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .appointment-card small {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .rating {
+      display: flex;
+      gap: 8px;
+      margin: 12px 0;
+      flex-wrap: wrap;
+    }
+
+    .star {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: white;
+      font-size: 20px;
+      transition: .18s ease;
+    }
+
+    .star.selected {
+      background: rgba(245,158,11,.14);
+      border-color: rgba(245,158,11,.40);
+      transform: translateY(-1px);
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 26px;
+    }
+
+    @media (max-width: 900px) {
+      .hero, .portal-section {
+        grid-template-columns: 1fr;
+      }
+
+      .grid-3 {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .shell {
+        width: min(100% - 24px, 1120px);
+        padding-top: 16px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .top-actions {
+        width: 100%;
+      }
+
+      .top-actions .btn {
+        width: 100%;
+      }
+
+      .hero-card, .booking {
+        padding: 22px;
+        border-radius: 26px;
+      }
+
+      .grid-3, .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .steps {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .slots {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .booking-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .booking-actions .btn {
+        width: 100%;
+      }
+
+      .date-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/">
+        <div class="mark">K</div>
+        <span>Kauze</span>
+      </a>
+
+      <div class="top-actions">
+        <a class="btn" href="/app/">Panel negocio</a>
+        <button class="btn primary" type="button" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Reservar ahora</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <article class="hero-card">
+        <div class="kicker">⚡ Reserva online con Kauze</div>
+        <h1 id="heroTitle">Agenda tu próxima hora sin esperar respuesta por WhatsApp.</h1>
+        <p id="heroSubtitle">
+          Elige servicio, profesional y horario disponible. Recibirás una confirmación simulada para esta demo.
+        </p>
+      </article>
+
+      <aside class="business-panel">
+        <article class="business-card">
+          <h2 id="businessName">Barbería Corte Fino</h2>
+          <p id="businessDescription">Agenda cortes, barba y servicios premium directamente desde este portal.</p>
+
+          <select class="business-switch" id="businessType">
+            <option value="barberia">💈 Barbería</option>
+            <option value="manicure">💅 Manicure</option>
+            <option value="pestanas">👁️ Pestañas</option>
+            <option value="estetica">💆 Estética</option>
+            <option value="peluqueria">💇 Peluquería</option>
+          </select>
+
+          <div class="business-meta" style="margin-top:14px">
+            <div class="meta-row"><span>Horario</span><span>Lun a Sáb · 10:00 a 19:00</span></div>
+            <div class="meta-row"><span>Confirmación</span><span>Automática</span></div>
+            <div class="meta-row"><span>Evaluación</span><span>Puntos Kauze</span></div>
+          </div>
+        </article>
+
+        <article class="quick-card">
+          <h3>¿Ya tienes una cita?</h3>
+          <p>Consulta tus reservas activas con tu código de acceso. En la versión real sería OTP por WhatsApp.</p>
+          <button class="btn full" type="button" onclick="document.getElementById('myAppointmentPanel').scrollIntoView({behavior:'smooth'})">Ver mi cita</button>
+        </article>
+      </aside>
+    </section>
+
+    <section class="booking" id="booking">
+      <div class="booking-head">
+        <div>
+          <h2>Reserva tu hora</h2>
+          <p>Demo del flujo cliente final: servicio → profesional → hora → datos mínimos.</p>
+        </div>
+        <button class="btn ghost" type="button" id="resetBooking">Reiniciar reserva</button>
+      </div>
+
+      <div class="steps">
+        <div class="step active" data-step="1">1. Servicio</div>
+        <div class="step" data-step="2">2. Profesional</div>
+        <div class="step" data-step="3">3. Horario</div>
+        <div class="step" data-step="4">4. Confirmar</div>
+      </div>
+
+      <div class="booking-view active" id="bookingStep1">
+        <div class="grid-3" id="servicesGrid"></div>
+      </div>
+
+      <div class="booking-view" id="bookingStep2">
+        <div class="grid-3" id="professionalsGrid"></div>
+      </div>
+
+      <div class="booking-view" id="bookingStep3">
+        <div class="date-row">
+          <div class="field-group" style="margin-bottom:0">
+            <label for="bookingDate">Fecha</label>
+            <input class="field" type="date" id="bookingDate">
+          </div>
+          <button class="btn" type="button" id="todayBtn">Usar hoy</button>
+        </div>
+        <div class="slots" id="slotsGrid"></div>
+      </div>
+
+      <div class="booking-view" id="bookingStep4">
+        <div class="grid-2">
+          <div>
+            <div class="summary">
+              <h3>Resumen de tu reserva</h3>
+              <div class="summary-row"><span>Negocio</span><span id="summaryBusiness">-</span></div>
+              <div class="summary-row"><span>Servicio</span><span id="summaryService">-</span></div>
+              <div class="summary-row"><span>Profesional</span><span id="summaryProfessional">-</span></div>
+              <div class="summary-row"><span>Fecha y hora</span><span id="summaryDate">-</span></div>
+              <div class="summary-row"><span>Total</span><span id="summaryPrice">-</span></div>
+            </div>
+          </div>
+
+          <form id="bookingForm">
+            <div class="field-group">
+              <label for="clientName">Nombre</label>
+              <input class="field" type="text" id="clientName" placeholder="Ej: Sergio Molina" required>
+            </div>
+            <div class="field-group">
+              <label for="clientPhone">WhatsApp</label>
+              <input class="field" type="tel" id="clientPhone" placeholder="+56 9 XXXX XXXX" required>
+            </div>
+            <div class="field-group">
+              <label for="clientEmail">Email</label>
+              <input class="field" type="email" id="clientEmail" placeholder="correo@ejemplo.cl">
+            </div>
+            <button class="btn primary full" type="submit">Confirmar reserva</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="booking-actions">
+        <button class="btn" type="button" id="prevStep">Volver</button>
+        <button class="btn primary" type="button" id="nextStep">Continuar</button>
+      </div>
+
+      <div class="success" id="bookingSuccess">
+        <h3>Reserva creada correctamente</h3>
+        <p id="successText">Tu cita quedó guardada localmente para esta presentación.</p>
+      </div>
+    </section>
+
+    <section class="portal-section">
+      <article class="mini-panel" id="myAppointmentPanel">
+        <h2>Ya tengo cita</h2>
+        <p>En producción, el cliente ingresaría su código OTP recibido por WhatsApp. En esta demo puedes consultar la última cita creada.</p>
+
+        <div class="field-group">
+          <label for="otpCode">Código de acceso</label>
+          <input class="field" id="otpCode" placeholder="Ej: 123456">
+        </div>
+        <button class="btn primary full" type="button" id="showAppointmentBtn">Ver reserva activa</button>
+
+        <div id="appointmentResult"></div>
+      </article>
+
+      <article class="mini-panel">
+        <h2>Evaluación postventa</h2>
+        <p>Simulación del flujo de estrellas y comentario que luego alimentará reseñas, fidelización y puntos Kauze.</p>
+
+        <div class="rating" id="ratingStars">
+          <button class="star" type="button" data-rating="1">★</button>
+          <button class="star" type="button" data-rating="2">★</button>
+          <button class="star" type="button" data-rating="3">★</button>
+          <button class="star" type="button" data-rating="4">★</button>
+          <button class="star" type="button" data-rating="5">★</button>
+        </div>
+
+        <div class="field-group">
+          <label for="reviewText">Comentario</label>
+          <textarea class="field" id="reviewText" rows="4" placeholder="Cuéntanos cómo fue tu experiencia"></textarea>
+        </div>
+
+        <button class="btn full" type="button" id="saveReview">Enviar evaluación</button>
+        <div class="success" id="reviewSuccess">
+          <h3>Evaluación guardada</h3>
+          <p>Demo: el cliente sumaría puntos Kauze y el negocio recibiría feedback.</p>
+        </div>
+      </article>
+    </section>
+
+    <footer class="footer">
+      © 2026 Kauze.cl · Portal cliente final demo · Sin backend
+    </footer>
+  </main>
+
+  <script>
+    const profiles = {
+      barberia: {
+        business: 'Barbería Corte Fino',
+        description: 'Agenda cortes, barba y servicios premium directamente desde este portal.',
+        hero: 'Reserva tu corte sin escribir por WhatsApp.',
+        subtitle: 'Elige servicio, barbero y horario disponible en segundos.',
+        prosLabel: 'barbero',
+        services: [
+          ['Corte clásico', '45 min', 12000],
+          ['Corte + barba', '60 min', 18000],
+          ['Perfilado de barba', '25 min', 8000],
+          ['Corte premium', '75 min', 24000],
+          ['Ritual barba', '45 min', 15000],
+          ['Niños', '35 min', 10000]
+        ],
+        pros: [
+          ['Carlos Ríos', 'Barbero senior', 'Especialista en cortes clásicos y barba.'],
+          ['Juan Pérez', 'Barbero', 'Fade, degradados y cortes modernos.'],
+          ['Pedro Ramírez', 'Barbero', 'Atención rápida y perfilado.']
+        ]
+      },
+      manicure: {
+        business: 'Studio Nails Valentina',
+        description: 'Reserva manicures, esmaltado permanente y diseños personalizados.',
+        hero: 'Agenda tus uñas sin esperar respuesta.',
+        subtitle: 'Selecciona servicio, técnica y hora disponible para tu próxima atención.',
+        prosLabel: 'técnica',
+        services: [
+          ['Manicure tradicional', '45 min', 12000],
+          ['Esmaltado permanente', '60 min', 18000],
+          ['Soft gel', '90 min', 28000],
+          ['Retiro + limpieza', '30 min', 9000],
+          ['Diseño simple', '20 min', 5000],
+          ['Nivelación', '75 min', 24000]
+        ],
+        pros: [
+          ['Valentina Mora', 'Técnica senior', 'Especialista en soft gel y diseños.'],
+          ['Antonia Ruiz', 'Técnica', 'Esmaltado permanente y manicure.'],
+          ['Sofía Muñoz', 'Técnica', 'Atención rápida y limpieza.']
+        ]
+      },
+      pestanas: {
+        business: 'Lash Room Camila',
+        description: 'Agenda lifting, extensiones, retoques y perfilado de cejas.',
+        hero: 'Reserva tus pestañas en pocos clics.',
+        subtitle: 'Elige tratamiento, lashista y horario disponible.',
+        prosLabel: 'lashista',
+        services: [
+          ['Lifting de pestañas', '75 min', 22000],
+          ['Extensiones clásicas', '120 min', 35000],
+          ['Volumen tecnológico', '150 min', 45000],
+          ['Retoque 2 semanas', '70 min', 18000],
+          ['Retiro seguro', '30 min', 10000],
+          ['Perfilado cejas', '35 min', 12000]
+        ],
+        pros: [
+          ['Camila Lagos', 'Lashista senior', 'Especialista en volumen y lifting.'],
+          ['Isidora Peña', 'Lashista', 'Extensiones clásicas y retoques.'],
+          ['Laura Gómez', 'Lashista', 'Perfilado y retiro seguro.']
+        ]
+      },
+      estetica: {
+        business: 'Estética Glow',
+        description: 'Reserva limpiezas faciales, masajes, depilación y tratamientos.',
+        hero: 'Agenda tu tratamiento estético sin fricción.',
+        subtitle: 'Elige servicio, profesional y horario disponible.',
+        prosLabel: 'esteticista',
+        services: [
+          ['Limpieza facial', '75 min', 28000],
+          ['Masaje relajación', '60 min', 25000],
+          ['Depilación facial', '30 min', 12000],
+          ['Tratamiento glow', '90 min', 42000],
+          ['Drenaje linfático', '60 min', 30000],
+          ['Evaluación piel', '25 min', 8000]
+        ],
+        pros: [
+          ['Andrea Salas', 'Esteticista senior', 'Limpieza facial y tratamientos.'],
+          ['Javiera Soto', 'Esteticista', 'Evaluación y glow facial.'],
+          ['Paula Arce', 'Masoterapeuta', 'Masajes y drenaje linfático.']
+        ]
+      },
+      peluqueria: {
+        business: 'Peluquería Studio',
+        description: 'Agenda corte, coloración, brushing, mechas y tratamientos.',
+        hero: 'Reserva tu hora de peluquería online.',
+        subtitle: 'Selecciona servicio, estilista y horario disponible.',
+        prosLabel: 'estilista',
+        services: [
+          ['Corte mujer', '60 min', 18000],
+          ['Coloración', '120 min', 45000],
+          ['Brushing', '45 min', 16000],
+          ['Tratamiento capilar', '75 min', 28000],
+          ['Mechas', '150 min', 65000],
+          ['Peinado evento', '60 min', 25000]
+        ],
+        pros: [
+          ['Francisca León', 'Estilista senior', 'Corte y peinado.'],
+          ['Romina Tapia', 'Colorista', 'Coloración y mechas.'],
+          ['Claudia Vera', 'Estilista', 'Brushing y tratamientos.']
+        ]
+      }
+    };
+
+    const slots = ['10:00','10:30','11:00','11:30','12:00','14:00','14:30','15:00','15:30','16:00','17:00','18:00'];
+    let currentType = localStorage.getItem('kauzeClienteType') || 'barberia';
+    let currentStep = 1;
+    let selectedService = null;
+    let selectedProfessional = null;
+    let selectedSlot = null;
+    let selectedRating = 0;
+
+    const money = (value) => value.toLocaleString('es-CL', { style:'currency', currency:'CLP', maximumFractionDigits:0 });
+
+    function todayISO() {
+      const d = new Date();
+      return d.toISOString().split('T')[0];
+    }
+
+    function profile() {
+      return profiles[currentType] || profiles.barberia;
+    }
+
+    function renderProfile() {
+      const p = profile();
+      document.getElementById('businessName').textContent = p.business;
+      document.getElementById('businessDescription').textContent = p.description;
+      document.getElementById('heroTitle').textContent = p.hero;
+      document.getElementById('heroSubtitle').textContent = p.subtitle;
+      document.getElementById('businessType').value = currentType;
+
+      renderServices();
+      renderProfessionals();
+      renderSlots();
+      updateSummary();
+    }
+
+    function renderServices() {
+      const p = profile();
+      document.getElementById('servicesGrid').innerHTML = p.services.map((service, index) => `
+        <button class="option-card ${selectedService === index ? 'selected' : ''}" type="button" data-service="${index}">
+          <h3>${service[0]}</h3>
+          <p>Duración estimada: ${service[1]}</p>
+          <div class="price">${money(service[2])}</div>
+        </button>
+      `).join('');
+
+      document.querySelectorAll('[data-service]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedService = Number(btn.dataset.service);
+          renderServices();
+          goStep(2);
+        });
+      });
+    }
+
+    function renderProfessionals() {
+      const p = profile();
+      document.getElementById('professionalsGrid').innerHTML = p.pros.map((pro, index) => `
+        <button class="option-card ${selectedProfessional === index ? 'selected' : ''}" type="button" data-pro="${index}">
+          <div class="pro-avatar">${pro[0].charAt(0)}</div>
+          <h3>${pro[0]}</h3>
+          <p><strong>${pro[1]}</strong><br>${pro[2]}</p>
+        </button>
+      `).join('');
+
+      document.querySelectorAll('[data-pro]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedProfessional = Number(btn.dataset.pro);
+          renderProfessionals();
+          goStep(3);
+        });
+      });
+    }
+
+    function renderSlots() {
+      document.getElementById('slotsGrid').innerHTML = slots.map(slot => `
+        <button class="slot ${selectedSlot === slot ? 'selected' : ''}" type="button" data-slot="${slot}">${slot}</button>
+      `).join('');
+
+      document.querySelectorAll('[data-slot]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedSlot = btn.dataset.slot;
+          renderSlots();
+          goStep(4);
+        });
+      });
+    }
+
+    function goStep(step) {
+      if (step < 1) step = 1;
+      if (step > 4) step = 4;
+      currentStep = step;
+
+      document.querySelectorAll('.booking-view').forEach(v => v.classList.remove('active'));
+      document.getElementById(`bookingStep${step}`).classList.add('active');
+
+      document.querySelectorAll('.step').forEach(s => s.classList.toggle('active', Number(s.dataset.step) === step));
+
+      document.getElementById('prevStep').style.visibility = step === 1 ? 'hidden' : 'visible';
+      document.getElementById('nextStep').style.display = step === 4 ? 'none' : 'inline-flex';
+
+      updateSummary();
+    }
+
+    function updateSummary() {
+      const p = profile();
+      const service = selectedService !== null ? p.services[selectedService] : null;
+      const pro = selectedProfessional !== null ? p.pros[selectedProfessional] : null;
+      const date = document.getElementById('bookingDate').value || todayISO();
+
+      document.getElementById('summaryBusiness').textContent = p.business;
+      document.getElementById('summaryService').textContent = service ? service[0] : '-';
+      document.getElementById('summaryProfessional').textContent = pro ? pro[0] : '-';
+      document.getElementById('summaryDate').textContent = selectedSlot ? `${date} · ${selectedSlot}` : '-';
+      document.getElementById('summaryPrice').textContent = service ? money(service[2]) : '-';
+    }
+
+    function resetBooking() {
+      currentStep = 1;
+      selectedService = null;
+      selectedProfessional = null;
+      selectedSlot = null;
+      document.getElementById('bookingDate').value = todayISO();
+      document.getElementById('clientName').value = '';
+      document.getElementById('clientPhone').value = '';
+      document.getElementById('clientEmail').value = '';
+      document.getElementById('bookingSuccess').classList.remove('active');
+      renderProfile();
+      goStep(1);
+    }
+
+    function latestAppointment() {
+      return JSON.parse(localStorage.getItem('kauzeClienteLastAppointment') || 'null');
+    }
+
+    function saveAppointment(data) {
+      localStorage.setItem('kauzeClienteLastAppointment', JSON.stringify(data));
+    }
+
+    document.getElementById('businessType').addEventListener('change', (e) => {
+      currentType = e.target.value;
+      localStorage.setItem('kauzeClienteType', currentType);
+      resetBooking();
+    });
+
+    document.getElementById('bookingDate').value = todayISO();
+    document.getElementById('todayBtn').addEventListener('click', () => {
+      document.getElementById('bookingDate').value = todayISO();
+      updateSummary();
+    });
+
+    document.getElementById('bookingDate').addEventListener('input', updateSummary);
+
+    document.getElementById('prevStep').addEventListener('click', () => goStep(currentStep - 1));
+
+    document.getElementById('nextStep').addEventListener('click', () => {
+      if (currentStep === 1 && selectedService === null) return alert('Primero selecciona un servicio.');
+      if (currentStep === 2 && selectedProfessional === null) return alert('Selecciona un profesional.');
+      if (currentStep === 3 && !selectedSlot) return alert('Selecciona una hora disponible.');
+      goStep(currentStep + 1);
+    });
+
+    document.getElementById('resetBooking').addEventListener('click', resetBooking);
+
+    document.getElementById('bookingForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const p = profile();
+      const service = selectedService !== null ? p.services[selectedService] : null;
+      const pro = selectedProfessional !== null ? p.pros[selectedProfessional] : null;
+      const date = document.getElementById('bookingDate').value || todayISO();
+
+      if (!service || !pro || !selectedSlot) return alert('Faltan datos de la reserva.');
+
+      const data = {
+        business: p.business,
+        service: service[0],
+        duration: service[1],
+        price: service[2],
+        professional: pro[0],
+        date,
+        time: selectedSlot,
+        name: document.getElementById('clientName').value.trim(),
+        phone: document.getElementById('clientPhone').value.trim(),
+        email: document.getElementById('clientEmail').value.trim(),
+        code: '123456'
+      };
+
+      saveAppointment(data);
+
+      document.getElementById('successText').textContent = `Listo, ${data.name}. Tu reserva para ${data.service} quedó para ${data.date} a las ${data.time}. Código demo: ${data.code}.`;
+      document.getElementById('bookingSuccess').classList.add('active');
+      document.getElementById('bookingSuccess').scrollIntoView({ behavior:'smooth', block:'center' });
+    });
+
+    document.getElementById('showAppointmentBtn').addEventListener('click', () => {
+      const code = document.getElementById('otpCode').value.trim();
+      const data = latestAppointment();
+      const box = document.getElementById('appointmentResult');
+
+      if (!data) {
+        box.innerHTML = `<div class="appointment-card"><strong>No hay citas guardadas</strong><small>Crea una reserva primero para verla aquí.</small></div>`;
+        return;
+      }
+
+      if (code && code !== data.code) {
+        box.innerHTML = `<div class="appointment-card"><strong>Código incorrecto</strong><small>Para la demo usa el código 123456.</small></div>`;
+        return;
+      }
+
+      box.innerHTML = `
+        <div class="appointment-card">
+          <strong>${data.service} · ${data.date} a las ${data.time}</strong>
+          <small>
+            ${data.business}<br>
+            Profesional: ${data.professional}<br>
+            Cliente: ${data.name}<br>
+            Estado: Confirmada · Código demo: ${data.code}
+          </small>
+        </div>
+      `;
+    });
+
+    document.querySelectorAll('.star').forEach(star => {
+      star.addEventListener('click', () => {
+        selectedRating = Number(star.dataset.rating);
+        document.querySelectorAll('.star').forEach(s => s.classList.toggle('selected', Number(s.dataset.rating) <= selectedRating));
+      });
+    });
+
+    document.getElementById('saveReview').addEventListener('click', () => {
+      if (!selectedRating) return alert('Selecciona una valoración.');
+      document.getElementById('reviewSuccess').classList.add('active');
+    });
+
+    renderProfile();
+    goStep(1);
+  </script>
+</body>
+</html>
