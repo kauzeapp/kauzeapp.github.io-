@@ -332,6 +332,54 @@
     const uid = () => 'appt-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,7);
     let editingAppointmentId = null;
 
+    // Referencias DOM explícitas para evitar choques entre IDs y nombres de funciones.
+    const loginScreen = document.getElementById('loginScreen');
+    const app = document.getElementById('app');
+    const loginForm = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const sidebar = document.getElementById('sidebar');
+    const businessTypeSwitch = document.getElementById('businessTypeSwitch');
+    const settingsType = document.getElementById('settingsType');
+    const settingsBusiness = document.getElementById('settingsBusiness');
+    const navProfessionals = document.getElementById('navProfessionals');
+    const professionalsTitle = document.getElementById('professionalsTitle');
+    const newProfessionalBtn = document.getElementById('newProfessionalBtn');
+    const mCitas = document.getElementById('mCitas');
+    const mIngresos = document.getElementById('mIngresos');
+    const mClientes = document.getElementById('mClientes');
+    const billingToday = document.getElementById('billingToday');
+    const billingAvg = document.getElementById('billingAvg');
+    const phoneCats = document.getElementById('phoneCats');
+    const todayList = document.getElementById('todayList');
+    const actionsList = document.getElementById('actionsList');
+    const agendaTable = document.getElementById('agendaTable');
+    const clientsTable = document.getElementById('clientsTable');
+    const servicesGrid = document.getElementById('servicesGrid');
+    const professionalsGrid = document.getElementById('professionalsGrid');
+    const marketingGrid = document.getElementById('marketingGrid');
+    const billingTable = document.getElementById('billingTable');
+    const saveSettings = document.getElementById('saveSettings');
+    const saveMsg = document.getElementById('saveMsg');
+    const openAppointmentFromHome = document.getElementById('openAppointmentFromHome');
+    const openAppointmentFromAgenda = document.getElementById('openAppointmentFromAgenda');
+    const appointmentModal = document.getElementById('appointmentModal');
+    const appointmentModalTitle = document.getElementById('appointmentModalTitle');
+    const closeAppointmentModalBtn = document.getElementById('closeAppointmentModal');
+    const cancelAppointmentForm = document.getElementById('cancelAppointmentForm');
+    const appointmentForm = document.getElementById('appointmentForm');
+    const appointmentSavedMsg = document.getElementById('appointmentSavedMsg');
+    const saveAppointmentBtn = document.getElementById('saveAppointmentBtn');
+    const apptDate = document.getElementById('apptDate');
+    const apptTime = document.getElementById('apptTime');
+    const apptClient = document.getElementById('apptClient');
+    const apptService = document.getElementById('apptService');
+    const apptProfessional = document.getElementById('apptProfessional');
+    const apptStatus = document.getElementById('apptStatus');
+    const pageTitle = document.getElementById('pageTitle');
+    const pageSubtitle = document.getElementById('pageSubtitle');
+
     function fillTypeSelects(){
       const opts = Object.entries(profiles).map(([k,p])=>`<option value="${k}">${p.emoji} ${p.label}</option>`).join('');
       businessTypeSwitch.innerHTML = opts;
@@ -468,7 +516,7 @@
       setTimeout(()=>apptClient.focus(), 50);
     }
 
-    function closeAppointmentModal(){
+    function closeApptModal(){
       appointmentModal.classList.remove('open');
       appointmentModal.setAttribute('aria-hidden','true');
       document.body.style.overflow = '';
@@ -506,10 +554,10 @@
 
     openAppointmentFromHome.addEventListener('click',()=>openAppointmentModal());
     openAppointmentFromAgenda.addEventListener('click',()=>openAppointmentModal());
-    closeAppointmentModal.addEventListener('click', closeAppointmentModal);
-    cancelAppointmentForm.addEventListener('click', closeAppointmentModal);
-    appointmentModal.addEventListener('click', e => { if(e.target === appointmentModal) closeAppointmentModal(); });
-    document.addEventListener('keydown', e => { if(e.key === 'Escape' && appointmentModal.classList.contains('open')) closeAppointmentModal(); });
+    closeAppointmentModalBtn.addEventListener('click', closeApptModal);
+    cancelAppointmentForm.addEventListener('click', closeApptModal);
+    appointmentModal.addEventListener('click', e => { if(e.target === appointmentModal) closeApptModal(); });
+    document.addEventListener('keydown', e => { if(e.key === 'Escape' && appointmentModal.classList.contains('open')) closeApptModal(); });
 
     appointmentForm.addEventListener('submit', e => {
       e.preventDefault();
@@ -529,15 +577,25 @@
       setAppointments(list);
       appointmentSavedMsg.style.display = 'block';
       render();
-      setTimeout(closeAppointmentModal, 550);
+      setTimeout(closeApptModal, 550);
     });
 
     const viewsMeta={inicio:['Inicio','Resumen general del negocio.'],agenda:['Agenda','Reservas, horarios y confirmaciones.'],clientes:['Clientes','Historial, preferencias y seguimiento.'],servicios:['Servicios','Catálogo, duración y precios.'],profesionales:['Profesionales','Equipo, horarios y desempeño.'],marketing:['Marketing','Promociones, campañas y fidelización.'],facturacion:['Facturación','Ingresos, pagos y movimientos.'],ajustes:['Ajustes','Configuración local de la demo.']};
-    document.querySelectorAll('#nav button').forEach(btn=>btn.addEventListener('click',()=>{ const v=btn.dataset.view; document.querySelectorAll('#nav button').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); document.querySelectorAll('.view').forEach(x=>x.classList.remove('active')); document.getElementById('view-'+v).classList.add('active'); pageTitle.textContent=viewsMeta[v][0]; pageSubtitle.textContent=viewsMeta[v][1]; sidebar.classList.remove('open'); }));
+    document.querySelectorAll('#nav button').forEach(btn=>btn.addEventListener('click',()=>{
+      const v=btn.dataset.view;
+      const targetView = document.getElementById('view-'+v);
+      if (!targetView || !viewsMeta[v]) return;
+      document.querySelectorAll('#nav button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+      targetView.classList.add('active');
+      pageTitle.textContent=viewsMeta[v][0];
+      pageSubtitle.textContent=viewsMeta[v][1];
+      sidebar.classList.remove('open');
+    }));
 
     fillTypeSelects();
     if(sessionStorage.getItem('kauzeAppV3Auth')==='true') showApp();
   </script>
 </body>
 </html>
-
