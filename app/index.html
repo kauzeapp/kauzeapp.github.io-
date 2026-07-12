@@ -141,28 +141,33 @@
     .campaign.amber{border-left-color:var(--amber)}
     .notice{padding:15px;border-radius:18px;border:1px solid rgba(245,158,11,.25);background:rgba(245,158,11,.07);color:#854D0E;font-size:13px;line-height:1.65}
     .save-msg{display:none;color:var(--teal);font-size:13px;font-weight:900;margin-top:10px}
-
-    .mini-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
-    .mini-btn{border:1px solid var(--border);background:#fff;color:var(--navy);border-radius:999px;padding:7px 10px;font-size:12px;font-weight:900;cursor:pointer;transition:.18s}
-    .mini-btn:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(15,23,42,.07)}
-    .mini-btn.danger{color:#B91C1C;background:#FEF2F2;border-color:#FECACA}
-    .editor-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:22px;z-index:9999}
-    .editor-modal.open{display:flex}
-    .editor-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.42);backdrop-filter:blur(8px)}
-    .editor-card{position:relative;z-index:1;width:min(520px,100%);background:#fff;border:1px solid var(--border);border-radius:28px;padding:28px;box-shadow:0 26px 80px rgba(15,23,42,.22)}
-    .editor-card h2{font-family:'Sora',sans-serif;font-size:25px;color:var(--navy);letter-spacing:-.8px;margin-bottom:8px}
-    .editor-card p{color:var(--muted);font-size:13px;line-height:1.55;margin-bottom:18px}
-    .editor-form{display:grid;gap:13px}
-    .editor-row{display:grid;gap:7px}
-    .editor-row label{font-size:13px;font-weight:900;color:var(--navy)}
-    .editor-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px}
-    .editor-close{position:absolute;top:14px;right:16px;width:34px;height:34px;border:0;border-radius:999px;background:var(--soft);color:var(--muted);font-size:22px;cursor:pointer}
-    .toolbar-note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.45}
-    @media(max-width:650px){.editor-card{padding:22px;border-radius:22px}.editor-actions .btn{width:100%}.mini-actions{width:100%}}
-
     @media(max-width:1120px){.grid-4{grid-template-columns:1fr 1fr}.grid-3{grid-template-columns:1fr 1fr}.dashboard-layout{grid-template-columns:1fr}.login-wrap{grid-template-columns:1fr}.brand-side{min-height:560px}}
     @media(max-width:880px){.app{grid-template-columns:1fr}.sidebar{position:fixed;inset:0 auto 0 0;width:280px;z-index:40;transform:translateX(-110%);transition:.22s}.sidebar.open{transform:translateX(0)}.mobile-menu{display:inline-flex}.main{padding:18px}}
     @media(max-width:650px){.brand-side{padding:28px;min-height:560px}.official-logo{width:92%}.login-side{padding:20px}.login-card{padding:24px}.topbar{align-items:flex-start;flex-direction:column}.top-right,.type-switch,.user-chip{width:100%}.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}.section-head{align-items:flex-start;flex-direction:column}.item{align-items:flex-start;flex-direction:column}table{min-width:720px}}
+
+
+    /* MODALES Y EDICIÓN LOCAL */
+    .btn.danger{background:#FEF2F2;color:#B91C1C;border-color:#FECACA}
+    .btn.outline{background:#fff;color:var(--navy);border-color:var(--border)}
+    .row-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .mini-btn{border:1px solid var(--border);background:#fff;color:var(--navy);border-radius:999px;padding:7px 10px;font-size:12px;font-weight:900;cursor:pointer;transition:.18s}
+    .mini-btn:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(15,23,42,.08)}
+    .mini-btn.danger{background:#FEF2F2;color:#B91C1C;border-color:#FECACA}
+    .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.42);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px;z-index:9999}
+    .modal-overlay.open{display:flex}
+    .modal-card{width:100%;max-width:620px;background:#fff;border:1px solid var(--border);border-radius:28px;box-shadow:0 28px 80px rgba(15,23,42,.22);padding:26px;animation:modalIn .18s ease;max-height:92vh;overflow:auto}
+    @keyframes modalIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+    .modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:18px}
+    .modal-head h2{font-family:'Sora',sans-serif;font-size:24px;letter-spacing:-.8px;color:var(--navy);margin-bottom:5px}
+    .modal-head p{font-size:14px;color:var(--muted);line-height:1.55}
+    .close-modal{width:36px;height:36px;border:0;border-radius:999px;background:var(--soft);color:var(--muted);font-size:24px;line-height:1;cursor:pointer;flex:0 0 auto}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .form-grid .full{grid-column:1 / -1}
+    .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;flex-wrap:wrap}
+    .empty-state{padding:24px;border:1px dashed #CBD5E1;border-radius:20px;background:rgba(255,255,255,.65);color:var(--muted);font-size:14px;line-height:1.7;text-align:center}
+    .appointment-created{color:var(--teal);font-weight:900;font-size:13px;margin-top:10px;display:none}
+    @media(max-width:650px){.form-grid{grid-template-columns:1fr}.modal-card{padding:22px;border-radius:24px}.modal-actions .btn{width:100%}.row-actions{width:100%}.mini-btn{flex:1}}
+
   </style>
 </head>
 <body>
@@ -179,16 +184,18 @@
     <main class="login-side">
       <div class="login-card">
         <h2>Ingresar a Kauze</h2>
-        <p>Ingresa con las credenciales internas de Kauze. Desde adentro podrás cambiar el tipo de negocio y editar la agenda, clientes, servicios y profesionales para presentar el flujo.</p>
+        <p>Usuario demo único para presentar la interfaz. Desde adentro puedes cambiar el tipo de negocio y ver cómo se adapta el panel.</p>
         <form id="loginForm">
-          <div class="field-group"><label for="email">Correo</label><input class="field" id="email" type="email" placeholder="correo@kauze.cl" autocomplete="username" required></div>
-          <div class="field-group"><label for="password">Contraseña</label><input class="field" id="password" type="password" placeholder="••••••••" autocomplete="current-password" required></div>
+          <div class="field-group"><label for="email">Correo</label><input class="field" id="email" type="email" placeholder="correo@kauze.cl" required autocomplete="username"></div>
+          <div class="field-group"><label for="password">Contraseña</label><input class="field" id="password" type="password" placeholder="••••••••" required autocomplete="current-password"></div>
           <button class="btn primary" type="submit">Entrar al panel</button>
           <div class="login-error" id="loginError">Credenciales incorrectas.</div>
         </form>
         <div class="demo-login">
-          <h3>Acceso de presentación</h3>
-          <p class="note" style="margin-top:0;">Las credenciales se mantienen internamente. Esta demo guarda cambios solo en este navegador mediante localStorage. No ingresar datos sensibles.</p>
+          <h3>Acceso privado de presentación</h3>
+          <p class="note">Las credenciales se manejan de forma interna. Esta demo aún no reemplaza autenticación real ni base de datos.</p>
+        </div><button class="btn small" id="demoFill">Usar</button></div>
+          <p class="note">Esto es un prototipo estático, no seguridad real. No ingresar datos sensibles.</p>
         </div>
       </div>
     </main>
@@ -225,7 +232,7 @@
           <article class="card metric"><div class="label">Nuevos clientes</div><div class="value" id="mClientes">0</div><div class="trend">+3 últimos 7 días</div></article>
           <article class="card metric"><div class="label">Valoración promedio</div><div class="value">4.8</div><div class="trend">★★★★★</div></article>
         </div>
-        <div class="section-head"><div><h2>Operación de hoy</h2><p>Agenda, ingresos y acciones recomendadas.</p></div><button class="btn primary" id="openAppointmentHome" style="width:auto">+ Nueva reserva</button></div>
+        <div class="section-head"><div><h2>Operación de hoy</h2><p>Agenda, ingresos y acciones recomendadas.</p></div><button class="btn primary" id="openAppointmentFromHome" style="width:auto">+ Nueva reserva</button></div>
         <div class="dashboard-layout">
           <article class="card"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Agenda de hoy</h2><div class="list" id="todayList"></div></article>
           <article class="card chart"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:2px">Ingresos de la semana</h2><p style="color:var(--muted);font-size:13px">Proyección visual para presentación.</p><svg viewBox="0 0 420 190" preserveAspectRatio="none"><defs><linearGradient id="grad" x1="0" x2="1"><stop offset="0" stop-color="#2563EB"/><stop offset="1" stop-color="#6366F1"/></linearGradient><linearGradient id="area" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2563EB" stop-opacity=".20"/><stop offset="1" stop-color="#2563EB" stop-opacity="0"/></linearGradient></defs><path class="chart-grid" d="M0 35H420M0 80H420M0 125H420M0 170H420"/><path class="chart-fill" d="M0 145 C40 120,60 130,95 95 S155 70,190 82 S250 125,285 80 S350 30,420 48 L420 190 L0 190Z"/><path class="chart-line" d="M0 145 C40 120,60 130,95 95 S155 70,190 82 S250 125,285 80 S350 30,420 48"/></svg></article>
@@ -234,9 +241,9 @@
         <div class="grid-2"><article class="card"><div class="phone-preview"><div class="phone-inner"><div class="phone-top"><strong>Kauze</strong><div class="phone-pill"></div></div><h3 style="font-family:Sora,sans-serif;color:var(--navy);margin-bottom:8px">¿Qué servicio necesitas?</h3><p style="color:var(--muted);font-size:12px;margin-bottom:14px">Categorías disponibles según el negocio.</p><div class="category-grid" id="phoneCats"></div><button class="btn primary" style="margin-top:18px;width:100%">Elegir fecha y hora</button></div></div></article><article class="card"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Acciones sugeridas</h2><div class="list" id="actionsList"></div></article></div>
       </section>
 
-      <section class="view" id="view-agenda"><div class="section-head"><div><h2>Agenda</h2><p>Reservas, horarios y estados.</p></div><button class="btn primary" id="openAppointment" style="width:auto">Crear cita</button></div><article class="card table-wrap"><table><thead><tr><th>Hora</th><th>Cliente</th><th>Servicio</th><th>Profesional</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="agendaTable"></tbody></table></article></section>
-      <section class="view" id="view-clientes"><div class="section-head"><div><h2>Clientes</h2><p>Historial, valor y próxima acción.</p></div><button class="btn primary" id="openClient" style="width:auto">Agregar cliente</button></div><article class="card table-wrap"><table><thead><tr><th>Cliente</th><th>Último servicio</th><th>Próxima acción</th><th>Valor</th><th>Acciones</th></tr></thead><tbody id="clientsTable"></tbody></table></article></section>
-      <section class="view" id="view-servicios"><div class="section-head"><div><h2>Servicios</h2><p>Catálogo de servicios del negocio.</p></div><button class="btn primary" id="openService" style="width:auto">Nuevo servicio</button></div><div class="grid-3" id="servicesGrid"></div></section>
+      <section class="view" id="view-agenda"><div class="section-head"><div><h2>Agenda</h2><p>Reservas, horarios y estados.</p></div><button class="btn primary" id="openAppointmentFromAgenda" style="width:auto">Crear cita</button></div><article class="card table-wrap"><table><thead><tr><th>Hora</th><th>Cliente</th><th>Servicio</th><th>Profesional</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="agendaTable"></tbody></table></article></section>
+      <section class="view" id="view-clientes"><div class="section-head"><div><h2>Clientes</h2><p>Historial, valor y próxima acción.</p></div><button class="btn primary" style="width:auto">Agregar cliente</button></div><article class="card table-wrap"><table><thead><tr><th>Cliente</th><th>Último servicio</th><th>Próxima acción</th><th>Valor</th></tr></thead><tbody id="clientsTable"></tbody></table></article></section>
+      <section class="view" id="view-servicios"><div class="section-head"><div><h2>Servicios</h2><p>Catálogo de servicios del negocio.</p></div><button class="btn primary" style="width:auto">Nuevo servicio</button></div><div class="grid-3" id="servicesGrid"></div></section>
       <section class="view" id="view-profesionales"><div class="section-head"><div><h2 id="professionalsTitle">Profesionales</h2><p>Equipo, disponibilidad y desempeño.</p></div><button class="btn primary" id="newProfessionalBtn" style="width:auto">Agregar profesional</button></div><div class="grid-3" id="professionalsGrid"></div></section>
       <section class="view" id="view-marketing"><div class="section-head"><div><h2>Marketing</h2><p>Promociones, fidelización y recuperación.</p></div><button class="btn primary" style="width:auto">Crear campaña</button></div><div class="grid-3" id="marketingGrid"></div></section>
       <section class="view" id="view-facturacion"><div class="section-head"><div><h2>Facturación</h2><p>Ingresos, métodos de pago y movimientos.</p></div><button class="btn primary" style="width:auto">Registrar pago</button></div><div class="grid-4"><article class="card metric"><div class="label">Ventas del día</div><div class="value" id="billingToday">$0</div><div class="trend">Registradas</div></article><article class="card metric"><div class="label">Ticket promedio</div><div class="value" id="billingAvg">$0</div><div class="trend">Por atención</div></article><article class="card metric"><div class="label">Pagos pendientes</div><div class="value">2</div><div class="trend warn">Revisar hoy</div></article><article class="card metric"><div class="label">Método principal</div><div class="value">Débito</div><div class="trend">Mayor uso</div></article></div><div class="section-head"><div><h2>Últimos pagos</h2><p>Movimiento temporal para demo.</p></div></div><article class="card table-wrap"><table><thead><tr><th>Cliente</th><th>Servicio</th><th>Método</th><th>Monto</th></tr></thead><tbody id="billingTable"></tbody></table></article></section>
@@ -244,13 +251,70 @@
     </main>
   </section>
 
-  
+
+
+  <div class="modal-overlay" id="appointmentModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="appointmentModalTitle">
+      <div class="modal-head">
+        <div>
+          <h2 id="appointmentModalTitle">Crear cita</h2>
+          <p>Registra una reserva para la agenda del negocio. Por ahora se guarda localmente en este navegador.</p>
+        </div>
+        <button class="close-modal" type="button" id="closeAppointmentModal">×</button>
+      </div>
+
+      <form id="appointmentForm">
+        <div class="form-grid">
+          <div class="field-group">
+            <label for="apptDate">Fecha</label>
+            <input class="field" id="apptDate" type="date" required>
+          </div>
+
+          <div class="field-group">
+            <label for="apptTime">Hora</label>
+            <input class="field" id="apptTime" type="time" required>
+          </div>
+
+          <div class="field-group full">
+            <label for="apptClient">Cliente</label>
+            <input class="field" id="apptClient" type="text" placeholder="Nombre del cliente" required>
+          </div>
+
+          <div class="field-group">
+            <label for="apptService">Servicio</label>
+            <select class="field" id="apptService" required></select>
+          </div>
+
+          <div class="field-group">
+            <label for="apptProfessional">Profesional</label>
+            <select class="field" id="apptProfessional" required></select>
+          </div>
+
+          <div class="field-group full">
+            <label for="apptStatus">Estado</label>
+            <select class="field" id="apptStatus" required>
+              <option value="Confirmada">Confirmada</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Completada">Completada</option>
+              <option value="Cancelada">Cancelada</option>
+              <option value="No asistió">No asistió</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn outline" type="button" id="cancelAppointmentForm">Cancelar</button>
+          <button class="btn primary" type="submit" style="width:auto" id="saveAppointmentBtn">Guardar cita</button>
+        </div>
+        <div class="appointment-created" id="appointmentSavedMsg">Cita guardada correctamente.</div>
+      </form>
+    </div>
+  </div>
+
   <script>
     const LOGIN_EMAIL = 'demo@kauze.cl';
     const LOGIN_PASSWORD = 'KauzeDemo2026';
-    const STORAGE_KEY = 'kauzeEditableAppV1';
-
-    const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', data:{} };
+    const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', appointments:{} };
     const profiles = {
       barberia: { label:'Barbería', emoji:'💈', business:'Kauze Demo Barbería', proPlural:'Barberos', newPro:'Agregar barbero', citas:24, ingresos:3580000, clientes:12, cats:['Corte','Barba','Corte + barba','Premium'], services:[['Corte clásico','45 min',12000],['Corte + barba','60 min',18000],['Perfilado de barba','25 min',8000],['Corte premium','75 min',24000],['Ritual barba','45 min',15000],['Niños','35 min',10000]], pros:[['Juan Pérez','Barbero senior','8 citas hoy'],['Carlos Ríos','Barbero','7 citas hoy'],['Pedro Ramírez','Barbero','5 citas hoy']], agenda:[['10:00','Juan Pérez','Corte clásico','Carlos Ríos','Confirmada'],['11:30','Mario López','Corte + barba','Juan Pérez','Pendiente'],['14:00','Camilo Torres','Perfilado de barba','Pedro Ramírez','Confirmada'],['15:30','Felipe Araya','Corte premium','Carlos Ríos','Confirmada']], clients:[['Juan Pérez','Corte clásico','Enviar recordatorio en 21 días',12000],['Mario López','Corte + barba','Pedir reseña',18000],['Felipe Araya','Corte premium','Promoción fidelización',24000]] },
       manicure: { label:'Manicure', emoji:'💅', business:'Studio Nails Demo', proPlural:'Técnicas', newPro:'Agregar técnica', citas:18, ingresos:2860000, clientes:9, cats:['Manicure','Permanente','Soft gel','Diseños'], services:[['Manicure tradicional','45 min',12000],['Esmaltado permanente','60 min',18000],['Soft gel','90 min',28000],['Retiro + limpieza','30 min',9000],['Diseño simple','20 min',5000],['Nivelación','75 min',24000]], pros:[['Valentina Mora','Técnica senior','7 citas hoy'],['Antonia Ruiz','Técnica','5 citas hoy'],['Sofía Muñoz','Técnica','4 citas hoy']], agenda:[['10:30','Paula Díaz','Esmaltado permanente','Valentina Mora','Confirmada'],['12:00','Fernanda Rojas','Soft gel','Antonia Ruiz','Pendiente'],['15:00','Daniela Vega','Manicure tradicional','Sofía Muñoz','Confirmada'],['17:00','Camila Ríos','Nivelación','Valentina Mora','Confirmada']], clients:[['Paula Díaz','Esmaltado permanente','Recordar mantenimiento',18000],['Fernanda Rojas','Soft gel','Enviar cuidado post-servicio',28000],['Daniela Vega','Manicure tradicional','Ofrecer permanente',12000]] },
@@ -259,438 +323,221 @@
       peluqueria: { label:'Peluquería', emoji:'💇', business:'Peluquería Studio Demo', proPlural:'Estilistas', newPro:'Agregar estilista', citas:22, ingresos:3920000, clientes:11, cats:['Corte','Color','Peinado','Tratamiento'], services:[['Corte mujer','60 min',18000],['Coloración','120 min',45000],['Brushing','45 min',16000],['Tratamiento capilar','75 min',28000],['Mechas','150 min',65000],['Peinado evento','60 min',25000]], pros:[['Francisca León','Estilista senior','8 citas hoy'],['Romina Tapia','Colorista','5 citas hoy'],['Claudia Vera','Estilista','6 citas hoy']], agenda:[['09:30','María José','Corte mujer','Francisca León','Confirmada'],['11:00','Tamara I.','Coloración','Romina Tapia','Pendiente'],['14:30','Catalina S.','Tratamiento capilar','Claudia Vera','Confirmada'],['16:00','Fernanda C.','Brushing','Francisca León','Confirmada']], clients:[['María José','Corte mujer','Agendar mantención',18000],['Tamara I.','Coloración','Confirmar asistencia',45000],['Catalina S.','Tratamiento capilar','Enviar recomendación',28000]] }
     };
 
-    let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || defaultBusiness;
+    let state = JSON.parse(localStorage.getItem('kauzeAppV3State') || 'null') || defaultBusiness;
+    if (!state.appointments) state.appointments = {};
 
-    const $ = (id) => document.getElementById(id);
-    const fmt = (n) => Number(n || 0).toLocaleString('es-CL', {style:'currency',currency:'CLP',maximumFractionDigits:0});
-    const statusClass = (s) => s === 'Pendiente' ? 'status wait' : s === 'Cancelada' ? 'status cancel' : 'status';
+    const fmt = n => Number(n || 0).toLocaleString('es-CL', {style:'currency',currency:'CLP',maximumFractionDigits:0});
+    const todayISO = () => new Date().toISOString().slice(0,10);
+    const statusClass = s => s === 'Pendiente' ? 'status wait' : (s === 'Cancelada' || s === 'No asistió') ? 'status cancel' : 'status';
+    const uid = () => 'appt-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,7);
+    let editingAppointmentId = null;
 
-    function esc(value) {
-      return String(value ?? '').replace(/[&<>"']/g, (m) => ({
-        '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
-      }[m]));
+    function fillTypeSelects(){
+      const opts = Object.entries(profiles).map(([k,p])=>`<option value="${k}">${p.emoji} ${p.label}</option>`).join('');
+      businessTypeSwitch.innerHTML = opts;
+      settingsType.innerHTML = opts;
     }
 
-    function cloneRows(rows) {
-      return rows.map((row) => Array.isArray(row) ? [...row] : row);
+    function currentProfile(){ return profiles[state.type] || profiles.barberia; }
+
+    function normalizeAgendaItem(row){
+      return { id: uid(), date: todayISO(), time: row[0], client: row[1], service: row[2], professional: row[3], status: row[4] };
     }
 
-    function buildDefaultData(type) {
-      const p = profiles[type] || profiles.barberia;
-      return {
-        business: p.business,
-        citas: p.citas,
-        ingresos: p.ingresos,
-        clientes: p.clientes,
-        cats: [...p.cats],
-        services: cloneRows(p.services),
-        pros: cloneRows(p.pros),
-        agenda: cloneRows(p.agenda),
-        clients: cloneRows(p.clients)
-      };
-    }
-
-    function ensureData(type = state.type) {
-      if (!state.data) state.data = {};
-      if (!state.data[type]) state.data[type] = buildDefaultData(type);
-      return state.data[type];
-    }
-
-    function currentProfile() {
-      return profiles[state.type] || profiles.barberia;
-    }
-
-    function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }
-
-    function fillTypeSelects() {
-      const opts = Object.entries(profiles)
-        .map(([k,p]) => `<option value="${k}">${p.emoji} ${p.label}</option>`)
-        .join('');
-      $('businessTypeSwitch').innerHTML = opts;
-      $('settingsType').innerHTML = opts;
-    }
-
-    function render() {
-      const p = currentProfile();
-      const d = ensureData();
-      const name = state.name || d.business || p.business;
-
-      $('sideBusiness').textContent = name;
-      $('sideType').textContent = `${p.emoji} ${p.label}`;
-      $('businessTypeSwitch').value = state.type;
-      $('settingsType').value = state.type;
-      $('settingsBusiness').value = name;
-      $('navProfessionals').innerHTML = `☷ ${p.proPlural}`;
-      $('professionalsTitle').textContent = p.proPlural;
-      $('newProfessionalBtn').textContent = p.newPro;
-
-      $('mCitas').textContent = d.agenda.length;
-      $('mIngresos').textContent = fmt(d.ingresos);
-      $('mClientes').textContent = d.clientes;
-      $('billingToday').textContent = fmt(d.ingresos);
-      $('billingAvg').textContent = fmt(Math.round(d.ingresos / Math.max(d.agenda.length, 1)));
-
-      $('phoneCats').innerHTML = d.cats.map(c => `<div class="cat-card">${p.emoji}<br>${esc(c)}</div>`).join('');
-
-      $('todayList').innerHTML = d.agenda.slice(0, 5).map((a, i) => `
-        <div class="item">
-          <div>
-            <strong>${esc(a[0])} · ${esc(a[1])}</strong>
-            <small>${esc(a[2])} · ${esc(a[3])}</small>
-          </div>
-          <span class="${statusClass(a[4])}">${esc(a[4])}</span>
-        </div>
-      `).join('') || `<div class="item"><div><strong>Sin citas</strong><small>Agrega una reserva para verla aquí.</small></div></div>`;
-
-      $('actionsList').innerHTML = [
-        ['Confirmar reservas pendientes','Enviar recordatorio por WhatsApp a quienes aún no confirman.'],
-        ['Pedir reseñas','Solicitar valoración a clientes atendidos esta semana.'],
-        ['Recuperar clientes','Campaña para clientes sin reserva reciente.']
-      ].map(x => `<div class="item"><div><strong>${x[0]}</strong><small>${x[1]}</small></div></div>`).join('');
-
-      $('agendaTable').innerHTML = d.agenda.map((a, i) => `
-        <tr>
-          <td>${esc(a[0])}</td>
-          <td>${esc(a[1])}</td>
-          <td>${esc(a[2])}</td>
-          <td>${esc(a[3])}</td>
-          <td><span class="${statusClass(a[4])}">${esc(a[4])}</span></td>
-          <td>
-            <div class="mini-actions">
-              <button class="mini-btn" data-edit-agenda="${i}">Editar</button>
-              <button class="mini-btn danger" data-delete-agenda="${i}">Eliminar</button>
-            </div>
-          </td>
-        </tr>
-      `).join('') || `<tr><td colspan="6">Aún no hay citas creadas.</td></tr>`;
-
-      $('clientsTable').innerHTML = d.clients.map((c, i) => `
-        <tr>
-          <td><strong>${esc(c[0])}</strong></td>
-          <td>${esc(c[1])}</td>
-          <td>${esc(c[2])}</td>
-          <td>${fmt(c[3])}</td>
-          <td>
-            <div class="mini-actions">
-              <button class="mini-btn" data-edit-client="${i}">Editar</button>
-              <button class="mini-btn danger" data-delete-client="${i}">Eliminar</button>
-            </div>
-          </td>
-        </tr>
-      `).join('') || `<tr><td colspan="5">Aún no hay clientes creados.</td></tr>`;
-
-      $('servicesGrid').innerHTML = d.services.map((s, i) => `
-        <article class="card service-card">
-          <h3>${esc(s[0])}</h3>
-          <p>Duración estimada: ${esc(s[1])}</p>
-          <div class="price">${fmt(s[2])}</div>
-          <div class="mini-actions" style="margin-top:14px">
-            <button class="mini-btn" data-edit-service="${i}">Editar</button>
-            <button class="mini-btn danger" data-delete-service="${i}">Eliminar</button>
-          </div>
-        </article>
-      `).join('');
-
-      $('professionalsGrid').innerHTML = d.pros.map((x, i) => `
-        <article class="card pro-card">
-          <div class="avatar">${esc(x[0][0] || 'P')}</div>
-          <h3>${esc(x[0])}</h3>
-          <p>${esc(x[1])}</p>
-          <span class="status" style="margin-top:12px">${esc(x[2])}</span>
-          <div class="mini-actions" style="margin-top:14px">
-            <button class="mini-btn" data-edit-pro="${i}">Editar</button>
-            <button class="mini-btn danger" data-delete-pro="${i}">Eliminar</button>
-          </div>
-        </article>
-      `).join('');
-
-      $('marketingGrid').innerHTML = [
-        ['Promoción del mes','Oferta destacada según el rubro para mover horas bajas.','campaign'],
-        ['Fidelización','Beneficio automático para clientes frecuentes.','campaign teal'],
-        ['Recuperación','Mensaje para clientes sin reserva reciente.','campaign amber']
-      ].map(x => `<article class="card ${x[2]}"><h3>${x[0]}</h3><p>${x[1]}</p></article>`).join('');
-
-      $('billingTable').innerHTML = d.clients.map((c, i) => `
-        <tr>
-          <td>${esc(c[0])}</td>
-          <td>${esc(c[1])}</td>
-          <td>${i % 2 ? 'Transferencia' : 'Débito'}</td>
-          <td><strong>${fmt(c[3])}</strong></td>
-        </tr>
-      `).join('');
-    }
-
-    function openModal(title, description, fields, values, onSave) {
-      closeModal();
-
-      const fieldsHTML = fields.map((field) => {
-        const value = values[field.name] ?? '';
-        if (field.type === 'select') {
-          const options = field.options.map(opt => `<option value="${esc(opt)}">${esc(opt)}</option>`).join('');
-          return `
-            <div class="editor-row">
-              <label>${esc(field.label)}</label>
-              <select class="field editor-input" data-name="${esc(field.name)}">${options}</select>
-            </div>
-          `;
-        }
-
-        return `
-          <div class="editor-row">
-            <label>${esc(field.label)}</label>
-            <input class="field editor-input" data-name="${esc(field.name)}" type="${field.type || 'text'}" value="${esc(value)}" placeholder="${esc(field.placeholder || '')}">
-          </div>
-        `;
-      }).join('');
-
-      document.body.insertAdjacentHTML('beforeend', `
-        <div class="editor-modal open" id="editorModal">
-          <div class="editor-backdrop" data-close-modal></div>
-          <div class="editor-card">
-            <button class="editor-close" type="button" data-close-modal>×</button>
-            <h2>${esc(title)}</h2>
-            <p>${esc(description)}</p>
-            <form class="editor-form" id="editorForm">
-              ${fieldsHTML}
-              <div class="editor-actions">
-                <button class="btn" type="button" data-close-modal>Cancelar</button>
-                <button class="btn primary" type="submit" style="width:auto">Guardar</button>
-              </div>
-              <div class="toolbar-note">Los cambios se guardan solo en este navegador. Es perfecto para presentar, no para datos reales.</div>
-            </form>
-          </div>
-        </div>
-      `);
-
-      fields.forEach((field) => {
-        if (field.type === 'select') {
-          const input = document.querySelector(`[data-name="${field.name}"]`);
-          input.value = values[field.name] ?? field.options[0];
-        }
-      });
-
-      document.querySelectorAll('[data-close-modal]').forEach(el => el.addEventListener('click', closeModal));
-      $('editorForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const result = {};
-        document.querySelectorAll('.editor-input').forEach(input => {
-          result[input.dataset.name] = input.type === 'number' ? Number(input.value || 0) : input.value.trim();
-        });
-        onSave(result);
+    function getAppointments(){
+      if (!state.appointments) state.appointments = {};
+      if (!state.appointments[state.type]) {
+        state.appointments[state.type] = currentProfile().agenda.map(normalizeAgendaItem);
         saveState();
-        render();
-        closeModal();
-      });
-    }
-
-    function closeModal() {
-      const modal = $('editorModal');
-      if (modal) modal.remove();
-    }
-
-    function serviceNames() {
-      return ensureData().services.map(s => s[0]);
-    }
-
-    function professionalNames() {
-      return ensureData().pros.map(p => p[0]);
-    }
-
-    function openAppointmentEditor(index = null) {
-      const d = ensureData();
-      const isEdit = index !== null;
-      const row = isEdit ? d.agenda[index] : ['', '', d.services[0]?.[0] || '', d.pros[0]?.[0] || '', 'Confirmada'];
-
-      openModal(
-        isEdit ? 'Editar cita' : 'Agregar cita',
-        'Crea o modifica una reserva para mostrar cómo funcionará la agenda de Kauze.',
-        [
-          { name:'time', label:'Hora', placeholder:'10:30' },
-          { name:'client', label:'Cliente', placeholder:'Nombre del cliente' },
-          { name:'service', label:'Servicio', type:'select', options: serviceNames() },
-          { name:'professional', label:'Profesional', type:'select', options: professionalNames() },
-          { name:'status', label:'Estado', type:'select', options:['Confirmada','Pendiente','Cancelada'] }
-        ],
-        { time:row[0], client:row[1], service:row[2], professional:row[3], status:row[4] },
-        (data) => {
-          const newRow = [data.time, data.client, data.service, data.professional, data.status];
-          if (isEdit) d.agenda[index] = newRow;
-          else d.agenda.push(newRow);
-        }
-      );
-    }
-
-    function openClientEditor(index = null) {
-      const d = ensureData();
-      const isEdit = index !== null;
-      const row = isEdit ? d.clients[index] : ['', d.services[0]?.[0] || '', 'Enviar seguimiento', 0];
-
-      openModal(
-        isEdit ? 'Editar cliente' : 'Agregar cliente',
-        'Registra información básica para la presentación. No uses datos sensibles todavía.',
-        [
-          { name:'name', label:'Cliente', placeholder:'Nombre del cliente' },
-          { name:'last', label:'Último servicio', placeholder:'Servicio realizado' },
-          { name:'next', label:'Próxima acción', placeholder:'Ej: Pedir reseña' },
-          { name:'value', label:'Valor', type:'number', placeholder:'18000' }
-        ],
-        { name:row[0], last:row[1], next:row[2], value:row[3] },
-        (data) => {
-          const newRow = [data.name, data.last, data.next, data.value];
-          if (isEdit) d.clients[index] = newRow;
-          else d.clients.push(newRow);
-        }
-      );
-    }
-
-    function openServiceEditor(index = null) {
-      const d = ensureData();
-      const isEdit = index !== null;
-      const row = isEdit ? d.services[index] : ['', '45 min', 0];
-
-      openModal(
-        isEdit ? 'Editar servicio' : 'Agregar servicio',
-        'Define nombre, duración y precio del servicio.',
-        [
-          { name:'name', label:'Servicio', placeholder:'Corte + barba' },
-          { name:'duration', label:'Duración', placeholder:'60 min' },
-          { name:'price', label:'Precio', type:'number', placeholder:'18000' }
-        ],
-        { name:row[0], duration:row[1], price:row[2] },
-        (data) => {
-          const newRow = [data.name, data.duration, data.price];
-          if (isEdit) d.services[index] = newRow;
-          else d.services.push(newRow);
-          d.cats = d.services.slice(0, 4).map(s => s[0]);
-        }
-      );
-    }
-
-    function openProfessionalEditor(index = null) {
-      const d = ensureData();
-      const p = currentProfile();
-      const isEdit = index !== null;
-      const row = isEdit ? d.pros[index] : ['', p.proPlural.slice(0, -1) || 'Profesional', '0 citas hoy'];
-
-      openModal(
-        isEdit ? 'Editar profesional' : 'Agregar profesional',
-        'Agrega miembros del equipo para mostrar horarios y atención.',
-        [
-          { name:'name', label:'Nombre', placeholder:'Nombre del profesional' },
-          { name:'role', label:'Cargo', placeholder:'Barbero senior' },
-          { name:'day', label:'Resumen del día', placeholder:'5 citas hoy' }
-        ],
-        { name:row[0], role:row[1], day:row[2] },
-        (data) => {
-          const newRow = [data.name, data.role, data.day];
-          if (isEdit) d.pros[index] = newRow;
-          else d.pros.push(newRow);
-        }
-      );
-    }
-
-    function deleteRow(collection, index, label) {
-      if (!confirm(`¿Eliminar ${label}?`)) return;
-      const d = ensureData();
-      d[collection].splice(index, 1);
-      saveState();
-      render();
-    }
-
-    function showApp() {
-      $('loginScreen').style.display = 'none';
-      $('app').style.display = 'grid';
-      render();
-    }
-
-    $('loginForm').addEventListener('submit', e => {
-      e.preventDefault();
-      const email = $('email').value.trim().toLowerCase();
-      const pass = $('password').value;
-      if (email === LOGIN_EMAIL && pass === LOGIN_PASSWORD) {
-        sessionStorage.setItem('kauzeAppV2Auth','true');
-        $('loginError').style.display = 'none';
-        showApp();
-      } else {
-        $('loginError').style.display = 'block';
       }
-    });
+      return state.appointments[state.type];
+    }
 
-    $('logoutBtn').addEventListener('click', () => {
-      sessionStorage.removeItem('kauzeAppV2Auth');
-      location.reload();
-    });
-
-    $('mobileMenu').addEventListener('click', () => $('sidebar').classList.toggle('open'));
-
-    $('businessTypeSwitch').addEventListener('change', () => {
-      state.type = $('businessTypeSwitch').value;
-      const d = ensureData(state.type);
-      state.name = d.business || profiles[state.type].business;
+    function setAppointments(list){
+      if (!state.appointments) state.appointments = {};
+      state.appointments[state.type] = list;
       saveState();
+    }
+
+    function saveState(){ localStorage.setItem('kauzeAppV3State', JSON.stringify(state)); }
+
+    function servicePrice(serviceName){
+      const service = currentProfile().services.find(s => s[0] === serviceName);
+      return service ? Number(service[2]) : 0;
+    }
+
+    function activeAppointments(){
+      return getAppointments().filter(a => a.status !== 'Cancelada' && a.status !== 'No asistió');
+    }
+
+    function todayRevenue(){
+      return activeAppointments().reduce((sum, a) => sum + servicePrice(a.service), 0);
+    }
+
+    function render(){
+      const p=currentProfile();
+      const name = state.name || p.business;
+      const appointments = getAppointments().slice().sort((a,b)=>(a.date + a.time).localeCompare(b.date + b.time));
+      const active = appointments.filter(a => a.status !== 'Cancelada' && a.status !== 'No asistió');
+      const pendingCount = appointments.filter(a => a.status === 'Pendiente').length;
+      const uniqueClients = new Set(active.map(a => a.client.trim().toLowerCase()).filter(Boolean)).size;
+      const revenue = todayRevenue();
+
+      sideBusiness.textContent=name;
+      sideType.textContent=`${p.emoji} ${p.label}`;
+      businessTypeSwitch.value=state.type;
+      settingsType.value=state.type;
+      settingsBusiness.value=name;
+      navProfessionals.innerHTML=`☷ ${p.proPlural}`;
+      professionalsTitle.textContent=p.proPlural;
+      newProfessionalBtn.textContent=p.newPro;
+      mCitas.textContent=active.length;
+      mIngresos.textContent=fmt(revenue);
+      mClientes.textContent=uniqueClients;
+      billingToday.textContent=fmt(revenue);
+      billingAvg.textContent=fmt(active.length ? Math.round(revenue/active.length) : 0);
+      phoneCats.innerHTML=p.cats.map(c=>`<div class="cat-card">${p.emoji}<br>${c}</div>`).join('');
+
+      todayList.innerHTML = appointments.length ? appointments.slice(0,5).map(a=>`<div class="item"><div><strong>${a.time} · ${a.client}</strong><small>${a.service} · ${a.professional}</small></div><span class="${statusClass(a.status)}">${a.status}</span></div>`).join('') : `<div class="empty-state">Aún no hay citas registradas. Crea la primera reserva para probar el flujo.</div>`;
+
+      actionsList.innerHTML=[
+        ['Confirmar reservas pendientes', pendingCount ? `${pendingCount} cita(s) pendiente(s) por confirmar.` : 'No hay reservas pendientes por ahora.'],
+        ['Pedir reseñas', 'Solicitar valoración a clientes atendidos esta semana.'],
+        ['Recuperar clientes', 'Campaña para clientes sin reserva hace 30 días.']
+      ].map(x=>`<div class="item"><div><strong>${x[0]}</strong><small>${x[1]}</small></div></div>`).join('');
+
+      agendaTable.innerHTML = appointments.length ? appointments.map(a=>`<tr><td>${a.date}<br><strong>${a.time}</strong></td><td>${a.client}</td><td>${a.service}</td><td>${a.professional}</td><td><span class="${statusClass(a.status)}">${a.status}</span></td><td><div class="row-actions"><button class="mini-btn" data-edit-appt="${a.id}">Editar</button><button class="mini-btn danger" data-delete-appt="${a.id}">Eliminar</button></div></td></tr>`).join('') : `<tr><td colspan="6"><div class="empty-state">Agenda vacía. Usa “Crear cita” para agregar una reserva.</div></td></tr>`;
+
+      const clientRows = buildClientsFromAppointments(appointments, p.clients);
+      clientsTable.innerHTML=clientRows.map(c=>`<tr><td><strong>${c[0]}</strong></td><td>${c[1]}</td><td>${c[2]}</td><td>${fmt(c[3])}</td></tr>`).join('');
+
+      servicesGrid.innerHTML=p.services.map(s=>`<article class="card service-card"><h3>${s[0]}</h3><p>Duración estimada: ${s[1]}</p><div class="price">${fmt(s[2])}</div></article>`).join('');
+      professionalsGrid.innerHTML=p.pros.map(x=>`<article class="card pro-card"><div class="avatar">${x[0][0]}</div><h3>${x[0]}</h3><p>${x[1]}</p><span class="status" style="margin-top:12px">${countAppointmentsForProfessional(x[0])} cita(s) hoy</span></article>`).join('');
+      marketingGrid.innerHTML=[['Promoción del mes','Oferta destacada según el rubro para mover horas bajas.','campaign'],['Fidelización','Beneficio automático para clientes frecuentes.','campaign teal'],['Recuperación','Mensaje para clientes sin reserva reciente.','campaign amber']].map(x=>`<article class="card ${x[2]}"><h3>${x[0]}</h3><p>${x[1]}</p></article>`).join('');
+      billingTable.innerHTML=active.map((a,i)=>`<tr><td>${a.client}</td><td>${a.service}</td><td>${i%2?'Transferencia':'Débito'}</td><td><strong>${fmt(servicePrice(a.service))}</strong></td></tr>`).join('') || `<tr><td colspan="4"><div class="empty-state">Sin movimientos todavía.</div></td></tr>`;
+      bindAppointmentRowActions();
+    }
+
+    function buildClientsFromAppointments(appointments, defaultClients){
+      const map = new Map();
+      defaultClients.forEach(c => map.set(c[0].toLowerCase(), [...c]));
+      appointments.forEach(a => {
+        const key = a.client.trim().toLowerCase();
+        if (!key) return;
+        const value = servicePrice(a.service);
+        if (!map.has(key)) {
+          map.set(key, [a.client, a.service, a.status === 'Pendiente' ? 'Confirmar asistencia' : 'Enviar seguimiento post-servicio', value]);
+        } else {
+          const row = map.get(key);
+          row[1] = a.service;
+          row[2] = a.status === 'Pendiente' ? 'Confirmar asistencia' : 'Enviar seguimiento post-servicio';
+          row[3] = Number(row[3] || 0) + value;
+        }
+      });
+      return Array.from(map.values());
+    }
+
+    function countAppointmentsForProfessional(name){
+      return getAppointments().filter(a => a.professional === name && a.status !== 'Cancelada').length;
+    }
+
+    function fillAppointmentSelects(){
+      const p = currentProfile();
+      apptService.innerHTML = p.services.map(s => `<option value="${s[0]}">${s[0]} · ${fmt(s[2])}</option>`).join('');
+      apptProfessional.innerHTML = p.pros.map(pro => `<option value="${pro[0]}">${pro[0]} · ${pro[1]}</option>`).join('');
+    }
+
+    function openAppointmentModal(id=null){
+      editingAppointmentId = id;
+      fillAppointmentSelects();
+      appointmentModalTitle.textContent = id ? 'Editar cita' : 'Crear cita';
+      saveAppointmentBtn.textContent = id ? 'Guardar cambios' : 'Guardar cita';
+      appointmentSavedMsg.style.display = 'none';
+
+      const appointment = id ? getAppointments().find(a => a.id === id) : null;
+      apptDate.value = appointment?.date || todayISO();
+      apptTime.value = appointment?.time || '10:00';
+      apptClient.value = appointment?.client || '';
+      apptService.value = appointment?.service || currentProfile().services[0][0];
+      apptProfessional.value = appointment?.professional || currentProfile().pros[0][0];
+      apptStatus.value = appointment?.status || 'Confirmada';
+
+      appointmentModal.classList.add('open');
+      appointmentModal.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+      setTimeout(()=>apptClient.focus(), 50);
+    }
+
+    function closeAppointmentModal(){
+      appointmentModal.classList.remove('open');
+      appointmentModal.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+      editingAppointmentId = null;
+      appointmentForm.reset();
+    }
+
+    function bindAppointmentRowActions(){
+      document.querySelectorAll('[data-edit-appt]').forEach(btn => btn.addEventListener('click', () => openAppointmentModal(btn.dataset.editAppt)));
+      document.querySelectorAll('[data-delete-appt]').forEach(btn => btn.addEventListener('click', () => deleteAppointment(btn.dataset.deleteAppt)));
+    }
+
+    function deleteAppointment(id){
+      const appt = getAppointments().find(a => a.id === id);
+      if (!appt) return;
+      if (!confirm(`¿Eliminar la cita de ${appt.client} a las ${appt.time}?`)) return;
+      setAppointments(getAppointments().filter(a => a.id !== id));
       render();
+    }
+
+    function showApp(){ loginScreen.style.display='none'; app.style.display='grid'; render(); }
+
+    loginForm.addEventListener('submit',e=>{
+      e.preventDefault();
+      const email=document.getElementById('email').value.trim().toLowerCase();
+      const pass=document.getElementById('password').value;
+      if(email===LOGIN_EMAIL && pass===LOGIN_PASSWORD){ sessionStorage.setItem('kauzeAppV3Auth','true'); loginError.style.display='none'; showApp(); }
+      else { loginError.style.display='block'; }
     });
 
-    $('saveSettings').addEventListener('click', () => {
-      state.name = $('settingsBusiness').value.trim() || profiles[$('settingsType').value].business;
-      state.type = $('settingsType').value;
-      const d = ensureData(state.type);
-      d.business = state.name;
-      saveState();
+    logoutBtn.addEventListener('click',()=>{ sessionStorage.removeItem('kauzeAppV3Auth'); location.reload(); });
+    mobileMenu.addEventListener('click',()=>sidebar.classList.toggle('open'));
+    businessTypeSwitch.addEventListener('change',()=>{ state.type=businessTypeSwitch.value; state.name=profiles[state.type].business; saveState(); render(); });
+    saveSettings.addEventListener('click',()=>{ state.name=settingsBusiness.value.trim() || profiles[settingsType.value].business; state.type=settingsType.value; saveState(); render(); saveMsg.style.display='block'; setTimeout(()=>saveMsg.style.display='none',1600); });
+
+    openAppointmentFromHome.addEventListener('click',()=>openAppointmentModal());
+    openAppointmentFromAgenda.addEventListener('click',()=>openAppointmentModal());
+    closeAppointmentModal.addEventListener('click', closeAppointmentModal);
+    cancelAppointmentForm.addEventListener('click', closeAppointmentModal);
+    appointmentModal.addEventListener('click', e => { if(e.target === appointmentModal) closeAppointmentModal(); });
+    document.addEventListener('keydown', e => { if(e.key === 'Escape' && appointmentModal.classList.contains('open')) closeAppointmentModal(); });
+
+    appointmentForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const data = {
+        id: editingAppointmentId || uid(),
+        date: apptDate.value,
+        time: apptTime.value,
+        client: apptClient.value.trim(),
+        service: apptService.value,
+        professional: apptProfessional.value,
+        status: apptStatus.value
+      };
+      if (!data.client) return;
+      let list = getAppointments();
+      if (editingAppointmentId) list = list.map(a => a.id === editingAppointmentId ? data : a);
+      else list = [...list, data];
+      setAppointments(list);
+      appointmentSavedMsg.style.display = 'block';
       render();
-      $('saveMsg').style.display = 'block';
-      setTimeout(() => $('saveMsg').style.display = 'none', 1600);
+      setTimeout(closeAppointmentModal, 550);
     });
 
-    $('openAppointmentHome').addEventListener('click', () => openAppointmentEditor());
-    $('openAppointment').addEventListener('click', () => openAppointmentEditor());
-    $('openClient').addEventListener('click', () => openClientEditor());
-    $('openService').addEventListener('click', () => openServiceEditor());
-    $('newProfessionalBtn').addEventListener('click', () => openProfessionalEditor());
-
-    document.addEventListener('click', (e) => {
-      const target = e.target;
-      if (target.matches('[data-edit-agenda]')) openAppointmentEditor(Number(target.dataset.editAgenda));
-      if (target.matches('[data-delete-agenda]')) deleteRow('agenda', Number(target.dataset.deleteAgenda), 'esta cita');
-
-      if (target.matches('[data-edit-client]')) openClientEditor(Number(target.dataset.editClient));
-      if (target.matches('[data-delete-client]')) deleteRow('clients', Number(target.dataset.deleteClient), 'este cliente');
-
-      if (target.matches('[data-edit-service]')) openServiceEditor(Number(target.dataset.editService));
-      if (target.matches('[data-delete-service]')) deleteRow('services', Number(target.dataset.deleteService), 'este servicio');
-
-      if (target.matches('[data-edit-pro]')) openProfessionalEditor(Number(target.dataset.editPro));
-      if (target.matches('[data-delete-pro]')) deleteRow('pros', Number(target.dataset.deletePro), 'este profesional');
-    });
-
-    const viewsMeta = {
-      inicio:['Inicio','Resumen general del negocio.'],
-      agenda:['Agenda','Reservas, horarios y confirmaciones.'],
-      clientes:['Clientes','Historial, preferencias y seguimiento.'],
-      servicios:['Servicios','Catálogo, duración y precios.'],
-      profesionales:['Profesionales','Equipo, horarios y desempeño.'],
-      marketing:['Marketing','Promociones, campañas y fidelización.'],
-      facturacion:['Facturación','Ingresos, pagos y movimientos.'],
-      ajustes:['Ajustes','Configuración local de la demo.']
-    };
-
-    document.querySelectorAll('#nav button').forEach(btn => btn.addEventListener('click', () => {
-      const v = btn.dataset.view;
-      document.querySelectorAll('#nav button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
-      $('view-' + v).classList.add('active');
-      $('pageTitle').textContent = viewsMeta[v][0];
-      $('pageSubtitle').textContent = viewsMeta[v][1];
-      $('sidebar').classList.remove('open');
-    }));
+    const viewsMeta={inicio:['Inicio','Resumen general del negocio.'],agenda:['Agenda','Reservas, horarios y confirmaciones.'],clientes:['Clientes','Historial, preferencias y seguimiento.'],servicios:['Servicios','Catálogo, duración y precios.'],profesionales:['Profesionales','Equipo, horarios y desempeño.'],marketing:['Marketing','Promociones, campañas y fidelización.'],facturacion:['Facturación','Ingresos, pagos y movimientos.'],ajustes:['Ajustes','Configuración local de la demo.']};
+    document.querySelectorAll('#nav button').forEach(btn=>btn.addEventListener('click',()=>{ const v=btn.dataset.view; document.querySelectorAll('#nav button').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); document.querySelectorAll('.view').forEach(x=>x.classList.remove('active')); document.getElementById('view-'+v).classList.add('active'); pageTitle.textContent=viewsMeta[v][0]; pageSubtitle.textContent=viewsMeta[v][1]; sidebar.classList.remove('open'); }));
 
     fillTypeSelects();
-    ensureData();
-    if (sessionStorage.getItem('kauzeAppV2Auth') === 'true') showApp();
+    if(sessionStorage.getItem('kauzeAppV3Auth')==='true') showApp();
   </script>
-
 </body>
 </html>
+
