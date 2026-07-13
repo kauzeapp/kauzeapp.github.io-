@@ -749,7 +749,7 @@
       <div class="booking-head">
         <div>
           <h2>Reserva tu hora</h2>
-          <p>Demo del flujo cliente final: servicio → profesional → hora → datos mínimos.</p>
+          <p>Demo del flujo cliente final: servicio → profesional → hora → datos mínimos. Al confirmar, la reserva se envía al panel del negocio en /app/.</p>
         </div>
         <button class="btn ghost" type="button" id="resetBooking">Reiniciar reserva</button>
       </div>
@@ -971,6 +971,7 @@
     };
 
     const slots = ['10:00','10:30','11:00','11:30','12:00','14:00','14:30','15:00','15:30','16:00','17:00','18:00'];
+    const CLIENT_PORTAL_APPOINTMENTS_KEY = 'kauzeSharedAppointmentsV1';
     let currentType = localStorage.getItem('kauzeClienteType') || 'barberia';
     let currentStep = 1;
     let selectedService = null;
@@ -1104,6 +1105,11 @@
 
     function saveAppointment(data) {
       localStorage.setItem('kauzeClienteLastAppointment', JSON.stringify(data));
+
+      const list = JSON.parse(localStorage.getItem(CLIENT_PORTAL_APPOINTMENTS_KEY) || '[]');
+      const exists = list.some(item => item.id === data.id);
+      const nextList = exists ? list.map(item => item.id === data.id ? data : item) : [...list, data];
+      localStorage.setItem(CLIENT_PORTAL_APPOINTMENTS_KEY, JSON.stringify(nextList));
     }
 
     document.getElementById('businessType').addEventListener('change', (e) => {
@@ -1142,6 +1148,11 @@
       if (!service || !pro || !selectedSlot) return alert('Faltan datos de la reserva.');
 
       const data = {
+        id: `reserva-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        type: currentType,
+        source: 'cliente',
+        status: 'Pendiente',
+        createdAt: new Date().toISOString(),
         business: p.business,
         service: service[0],
         duration: service[1],
@@ -1150,6 +1161,7 @@
         date,
         time: selectedSlot,
         name: document.getElementById('clientName').value.trim(),
+        client: document.getElementById('clientName').value.trim(),
         phone: document.getElementById('clientPhone').value.trim(),
         email: document.getElementById('clientEmail').value.trim(),
         code: '123456'
@@ -1157,7 +1169,7 @@
 
       saveAppointment(data);
 
-      document.getElementById('successText').textContent = `Listo, ${data.name}. Tu reserva para ${data.service} quedó para ${data.date} a las ${data.time}. Código demo: ${data.code}.`;
+      document.getElementById('successText').textContent = `Listo, ${data.name}. Tu reserva para ${data.service} quedó para ${data.date} a las ${data.time}. Código demo: ${data.code}. También quedará visible en el panel del negocio cuando abras /app/ en este mismo navegador.`;
       document.getElementById('bookingSuccess').classList.add('active');
       document.getElementById('bookingSuccess').scrollIntoView({ behavior:'smooth', block:'center' });
     });
