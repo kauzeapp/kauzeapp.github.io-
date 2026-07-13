@@ -896,11 +896,12 @@
   <script>
     const LOGIN_EMAIL = 'demo@kauze.cl';
     const LOGIN_PASSWORD = 'KauzeDemo2026';
-    const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', ownerWhatsapp:'', ownerCalendarEmail:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, activeTheme:'Club Náutico', pageTitle:'Agenda tu próxima hora sin escribir por WhatsApp', pageSubtitle:'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.', pageCta:'Reservar ahora', bannerStyle:'soft', bannerImage:'', appointments:{}, professionals:{}, campaigns:{} };
+    const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', ownerWhatsapp:'', ownerCalendarEmail:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, activeTheme:'Kauze Base', pageTitle:'Agenda tu próxima hora sin escribir por WhatsApp', pageSubtitle:'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.', pageCta:'Reservar ahora', bannerStyle:'soft', bannerImage:'', appointments:{}, professionals:{}, campaigns:{} };
     const CLIENT_PORTAL_APPOINTMENTS_KEY = 'kauzeSharedAppointmentsV1';
     
     // --- CATALOGO DE ESTILOS Y TEMAS (Kauze Design System) ---
     const THEMES = [
+      { name: 'Kauze Base', vertical: 'base', font: 'Inter', bg: '#F7F9FC', card: '#FFFFFF', text: '#0B1736', muted: '#64748B', primary: '#2563EB', border: '#E2E8F0' },
       { name: 'Brisa Serena', vertical: 'estetica', font: 'Inter', bg: '#E3F2FD', card: '#FFFFFF', text: '#0B1736', muted: '#546E7A', primary: '#0288D1', border: '#CFD8DC' },
       { name: 'Rubor Esencial', vertical: 'estetica', font: 'Poppins', bg: '#FFF0F5', card: '#FFFFFF', text: '#3E2723', muted: '#8D6E63', primary: '#D4A373', border: '#F8BBD0' },
       { name: 'Canvas Orgánico', vertical: 'estetica', font: 'Playfair Display', bg: '#FDFBF7', card: '#FFFFFF', text: '#2C3531', muted: '#6C7A72', primary: '#A3B19B', border: '#E5DEC9' },
@@ -934,7 +935,7 @@
 
     function allowedThemesForType(type) {
       const vertical = themeVerticalForType(type);
-      return THEMES.filter(t => t.vertical === vertical);
+      return THEMES.filter(t => t.vertical === 'base' || t.vertical === vertical);
     }
 
     function firstThemeForType(type) {
@@ -966,13 +967,15 @@
       const label = verticalLabel(themeVerticalForType(type));
       settingsThemeSelector.innerHTML = allowed.map(t => `
         <option value="${t.name}">
-          ${t.name} · ${t.font}
+          ${t.vertical === 'base' ? '⭐ ' : ''}${t.name} · ${t.font}
         </option>
       `).join('');
       settingsThemeSelector.value = selected.name;
 
       if (themePolicyNote) {
-        themePolicyNote.textContent = `Paletas disponibles para ${profiles[type]?.label || 'este negocio'}: ${allowed.length} tema(s) de ${label}.`;
+        const baseCount = allowed.filter(t => t.vertical === 'base').length;
+        const verticalCount = allowed.length - baseCount;
+        themePolicyNote.textContent = `Paletas disponibles para ${profiles[type]?.label || 'este negocio'}: Kauze Base por defecto + ${verticalCount} tema(s) de ${label}.`;
       }
 
       if (themePalettePreview) {
@@ -1133,7 +1136,7 @@
 
       themeMiniList.innerHTML = `
         <div class="theme-filter-head">
-          <span>Paletas permitidas</span>
+          <span>Paletas permitidas · Kauze Base siempre disponible</span>
           <span class="theme-filter-pill">${vertical === 'barberia' ? '💈' : '🌸'} ${verticalLabel(vertical)}</span>
         </div>
         ${list.map(t => `
@@ -1145,7 +1148,7 @@
                 <small style="color:var(--muted);font-weight:700;">${t.font}</small>
               </span>
             </span>
-            <span class="theme-chip-meta">${t.vertical === 'barberia' ? 'Barbería' : 'Estética'}</span>
+            <span class="theme-chip-meta">${t.vertical === 'base' ? 'Default' : (t.vertical === 'barberia' ? 'Barbería' : 'Estética')}</span>
           </button>
         `).join('')}
       `;
@@ -1272,8 +1275,7 @@
     if (typeof state.depositPercent === 'undefined') state.depositPercent = 15;
     if (typeof state.depositFixedAmount === 'undefined') state.depositFixedAmount = 1000;
     if (typeof state.depositMinimum === 'undefined') state.depositMinimum = 1000;
-    if (!state.activeTheme) state.activeTheme = firstThemeForType(state.type).name;
-    if (!state.activeTheme) state.activeTheme = state.type === 'barberia' ? 'Club Náutico' : 'Brisa Serena';
+    if (!state.activeTheme || state.activeTheme === 'Club Náutico' || state.activeTheme === 'Brisa Serena') state.activeTheme = 'Kauze Base';
     if (!state.pageTitle) state.pageTitle = 'Agenda tu próxima hora sin escribir por WhatsApp';
     if (!state.pageSubtitle) state.pageSubtitle = 'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.';
     if (!state.pageCta) state.pageCta = 'Reservar ahora';
