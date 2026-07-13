@@ -1024,6 +1024,18 @@
       const opts = Object.entries(profiles).map(([k,p])=>`<option value="${k}">${p.emoji} ${p.label}</option>`).join('');
       businessTypeSwitch.innerHTML = opts;
       settingsType.innerHTML = opts;
+      
+      const themeSelector = document.getElementById('settingsThemeSelector');
+      if (themeSelector) {
+        themeSelector.innerHTML = THEMES.map(t => `<option value="${t.name}">${t.name} (${t.vertical === 'barberia' ? 'Barbería' : 'Estética'})</option>`).join('');
+        
+        themeSelector.addEventListener('change', () => {
+          const theme = THEMES.find(t => t.name === themeSelector.value);
+          if (theme) {
+            updateMockupPreview(theme);
+          }
+        });
+      }
     }
 
     function currentProfile(){ return profiles[state.type] || profiles.barberia; }
