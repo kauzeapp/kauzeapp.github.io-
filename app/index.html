@@ -198,6 +198,70 @@
       border-left: 4px solid var(--blue);
     }
 
+  
+    .notification-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .notification-item {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 13px;
+      display: grid;
+      gap: 7px;
+    }
+
+    .notification-item strong {
+      color: var(--navy);
+      font-size: 14px;
+    }
+
+    .notification-item small {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .notify-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .notify-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--muted);
+    }
+
+    .notify-tag.ok {
+      background: rgba(16,185,129,.08);
+      color: #047857;
+      border-color: rgba(16,185,129,.22);
+    }
+
+    .notify-tag.wait {
+      background: rgba(217,119,6,.08);
+      color: #92400e;
+      border-color: rgba(217,119,6,.22);
+    }
+
+    .notify-tag.info {
+      background: rgba(37,99,235,.08);
+      color: var(--blue);
+      border-color: rgba(37,99,235,.22);
+    }
+
   </style>
 </head>
 <body>
@@ -263,7 +327,15 @@
           <article class="card chart"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:2px">Ingresos de la semana</h2><p style="color:var(--muted);font-size:13px">Proyección visual para presentación.</p><svg viewBox="0 0 420 190" preserveAspectRatio="none"><defs><linearGradient id="grad" x1="0" x2="1"><stop offset="0" stop-color="#2563EB"/><stop offset="1" stop-color="#6366F1"/></linearGradient><linearGradient id="area" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2563EB" stop-opacity=".20"/><stop offset="1" stop-color="#2563EB" stop-opacity="0"/></linearGradient></defs><path class="chart-grid" d="M0 35H420M0 80H420M0 125H420M0 170H420"/><path class="chart-fill" d="M0 145 C40 120,60 130,95 95 S155 70,190 82 S250 125,285 80 S350 30,420 48 L420 190 L0 190Z"/><path class="chart-line" d="M0 145 C40 120,60 130,95 95 S155 70,190 82 S250 125,285 80 S350 30,420 48"/></svg></article>
         </div>
         <div class="section-head"><div><h2>Vista móvil cliente</h2><p>Simulación de reserva desde celular.</p></div></div>
-        <div class="grid-2"><article class="card"><div class="phone-preview"><div class="phone-inner"><div class="phone-top"><strong>Kauze</strong><div class="phone-pill"></div></div><h3 style="font-family:Sora,sans-serif;color:var(--navy);margin-bottom:8px">¿Qué servicio necesitas?</h3><p style="color:var(--muted);font-size:12px;margin-bottom:14px">Categorías disponibles según el negocio.</p><div class="category-grid" id="phoneCats"></div><button type="button" class="btn primary" style="margin-top:18px;width:100%">Elegir fecha y hora</button></div></div></article><article class="card"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Acciones sugeridas</h2><div class="list" id="actionsList"></div></article></div>
+        <div class="grid-2"><article class="card"><div class="phone-preview"><div class="phone-inner"><div class="phone-top"><strong>Kauze</strong><div class="phone-pill"></div></div><h3 style="font-family:Sora,sans-serif;color:var(--navy);margin-bottom:8px">¿Qué servicio necesitas?</h3><p style="color:var(--muted);font-size:12px;margin-bottom:14px">Categorías disponibles según el negocio.</p><div class="category-grid" id="phoneCats"></div><button type="button" class="btn primary" style="margin-top:18px;width:100%">Elegir fecha y hora</button></div></div></article><article class="card"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Acciones sugeridas</h2><div class="list" id="actionsList"></div></article>
+          <article class="card">
+            <h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:6px">Centro de notificaciones</h2>
+            <p style="color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:10px">
+              Simulación del flujo real: WhatsApp al cliente, aviso al dueño, evento en Calendar y actualización dentro de Kauze.
+            </p>
+            <div class="notification-list" id="notificationCenter"></div>
+          </article>
+        </div>
       </section>
 
       <section class="view" id="view-agenda"><div class="section-head"><div><h2>Agenda</h2><p>Reservas, horarios y estados.</p></div><button type="button" class="btn primary" id="openAppointmentFromAgenda" style="width:auto">Crear cita</button></div><article class="card table-wrap"><table><thead><tr><th>Hora</th><th>Cliente</th><th>Servicio</th><th>Profesional</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="agendaTable"></tbody></table></article></section>
@@ -272,7 +344,83 @@
       <section class="view" id="view-profesionales"><div class="section-head"><div><h2 id="professionalsTitle">Profesionales</h2><p>Equipo, disponibilidad y desempeño.</p></div><button type="button" class="btn primary" id="newProfessionalBtn" style="width:auto">Agregar profesional</button></div><div class="grid-3" id="professionalsGrid"></div><div class="notice" style="margin-top:14px">Los profesionales se guardan localmente en este navegador. Si asignas citas a un profesional y luego lo eliminas, las citas antiguas se mantienen como registro.</div></section>
       <section class="view" id="view-marketing"><div class="section-head"><div><h2>Marketing</h2><p>Promociones, fidelización y recuperación.</p></div><button type="button" class="btn primary" id="newCampaignBtn" style="width:auto">Crear campaña</button></div><div class="grid-3" id="marketingGrid"></div><div class="section-head"><div><h2>Análisis de integraciones</h2><p>Vista comercial para explicar cómo Kauze conectará WhatsApp e Instagram.</p></div></div><div class="grid-3" id="integrationGrid"></div><article class="card" style="margin-top:14px"><h3 style="font-family:Sora,sans-serif;font-size:18px;color:var(--navy);margin-bottom:8px">Checklist antes de conectar Meta</h3><div class="checklist"><div class="check-item"><span class="check-dot">1</span><span>Número de WhatsApp corporativo libre, sin WhatsApp normal activo en celular.</span></div><div class="check-item"><span class="check-dot">2</span><span>Cuenta de Meta Business verificada y permisos para WhatsApp Business Cloud API.</span></div><div class="check-item"><span class="check-dot">3</span><span>Plantillas de confirmación, recordatorio, reactivación y postventa aprobadas por Meta.</span></div><div class="check-item"><span class="check-dot">4</span><span>Instagram conectado para automatizar respuestas, seguimiento y recuperación de clientes.</span></div></div></article></section>
       <section class="view" id="view-facturacion"><div class="section-head"><div><h2>Facturación</h2><p>Ingresos, métodos de pago y movimientos.</p></div><button type="button" class="btn primary" style="width:auto">Registrar pago</button></div><div class="grid-4"><article class="card metric"><div class="label">Ventas del día</div><div class="value" id="billingToday">$0</div><div class="trend">Registradas</div></article><article class="card metric"><div class="label">Ticket promedio</div><div class="value" id="billingAvg">$0</div><div class="trend">Por atención</div></article><article class="card metric"><div class="label">Pagos pendientes</div><div class="value">2</div><div class="trend warn">Revisar hoy</div></article><article class="card metric"><div class="label">Método principal</div><div class="value">Débito</div><div class="trend">Mayor uso</div></article></div><div class="section-head"><div><h2>Últimos pagos</h2><p>Movimiento temporal para demo.</p></div></div><article class="card table-wrap"><table><thead><tr><th>Cliente</th><th>Servicio</th><th>Método</th><th>Monto</th></tr></thead><tbody id="billingTable"></tbody></table></article></section>
-      <section class="view" id="view-ajustes"><div class="section-head"><div><h2>Ajustes</h2><p>Configuración local de la demo.</p></div></div><div class="grid-2"><article class="card"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Datos del negocio</h2><div class="field-group"><label>Nombre del negocio</label><input class="field" id="settingsBusiness" type="text"></div><div class="field-group"><label>Tipo de negocio</label><select class="field" id="settingsType"></select></div><button type="button" class="btn primary" id="saveSettings">Guardar cambios locales</button><div class="save-msg" id="saveMsg">Cambios guardados en este navegador.</div></article><article class="card"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Próxima etapa real</h2><p style="color:var(--muted);line-height:1.75">Esta interfaz sirve para presentar Kauze y definir pantallas. Para usuarios reales, cada negocio necesita autenticación, base de datos y permisos por rol.</p><div class="notice" style="margin-top:16px">Arquitectura futura recomendada: Supabase Auth + tablas de negocios, usuarios, clientes, servicios, profesionales, reservas, campañas y pagos.</div></article></div></section>
+      <section class="view" id="view-ajustes">
+        <div class="section-head">
+          <div>
+            <h2>Ajustes</h2>
+            <p>Configuración local de la demo.</p>
+          </div>
+        </div>
+        <div class="grid-2">
+          <article class="card">
+            <h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Datos del negocio</h2>
+            <div class="field-group">
+              <label>Nombre del negocio</label>
+              <input class="field" id="settingsBusiness" type="text">
+            </div>
+            <div class="field-group">
+              <label>Tipo de negocio</label>
+              <select class="field" id="settingsType"></select>
+            </div>
+
+            <h2 style="font-family:Sora,sans-serif;font-size:18px;margin:18px 0 12px">Canales de notificación del dueño</h2>
+            <div class="field-group">
+              <label>WhatsApp del dueño / encargado</label>
+              <input class="field" id="settingsOwnerWhatsapp" type="tel" placeholder="+56 9 XXXX XXXX">
+            </div>
+            <div class="field-group">
+              <label>Correo para Google Calendar</label>
+              <input class="field" id="settingsCalendarEmail" type="email" placeholder="dueño@negocio.cl">
+            </div>
+
+            <h2 style="font-family:Sora,sans-serif;font-size:18px;margin:18px 0 12px">Abono de reserva</h2>
+
+            <label class="task" style="cursor:pointer; margin-bottom:12px;">
+              <input id="settingsDepositEnabled" type="checkbox">
+              <span>
+                <strong>Solicitar abono al reservar</strong><br>
+                <small style="color:var(--muted);font-weight:600;">Si está apagado, el cliente reserva sin pagar abono.</small>
+              </span>
+            </label>
+
+            <div class="field-group">
+              <label>Tipo de abono</label>
+              <select class="field" id="settingsDepositMode">
+                <option value="percent">Porcentaje del servicio</option>
+                <option value="fixed">Monto fijo</option>
+              </select>
+            </div>
+
+            <div class="form-grid">
+              <div class="field-group">
+                <label>Porcentaje</label>
+                <input class="field" id="settingsDepositPercent" type="number" min="0" max="100" step="1" placeholder="15">
+              </div>
+              <div class="field-group">
+                <label>Monto fijo CLP</label>
+                <input class="field" id="settingsDepositFixed" type="number" min="0" step="500" placeholder="1000">
+              </div>
+              <div class="field-group">
+                <label>Mínimo CLP</label>
+                <input class="field" id="settingsDepositMinimum" type="number" min="0" step="500" placeholder="1000">
+              </div>
+            </div>
+
+            <button type="button" class="btn primary" id="saveSettings">Guardar cambios locales</button>
+            <div class="save-msg" id="saveMsg">Cambios guardados en este navegador.</div>
+          </article>
+
+          <article class="card">
+            <h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Flujo real de notificaciones</h2>
+            <p style="color:var(--muted);line-height:1.75">
+              Cada negocio podrá configurar su propio número de WhatsApp, calendario y regla de abono. Si el dueño activa abono, el cliente paga antes de reservar. Si lo desactiva, la reserva entra sin pago previo. En ambos casos Kauze crea el evento, avisa dentro de la app y programa el mensaje de confirmación al cliente 5 horas antes.
+            </p>
+            <div class="notice" style="margin-top:16px">
+              Demo actual: todo se simula con localStorage. Producción: WhatsApp Cloud API + Google Calendar API + backend/scheduler.
+            </div>
+          </article>
+        </div>
+      </section>
     </main>
   </section>
 
@@ -319,6 +467,7 @@
             <label for="apptStatus">Estado</label>
             <select class="field" id="apptStatus" required>
               <option value="Confirmada">Confirmada</option>
+              <option value="Esperando confirmación">Esperando confirmación</option>
               <option value="Pendiente">Pendiente</option>
               <option value="Completada">Completada</option>
               <option value="Cancelada">Cancelada</option>
@@ -427,7 +576,7 @@
   <script>
     const LOGIN_EMAIL = 'demo@kauze.cl';
     const LOGIN_PASSWORD = 'KauzeDemo2026';
-    const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', appointments:{}, professionals:{}, campaigns:{} };
+    const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', ownerWhatsapp:'', ownerCalendarEmail:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, appointments:{}, professionals:{}, campaigns:{} };
     const CLIENT_PORTAL_APPOINTMENTS_KEY = 'kauzeSharedAppointmentsV1';
     const profiles = {
       barberia: { label:'Barbería', emoji:'💈', business:'Kauze Demo Barbería', proPlural:'Barberos', newPro:'Agregar barbero', citas:24, ingresos:3580000, clientes:12, cats:['Corte','Barba','Corte + barba','Premium'], services:[['Corte clásico','45 min',12000],['Corte + barba','60 min',18000],['Perfilado de barba','25 min',8000],['Corte premium','75 min',24000],['Ritual barba','45 min',15000],['Niños','35 min',10000]], pros:[['Juan Pérez','Barbero senior','8 citas hoy'],['Carlos Ríos','Barbero','7 citas hoy'],['Pedro Ramírez','Barbero','5 citas hoy']], agenda:[['10:00','Juan Pérez','Corte clásico','Carlos Ríos','Confirmada'],['11:30','Mario López','Corte + barba','Juan Pérez','Pendiente'],['14:00','Camilo Torres','Perfilado de barba','Pedro Ramírez','Confirmada'],['15:30','Felipe Araya','Corte premium','Carlos Ríos','Confirmada']], clients:[['Juan Pérez','Corte clásico','Enviar recordatorio en 21 días',12000],['Mario López','Corte + barba','Pedir reseña',18000],['Felipe Araya','Corte premium','Promoción fidelización',24000]] },
@@ -439,10 +588,17 @@
 
     let state = JSON.parse(localStorage.getItem('kauzeAppV3State') || 'null') || defaultBusiness;
     if (!state.appointments) state.appointments = {};
+    if (typeof state.ownerWhatsapp === 'undefined') state.ownerWhatsapp = '';
+    if (typeof state.ownerCalendarEmail === 'undefined') state.ownerCalendarEmail = '';
+    if (typeof state.depositEnabled === 'undefined') state.depositEnabled = true;
+    if (!state.depositMode) state.depositMode = 'percent';
+    if (typeof state.depositPercent === 'undefined') state.depositPercent = 15;
+    if (typeof state.depositFixedAmount === 'undefined') state.depositFixedAmount = 1000;
+    if (typeof state.depositMinimum === 'undefined') state.depositMinimum = 1000;
 
     const fmt = n => Number(n || 0).toLocaleString('es-CL', {style:'currency',currency:'CLP',maximumFractionDigits:0});
     const todayISO = () => new Date().toISOString().slice(0,10);
-    const statusClass = s => s === 'Pendiente' ? 'status wait' : (s === 'Cancelada' || s === 'No asistió') ? 'status cancel' : 'status';
+    const statusClass = s => (s === 'Pendiente' || s === 'Esperando confirmación') ? 'status wait' : (s === 'Cancelada' || s === 'No asistió') ? 'status cancel' : 'status';
     const uid = () => 'appt-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,7);
     let editingAppointmentId = null;
 
@@ -457,6 +613,14 @@
     const businessTypeSwitch = document.getElementById('businessTypeSwitch');
     const settingsType = document.getElementById('settingsType');
     const settingsBusiness = document.getElementById('settingsBusiness');
+    const settingsOwnerWhatsapp = document.getElementById('settingsOwnerWhatsapp');
+    const settingsCalendarEmail = document.getElementById('settingsCalendarEmail');
+    const settingsDepositEnabled = document.getElementById('settingsDepositEnabled');
+    const settingsDepositMode = document.getElementById('settingsDepositMode');
+    const settingsDepositPercent = document.getElementById('settingsDepositPercent');
+    const settingsDepositFixed = document.getElementById('settingsDepositFixed');
+    const settingsDepositMinimum = document.getElementById('settingsDepositMinimum');
+    const notificationCenter = document.getElementById('notificationCenter');
     const navProfessionals = document.getElementById('navProfessionals');
     const professionalsTitle = document.getElementById('professionalsTitle');
     const newProfessionalBtn = document.getElementById('newProfessionalBtn');
@@ -567,22 +731,38 @@
 
       incoming.forEach(item => {
         const id = `cliente-${item.id}`;
-        const alreadyExists = list.some(appt => appt.id === id);
-        if (alreadyExists) return;
-
-        list.push({
+        const synced = {
           id,
           date: item.date,
           time: item.time,
           client: item.name || item.client || 'Cliente sin nombre',
           service: item.service,
           professional: item.professional,
-          status: item.status || 'Pendiente',
+          status: item.status || 'Esperando confirmación',
           phone: item.phone || '',
           email: item.email || '',
           source: 'cliente',
-          createdAt: item.createdAt || new Date().toISOString()
-        });
+          createdAt: item.createdAt || new Date().toISOString(),
+          confirmationStatus: item.confirmationStatus || 'Pendiente',
+          confirmedAt: item.confirmedAt || '',
+          paymentStatus: item.paymentStatus || 'Pendiente',
+          paymentMethod: item.paymentMethod || 'No informado',
+          depositAmount: item.depositAmount || 0,
+          remainingAmount: item.remainingAmount || 0,
+          whatsappReminderStatus: item.whatsappReminderStatus || 'Programado',
+          code: item.code || '123456',
+          ownerWhatsapp: item.ownerWhatsapp || state.ownerWhatsapp || '',
+          ownerCalendarEmail: item.ownerCalendarEmail || state.ownerCalendarEmail || '',
+          calendarStatus: item.calendarStatus || 'Evento Calendar demo creado',
+          notifications: item.notifications || []
+        };
+
+        const idx = list.findIndex(appt => appt.id === id);
+        if (idx >= 0) {
+          list[idx] = { ...list[idx], ...synced };
+        } else {
+          list.push(synced);
+        }
         imported++;
       });
 
@@ -591,10 +771,28 @@
     }
 
     function sourceLabel(appt){
-      return appt.source === 'cliente' ? '<span class="source-pill">🌐 Portal cliente</span>' : '';
+      if (appt.source !== 'cliente') return '';
+      const pay = appt.paymentStatus ? `<span class="source-pill">${appt.paymentStatus === 'Sin abono' ? '🟢' : '💳'} ${appt.paymentStatus}</span>` : '';
+      const confirm = appt.confirmationStatus === 'Confirmada'
+        ? '<span class="source-pill">✅ Cliente confirmó</span>'
+        : '<span class="source-pill">📲 Esperando WhatsApp</span>';
+      return `<span class="source-pill">🌐 Portal cliente</span>${pay}${confirm}`;
     }
 
-    function saveState(){ localStorage.setItem('kauzeAppV3State', JSON.stringify(state)); }
+    function saveState(){
+      localStorage.setItem('kauzeAppV3State', JSON.stringify(state));
+      localStorage.setItem('kauzeBusinessContactV1', JSON.stringify({
+        businessName: state.name || currentProfile().business,
+        businessType: state.type,
+        ownerWhatsapp: state.ownerWhatsapp || '',
+        ownerCalendarEmail: state.ownerCalendarEmail || '',
+        depositEnabled: !!state.depositEnabled,
+        depositMode: state.depositMode || 'percent',
+        depositPercent: Number(state.depositPercent || 0),
+        depositFixedAmount: Number(state.depositFixedAmount || 0),
+        depositMinimum: Number(state.depositMinimum || 0)
+      }));
+    }
 
     function normalizeProfessional(row){
       return { id: uid(), name: row[0], role: row[1], note: row[2] || '' };
@@ -669,6 +867,13 @@
       businessTypeSwitch.value=state.type;
       settingsType.value=state.type;
       settingsBusiness.value=name;
+      if (settingsOwnerWhatsapp) settingsOwnerWhatsapp.value = state.ownerWhatsapp || '';
+      if (settingsCalendarEmail) settingsCalendarEmail.value = state.ownerCalendarEmail || '';
+      if (settingsDepositEnabled) settingsDepositEnabled.checked = !!state.depositEnabled;
+      if (settingsDepositMode) settingsDepositMode.value = state.depositMode || 'percent';
+      if (settingsDepositPercent) settingsDepositPercent.value = Number(state.depositPercent || 0);
+      if (settingsDepositFixed) settingsDepositFixed.value = Number(state.depositFixedAmount || 0);
+      if (settingsDepositMinimum) settingsDepositMinimum.value = Number(state.depositMinimum || 0);
       navProfessionals.innerHTML=`☷ ${p.proPlural}`;
       professionalsTitle.textContent=p.proPlural;
       newProfessionalBtn.textContent=p.newPro;
@@ -688,7 +893,14 @@
         ['Recuperar clientes', 'Campaña para clientes sin reserva hace 30 días.']
       ].map(x=>`<div class="item"><div><strong>${x[0]}</strong><small>${x[1]}</small></div></div>`).join('');
 
-      agendaTable.innerHTML = appointments.length ? appointments.map(a=>`<tr><td>${a.date}<br><strong>${a.time}</strong></td><td>${a.client}${sourceLabel(a)}</td><td>${a.service}</td><td>${a.professional}</td><td><span class="${statusClass(a.status)}">${a.status}</span></td><td><div class="row-actions"><button class="mini-btn" data-edit-appt="${a.id}">Editar</button><button class="mini-btn danger" data-delete-appt="${a.id}">Eliminar</button></div></td></tr>`).join('') : `<tr><td colspan="6"><div class="empty-state">Agenda vacía. Usa “Crear cita” para agregar una reserva.</div></td></tr>`;
+      renderNotificationCenter(appointments);
+
+      agendaTable.innerHTML = appointments.length ? appointments.map(a=>{
+        const confirmBtn = a.source === 'cliente' && a.status !== 'Confirmada'
+          ? `<button class="mini-btn" data-confirm-appt="${a.id}">Confirmar</button>`
+          : '';
+        return `<tr><td>${a.date}<br><strong>${a.time}</strong></td><td>${a.client}${sourceLabel(a)}</td><td>${a.service}</td><td>${a.professional}</td><td><span class="${statusClass(a.status)}">${a.status}</span></td><td><div class="row-actions">${confirmBtn}<button class="mini-btn" data-edit-appt="${a.id}">Editar</button><button class="mini-btn danger" data-delete-appt="${a.id}">Eliminar</button></div></td></tr>`;
+      }).join('') : `<tr><td colspan="6"><div class="empty-state">Agenda vacía. Usa “Crear cita” para agregar una reserva.</div></td></tr>`;
 
       const clientRows = buildClientsFromAppointments(appointments, p.clients);
       clientsTable.innerHTML=clientRows.map(c=>`<tr><td><strong>${c[0]}</strong></td><td>${c[1]}</td><td>${c[2]}</td><td>${fmt(c[3])}</td></tr>`).join('');
@@ -702,6 +914,46 @@
       bindProfessionalActions();
       bindCampaignActions();
     }
+
+    
+    function renderNotificationCenter(appointments){
+      if (!notificationCenter) return;
+
+      const portalAppointments = appointments
+        .filter(a => a.source === 'cliente')
+        .slice()
+        .sort((a,b)=>(b.createdAt || '').localeCompare(a.createdAt || ''))
+        .slice(0,5);
+
+      if (!portalAppointments.length) {
+        notificationCenter.innerHTML = `<div class="notification-item">
+          <strong>Sin reservas externas todavía</strong>
+          <small>Cuando alguien reserve desde /cliente/, aquí verás el aviso a la app, WhatsApp, Calendar y estado de confirmación.</small>
+        </div>`;
+        return;
+      }
+
+      notificationCenter.innerHTML = portalAppointments.map(a => {
+        const ownerPhone = a.ownerWhatsapp || state.ownerWhatsapp || 'Número dueño no configurado';
+        const calendar = a.ownerCalendarEmail || state.ownerCalendarEmail || 'Calendario no configurado';
+        const confirmed = a.confirmationStatus === 'Confirmada';
+        const whatsappStatus = confirmed ? 'Dueño notificado por WhatsApp demo' : 'WhatsApp cliente programado';
+        const calendarStatus = confirmed ? 'Calendar actualizado: Confirmada' : (a.calendarStatus || 'Evento Calendar demo creado');
+
+        return `<div class="notification-item">
+          <strong>${a.client} · ${a.service}</strong>
+          <small>${a.date} a las ${a.time} con ${a.professional}</small>
+          <div class="notify-tags">
+            <span class="notify-tag info">📱 App Kauze</span>
+            <span class="notify-tag ${confirmed ? 'ok' : 'wait'}">💬 ${whatsappStatus}</span>
+            <span class="notify-tag ${confirmed ? 'ok' : 'info'}">📅 ${calendarStatus}</span>
+            <span class="notify-tag ${confirmed ? 'ok' : 'wait'}">${confirmed ? '✅ Confirmada' : '⏳ Esperando cliente'}</span>
+          </div>
+          <small><strong>Destino dueño:</strong> ${ownerPhone} · <strong>Calendar:</strong> ${calendar}</small>
+        </div>`;
+      }).join('');
+    }
+
 
     function buildClientsFromAppointments(appointments, defaultClients){
       const map = new Map();
@@ -800,6 +1052,20 @@
     function bindAppointmentRowActions(){
       document.querySelectorAll('[data-edit-appt]').forEach(btn => btn.addEventListener('click', () => openAppointmentModal(btn.dataset.editAppt)));
       document.querySelectorAll('[data-delete-appt]').forEach(btn => btn.addEventListener('click', () => deleteAppointment(btn.dataset.deleteAppt)));
+      document.querySelectorAll('[data-confirm-appt]').forEach(btn => btn.addEventListener('click', () => confirmAppointmentFromOwner(btn.dataset.confirmAppt)));
+    }
+
+    function confirmAppointmentFromOwner(id){
+      let list = getAppointments();
+      const appt = list.find(a => a.id === id);
+      if (!appt) return;
+      appt.status = 'Confirmada';
+      appt.confirmationStatus = 'Confirmada manualmente por dueño';
+      appt.confirmedAt = new Date().toISOString();
+      appt.calendarStatus = 'Calendar actualizado por dueño';
+      appt.notifications = [...(appt.notifications || []), { channel:'app', status:'ok', text:'Dueño confirmó manualmente la cita', at:new Date().toISOString() }];
+      setAppointments(list);
+      render();
     }
 
     function deleteAppointment(id){
@@ -910,7 +1176,7 @@
     logoutBtn.addEventListener('click',()=>{ sessionStorage.removeItem('kauzeAppV3Auth'); location.reload(); });
     mobileMenu.addEventListener('click',()=>sidebar.classList.toggle('open'));
     businessTypeSwitch.addEventListener('change',()=>{ state.type=businessTypeSwitch.value; state.name=profiles[state.type].business; saveState(); render(); });
-    saveSettings.addEventListener('click',()=>{ state.name=settingsBusiness.value.trim() || profiles[settingsType.value].business; state.type=settingsType.value; saveState(); render(); saveMsg.style.display='block'; setTimeout(()=>saveMsg.style.display='none',1600); });
+    saveSettings.addEventListener('click',()=>{ state.name=settingsBusiness.value.trim() || profiles[settingsType.value].business; state.type=settingsType.value; state.ownerWhatsapp = settingsOwnerWhatsapp ? settingsOwnerWhatsapp.value.trim() : ''; state.ownerCalendarEmail = settingsCalendarEmail ? settingsCalendarEmail.value.trim() : ''; state.depositEnabled = settingsDepositEnabled ? settingsDepositEnabled.checked : false; state.depositMode = settingsDepositMode ? settingsDepositMode.value : 'percent'; state.depositPercent = settingsDepositPercent ? Number(settingsDepositPercent.value || 0) : 0; state.depositFixedAmount = settingsDepositFixed ? Number(settingsDepositFixed.value || 0) : 0; state.depositMinimum = settingsDepositMinimum ? Number(settingsDepositMinimum.value || 0) : 0; saveState(); render(); saveMsg.style.display='block'; setTimeout(()=>saveMsg.style.display='none',1600); });
 
     openAppointmentFromHome.addEventListener('click',()=>openAppointmentModal());
     openAppointmentFromAgenda.addEventListener('click',()=>openAppointmentModal());
@@ -925,7 +1191,9 @@
     });
 
     function saveAppointmentFromModal(){
+      const existing = editingAppointmentId ? getAppointments().find(a => a.id === editingAppointmentId) : null;
       const data = {
+        ...(existing || {}),
         id: editingAppointmentId || uid(),
         date: apptDate.value,
         time: apptTime.value,
@@ -997,9 +1265,6 @@
 
     fillTypeSelects();
     if(sessionStorage.getItem('kauzeAppV3Auth')==='true') showApp();
-  </script>
-</body>
-</html>
   </script>
 </body>
 </html>
