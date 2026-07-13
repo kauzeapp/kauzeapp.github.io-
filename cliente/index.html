@@ -691,6 +691,154 @@
         grid-template-columns: 1fr;
       }
     }
+    .payment-card {
+      border: 1px solid rgba(37,99,235,.18);
+      background: linear-gradient(180deg, #ffffff, #F8FAFF);
+      border-radius: 22px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .payment-card h3 {
+      font-family: 'Sora', sans-serif;
+      color: var(--navy);
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .payment-card p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    .payment-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .payment-row:last-child {
+      border-bottom: 0;
+    }
+
+    .payment-row span:first-child {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .payment-row span:last-child {
+      color: var(--navy);
+      font-weight: 900;
+      text-align: right;
+    }
+
+    .pay-options {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .pay-option {
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 16px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--navy);
+      cursor: pointer;
+      transition: .18s ease;
+    }
+
+    .pay-option.selected {
+      border-color: rgba(37,99,235,.58);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.08);
+      background: var(--soft-blue);
+    }
+
+    .pay-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      background: rgba(245,158,11,.12);
+      color: #92400e;
+      margin-top: 10px;
+    }
+
+    .pay-status.ok {
+      background: rgba(16,185,129,.10);
+      color: #047857;
+    }
+
+    .confirm-card {
+      border: 1px solid rgba(16,185,129,.24);
+      background: rgba(16,185,129,.07);
+      border-radius: 18px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    .confirm-card strong {
+      display: block;
+      color: #047857;
+      margin-bottom: 5px;
+    }
+
+    .confirm-card small {
+      color: #065f46;
+      line-height: 1.5;
+    }
+
+  
+    .flow-explain {
+      border: 1px solid rgba(37,99,235,.22);
+      background: rgba(37,99,235,.06);
+      color: var(--navy);
+      border-radius: 18px;
+      padding: 14px;
+      font-size: 13px;
+      line-height: 1.55;
+      margin-top: 14px;
+    }
+
+    .flow-explain strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .notify-flow {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .notify-flow span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 11px;
+      border-radius: 14px;
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
   </style>
 </head>
 
@@ -732,8 +880,13 @@
 
           <div class="business-meta" style="margin-top:14px">
             <div class="meta-row"><span>Horario</span><span>Lun a Sáb · 10:00 a 19:00</span></div>
-            <div class="meta-row"><span>Confirmación</span><span>Automática</span></div>
+            <div class="meta-row"><span>Confirmación</span><span>WhatsApp + App</span></div>
+            <div class="meta-row"><span>Calendar</span><span>Evento automático demo</span></div>
             <div class="meta-row"><span>Evaluación</span><span>Puntos Kauze</span></div>
+          </div>
+          <div class="flow-explain">
+            <strong>Flujo Kauze</strong>
+            El cliente reserva. Si el negocio activó abono, paga antes de solicitar la hora; si no, reserva sin pago previo. Kauze avisa en la app, crea evento Calendar demo y programa WhatsApp de confirmación 5 horas antes.
           </div>
         </article>
 
@@ -758,7 +911,7 @@
         <div class="step active" data-step="1">1. Servicio</div>
         <div class="step" data-step="2">2. Profesional</div>
         <div class="step" data-step="3">3. Horario</div>
-        <div class="step" data-step="4">4. Confirmar</div>
+        <div class="step" data-step="4">4. Pago</div>
       </div>
 
       <div class="booking-view active" id="bookingStep1">
@@ -789,7 +942,32 @@
               <div class="summary-row"><span>Servicio</span><span id="summaryService">-</span></div>
               <div class="summary-row"><span>Profesional</span><span id="summaryProfessional">-</span></div>
               <div class="summary-row"><span>Fecha y hora</span><span id="summaryDate">-</span></div>
-              <div class="summary-row"><span>Total</span><span id="summaryPrice">-</span></div>
+              <div class="summary-row"><span>Total servicio</span><span id="summaryPrice">-</span></div>
+              <div class="summary-row"><span>Abono reserva</span><span id="summaryDeposit">-</span></div>
+            </div>
+
+            <div class="payment-card">
+              <h3 id="paymentCardTitle">Abono de reserva</h3>
+              <p id="paymentCardText">El negocio define si solicita un abono para reducir inasistencias. Si no lo solicita, podrás reservar sin pago previo.</p>
+              <div class="payment-row"><span>Monto a pagar ahora</span><span id="depositAmount">-</span></div>
+              <div class="payment-row"><span>Saldo estimado en local</span><span id="remainingAmount">-</span></div>
+
+              <div class="pay-options" id="paymentOptions">
+                <button class="pay-option selected" type="button" data-pay-method="Mercado Pago Demo">
+                  <span>💳 Mercado Pago demo</span>
+                  <span>Seleccionado</span>
+                </button>
+                <button class="pay-option" type="button" data-pay-method="Tarjeta demo">
+                  <span>💳 Tarjeta demo</span>
+                  <span>Simulado</span>
+                </button>
+                <button class="pay-option" type="button" data-pay-method="Transferencia demo">
+                  <span>🏦 Transferencia demo</span>
+                  <span>Manual</span>
+                </button>
+              </div>
+
+              <div class="pay-status" id="paymentStatus">🟡 Pago pendiente de simulación</div>
             </div>
           </div>
 
@@ -806,7 +984,7 @@
               <label for="clientEmail">Email</label>
               <input class="field" type="email" id="clientEmail" placeholder="correo@ejemplo.cl">
             </div>
-            <button class="btn primary full" type="submit">Confirmar reserva</button>
+            <button class="btn primary full" type="submit" id="submitBookingBtn">Solicitar reserva</button>
           </form>
         </div>
       </div>
@@ -972,14 +1150,103 @@
 
     const slots = ['10:00','10:30','11:00','11:30','12:00','14:00','14:30','15:00','15:30','16:00','17:00','18:00'];
     const CLIENT_PORTAL_APPOINTMENTS_KEY = 'kauzeSharedAppointmentsV1';
+
+    function getBusinessContact() {
+      try {
+        const raw = localStorage.getItem('kauzeBusinessContactV1');
+        return raw ? JSON.parse(raw) : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function getDepositConfig() {
+      const contact = getBusinessContact();
+      return {
+        enabled: contact.depositEnabled !== false,
+        mode: contact.depositMode || 'percent',
+        percent: Number(contact.depositPercent ?? 15),
+        fixedAmount: Number(contact.depositFixedAmount ?? 1000),
+        minimum: Number(contact.depositMinimum ?? 1000)
+      };
+    }
+
+    function isDepositRequired() {
+      return !!getDepositConfig().enabled;
+    }
+
+    function buildNotificationFlow(data) {
+      const contact = getBusinessContact();
+      const ownerWhatsapp = contact.ownerWhatsapp || data.ownerWhatsapp || 'Número dueño no configurado';
+      const ownerCalendarEmail = contact.ownerCalendarEmail || data.ownerCalendarEmail || 'Calendar dueño no configurado';
+
+      return [
+        { channel:'app', status:'ok', text:'Nueva reserva recibida en Kauze App', target:'Panel del negocio', at:new Date().toISOString() },
+        { channel:'calendar', status:'ok', text:'Evento creado en Calendar demo', target:ownerCalendarEmail, at:new Date().toISOString() },
+        { channel:'whatsapp_client', status:'scheduled', text:'Mensaje al cliente para confirmar 5 horas antes', target:data.phone, at:new Date().toISOString() },
+        { channel:'whatsapp_owner', status:'scheduled', text:'Aviso al dueño cuando el cliente confirme', target:ownerWhatsapp, at:new Date().toISOString() }
+      ];
+    }
     let currentType = localStorage.getItem('kauzeClienteType') || 'barberia';
     let currentStep = 1;
     let selectedService = null;
     let selectedProfessional = null;
     let selectedSlot = null;
     let selectedRating = 0;
+    let selectedPaymentMethod = 'Mercado Pago Demo';
 
     const money = (value) => value.toLocaleString('es-CL', { style:'currency', currency:'CLP', maximumFractionDigits:0 });
+
+    function depositAmount(price) {
+      if (!price) return 0;
+      const config = getDepositConfig();
+      if (!config.enabled) return 0;
+
+      if (config.mode === 'fixed') {
+        return Math.max(0, Math.round(config.fixedAmount || 0));
+      }
+
+      const raw = Math.round(price * (config.percent || 0) / 100 / 100) * 100;
+      return Math.max(config.minimum || 0, raw);
+    }
+
+    function depositLabel() {
+      const config = getDepositConfig();
+      if (!config.enabled) return 'Sin abono requerido';
+      if (config.mode === 'fixed') return `Abono fijo de ${money(config.fixedAmount || 0)}`;
+      return `Abono de ${config.percent || 0}% · mínimo ${money(config.minimum || 0)}`;
+    }
+
+    function refreshPaymentUI(service) {
+      const required = isDepositRequired();
+      const paymentOptions = document.getElementById('paymentOptions');
+      const paymentStatus = document.getElementById('paymentStatus');
+      const submitBtn = document.getElementById('submitBookingBtn');
+      const paymentTitle = document.getElementById('paymentCardTitle');
+      const paymentText = document.getElementById('paymentCardText');
+
+      if (paymentTitle) paymentTitle.textContent = required ? 'Pago de abono' : 'Reserva sin abono';
+      if (paymentText) paymentText.textContent = required
+        ? `Este negocio solicita ${depositLabel()} para reducir inasistencias.`
+        : 'Este negocio no solicita abono. La reserva entra sin pago previo y queda pendiente de confirmación.';
+      if (paymentOptions) paymentOptions.style.display = required ? 'grid' : 'none';
+      if (paymentStatus) {
+        paymentStatus.className = required ? 'pay-status' : 'pay-status ok';
+        paymentStatus.textContent = required ? '🟡 Pago pendiente de simulación' : '🟢 Sin abono requerido por el negocio';
+      }
+      if (submitBtn) submitBtn.textContent = required ? 'Pagar abono y solicitar reserva' : 'Solicitar reserva sin abono';
+    }
+
+    function hoursUntilAppointment(date, time) {
+      const target = new Date(`${date}T${time || '00:00'}:00`);
+      const now = new Date();
+      return (target - now) / 36e5;
+    }
+
+    function shouldTriggerWhatsAppConfirmation(date, time) {
+      const hours = hoursUntilAppointment(date, time);
+      return hours > 0 && hours <= 5;
+    }
 
     function todayISO() {
       const d = new Date();
@@ -1082,7 +1349,13 @@
       document.getElementById('summaryService').textContent = service ? service[0] : '-';
       document.getElementById('summaryProfessional').textContent = pro ? pro[0] : '-';
       document.getElementById('summaryDate').textContent = selectedSlot ? `${date} · ${selectedSlot}` : '-';
+      const deposit = service ? depositAmount(service[2]) : 0;
+      const required = isDepositRequired();
       document.getElementById('summaryPrice').textContent = service ? money(service[2]) : '-';
+      document.getElementById('summaryDeposit').textContent = service ? (required ? money(deposit) : 'No requerido') : '-';
+      document.getElementById('depositAmount').textContent = service ? (required ? money(deposit) : '$0 · sin abono') : '-';
+      document.getElementById('remainingAmount').textContent = service ? money(Math.max(service[2] - deposit, 0)) : '-';
+      refreshPaymentUI(service);
     }
 
     function resetBooking() {
@@ -1091,6 +1364,15 @@
       selectedProfessional = null;
       selectedSlot = null;
       document.getElementById('bookingDate').value = todayISO();
+
+    document.querySelectorAll('[data-pay-method]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedPaymentMethod = btn.dataset.payMethod;
+        document.querySelectorAll('[data-pay-method]').forEach(item => item.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+    });
+
       document.getElementById('clientName').value = '';
       document.getElementById('clientPhone').value = '';
       document.getElementById('clientEmail').value = '';
@@ -1119,8 +1401,26 @@
     });
 
     document.getElementById('bookingDate').value = todayISO();
+
+    document.querySelectorAll('[data-pay-method]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedPaymentMethod = btn.dataset.payMethod;
+        document.querySelectorAll('[data-pay-method]').forEach(item => item.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+    });
+
     document.getElementById('todayBtn').addEventListener('click', () => {
       document.getElementById('bookingDate').value = todayISO();
+
+    document.querySelectorAll('[data-pay-method]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedPaymentMethod = btn.dataset.payMethod;
+        document.querySelectorAll('[data-pay-method]').forEach(item => item.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+    });
+
       updateSummary();
     });
 
@@ -1147,11 +1447,22 @@
 
       if (!service || !pro || !selectedSlot) return alert('Faltan datos de la reserva.');
 
+      const requiredDeposit = isDepositRequired();
+      const calculatedDeposit = depositAmount(service[2]);
+
       const data = {
         id: `reserva-${Date.now()}-${Math.random().toString(16).slice(2)}`,
         type: currentType,
         source: 'cliente',
-        status: 'Pendiente',
+        status: 'Esperando confirmación',
+        confirmationStatus: 'Pendiente',
+        whatsappReminderStatus: shouldTriggerWhatsAppConfirmation(date, selectedSlot) ? 'Listo para enviar' : 'Programado',
+        paymentStatus: requiredDeposit ? 'Pagado demo' : 'Sin abono',
+        paymentMethod: requiredDeposit ? selectedPaymentMethod : 'No aplica',
+        depositRequired: requiredDeposit,
+        depositConfig: getDepositConfig(),
+        depositAmount: calculatedDeposit,
+        remainingAmount: Math.max(service[2] - calculatedDeposit, 0),
         createdAt: new Date().toISOString(),
         business: p.business,
         service: service[0],
@@ -1164,12 +1475,25 @@
         client: document.getElementById('clientName').value.trim(),
         phone: document.getElementById('clientPhone').value.trim(),
         email: document.getElementById('clientEmail').value.trim(),
+        ownerWhatsapp: getBusinessContact().ownerWhatsapp || '',
+        ownerCalendarEmail: getBusinessContact().ownerCalendarEmail || '',
+        calendarStatus: 'Evento Calendar demo creado',
         code: '123456'
       };
 
+      data.notifications = buildNotificationFlow(data);
+
+      document.getElementById('paymentStatus').className = 'pay-status ok';
+      document.getElementById('paymentStatus').textContent = requiredDeposit
+        ? `🟢 Pago demo aprobado por ${selectedPaymentMethod}`
+        : '🟢 Reserva sin abono solicitada correctamente';
       saveAppointment(data);
 
-      document.getElementById('successText').textContent = `Listo, ${data.name}. Tu reserva para ${data.service} quedó para ${data.date} a las ${data.time}. Código demo: ${data.code}. También quedará visible en el panel del negocio cuando abras /app/ en este mismo navegador.`;
+      const paymentMessage = requiredDeposit
+        ? `Pagaste un abono demo de ${money(data.depositAmount)} para ${data.service}.`
+        : `Solicitaste ${data.service} sin abono porque este negocio no lo exige.`;
+
+      document.getElementById('successText').textContent = `Listo, ${data.name}. ${paymentMessage} La reserva quedó esperando confirmación de asistencia. Código demo: ${data.code}. También quedará visible en el panel del negocio cuando abras /app/ en este mismo navegador. Kauze deja programado el WhatsApp al cliente, el aviso al dueño, el evento Calendar demo y la actualización en app.`;
       document.getElementById('bookingSuccess').classList.add('active');
       document.getElementById('bookingSuccess').scrollIntoView({ behavior:'smooth', block:'center' });
     });
@@ -1189,6 +1513,10 @@
         return;
       }
 
+      const reminder = shouldTriggerWhatsAppConfirmation(data.date, data.time)
+        ? 'Kauze enviaría el WhatsApp de confirmación ahora porque faltan menos de 5 horas.'
+        : 'Kauze dejaría programado el WhatsApp de confirmación para cuando falten 5 horas.';
+
       box.innerHTML = `
         <div class="appointment-card">
           <strong>${data.service} · ${data.date} a las ${data.time}</strong>
@@ -1196,10 +1524,40 @@
             ${data.business}<br>
             Profesional: ${data.professional}<br>
             Cliente: ${data.name}<br>
-            Estado: Confirmada · Código demo: ${data.code}
+            Estado: ${data.status || 'Esperando confirmación'} · Código demo: ${data.code}<br>
+            Pago: ${data.paymentStatus || 'Pagado demo'} · Abono: ${money(data.depositAmount || 0)}<br>
+            WhatsApp cliente: ${reminder}<br>
+            Dueño: ${data.ownerWhatsapp || getBusinessContact().ownerWhatsapp || 'Número dueño no configurado'}<br>
+            Calendar: ${data.ownerCalendarEmail || getBusinessContact().ownerCalendarEmail || 'Calendar dueño no configurado'}
           </small>
+          <div class="notify-flow">
+            <span>📱 App Kauze: reserva recibida</span>
+            <span>📅 Calendar: evento demo creado</span>
+            <span>💬 Cliente: WhatsApp de confirmación programado</span>
+            <span>🔔 Dueño: aviso al confirmar asistencia</span>
+          </div>
+          <div class="confirm-card">
+            <strong>Confirmación de asistencia</strong>
+            <small>En producción este botón se respondería desde WhatsApp. En esta demo actualiza el panel del dueño automáticamente en este navegador.</small>
+            <button class="btn primary full" type="button" id="confirmAttendanceBtn" style="margin-top:12px;">Confirmar asistencia</button>
+          </div>
         </div>
       `;
+
+      document.getElementById('confirmAttendanceBtn').addEventListener('click', () => {
+        data.status = 'Confirmada';
+        data.confirmationStatus = 'Confirmada';
+        data.confirmedAt = new Date().toISOString();
+        data.calendarStatus = 'Calendar actualizado: cliente confirmó';
+        data.notifications = [
+          ...(data.notifications || []),
+          { channel:'whatsapp_owner', status:'ok', text:'Cliente confirmó asistencia. Notificar al dueño por WhatsApp demo.', target:data.ownerWhatsapp || getBusinessContact().ownerWhatsapp || 'Número dueño no configurado', at:new Date().toISOString() },
+          { channel:'app', status:'ok', text:'Estado actualizado a Confirmada en Kauze App', target:'Panel del negocio', at:new Date().toISOString() },
+          { channel:'calendar', status:'ok', text:'Evento Calendar marcado como confirmado', target:data.ownerCalendarEmail || getBusinessContact().ownerCalendarEmail || 'Calendar dueño no configurado', at:new Date().toISOString() }
+        ];
+        saveAppointment(data);
+        box.innerHTML += `<div class="success active"><h3>Asistencia confirmada</h3><p>La reserva ahora aparecerá como Confirmada en el panel del negocio y el dueño verá la notificación WhatsApp/Calendar/App simulada.</p></div>`;
+      });
     });
 
     document.querySelectorAll('.star').forEach(star => {
