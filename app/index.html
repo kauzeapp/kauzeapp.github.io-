@@ -179,6 +179,25 @@
     .check-dot{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:var(--soft-blue);color:var(--blue);font-size:11px;font-weight:900;flex:0 0 auto;margin-top:1px}
     .muted-small{color:var(--muted);font-size:12px;line-height:1.55;margin-top:8px}
 
+  
+    .source-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 5px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, .08);
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 900;
+      border: 1px solid rgba(37, 99, 235, .18);
+    }
+
+    .portal-sync-card {
+      border-left: 4px solid var(--blue);
+    }
+
   </style>
 </head>
 <body>
@@ -409,6 +428,7 @@
     const LOGIN_EMAIL = 'demo@kauze.cl';
     const LOGIN_PASSWORD = 'KauzeDemo2026';
     const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', appointments:{}, professionals:{}, campaigns:{} };
+    const CLIENT_PORTAL_APPOINTMENTS_KEY = 'kauzeSharedAppointmentsV1';
     const profiles = {
       barberia: { label:'Barbería', emoji:'💈', business:'Kauze Demo Barbería', proPlural:'Barberos', newPro:'Agregar barbero', citas:24, ingresos:3580000, clientes:12, cats:['Corte','Barba','Corte + barba','Premium'], services:[['Corte clásico','45 min',12000],['Corte + barba','60 min',18000],['Perfilado de barba','25 min',8000],['Corte premium','75 min',24000],['Ritual barba','45 min',15000],['Niños','35 min',10000]], pros:[['Juan Pérez','Barbero senior','8 citas hoy'],['Carlos Ríos','Barbero','7 citas hoy'],['Pedro Ramírez','Barbero','5 citas hoy']], agenda:[['10:00','Juan Pérez','Corte clásico','Carlos Ríos','Confirmada'],['11:30','Mario López','Corte + barba','Juan Pérez','Pendiente'],['14:00','Camilo Torres','Perfilado de barba','Pedro Ramírez','Confirmada'],['15:30','Felipe Araya','Corte premium','Carlos Ríos','Confirmada']], clients:[['Juan Pérez','Corte clásico','Enviar recordatorio en 21 días',12000],['Mario López','Corte + barba','Pedir reseña',18000],['Felipe Araya','Corte premium','Promoción fidelización',24000]] },
       manicure: { label:'Manicure', emoji:'💅', business:'Studio Nails Demo', proPlural:'Técnicas', newPro:'Agregar técnica', citas:18, ingresos:2860000, clientes:9, cats:['Manicure','Permanente','Soft gel','Diseños'], services:[['Manicure tradicional','45 min',12000],['Esmaltado permanente','60 min',18000],['Soft gel','90 min',28000],['Retiro + limpieza','30 min',9000],['Diseño simple','20 min',5000],['Nivelación','75 min',24000]], pros:[['Valentina Mora','Técnica senior','7 citas hoy'],['Antonia Ruiz','Técnica','5 citas hoy'],['Sofía Muñoz','Técnica','4 citas hoy']], agenda:[['10:30','Paula Díaz','Esmaltado permanente','Valentina Mora','Confirmada'],['12:00','Fernanda Rojas','Soft gel','Antonia Ruiz','Pendiente'],['15:00','Daniela Vega','Manicure tradicional','Sofía Muñoz','Confirmada'],['17:00','Camila Ríos','Nivelación','Valentina Mora','Confirmada']], clients:[['Paula Díaz','Esmaltado permanente','Recordar mantenimiento',18000],['Fernanda Rojas','Soft gel','Enviar cuidado post-servicio',28000],['Daniela Vega','Manicure tradicional','Ofrecer permanente',12000]] },
@@ -527,6 +547,53 @@
       saveState();
     }
 
+    function getClientPortalAppointments(){
+      try {
+        const raw = localStorage.getItem(CLIENT_PORTAL_APPOINTMENTS_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        console.warn('No se pudieron leer las reservas del portal cliente:', error);
+        return [];
+      }
+    }
+
+    function importClientPortalAppointments(){
+      const incoming = getClientPortalAppointments().filter(item => item && item.type === state.type);
+      if (!incoming.length) return 0;
+
+      let list = getAppointments();
+      let imported = 0;
+
+      incoming.forEach(item => {
+        const id = `cliente-${item.id}`;
+        const alreadyExists = list.some(appt => appt.id === id);
+        if (alreadyExists) return;
+
+        list.push({
+          id,
+          date: item.date,
+          time: item.time,
+          client: item.name || item.client || 'Cliente sin nombre',
+          service: item.service,
+          professional: item.professional,
+          status: item.status || 'Pendiente',
+          phone: item.phone || '',
+          email: item.email || '',
+          source: 'cliente',
+          createdAt: item.createdAt || new Date().toISOString()
+        });
+        imported++;
+      });
+
+      if (imported > 0) setAppointments(list);
+      return imported;
+    }
+
+    function sourceLabel(appt){
+      return appt.source === 'cliente' ? '<span class="source-pill">🌐 Portal cliente</span>' : '';
+    }
+
     function saveState(){ localStorage.setItem('kauzeAppV3State', JSON.stringify(state)); }
 
     function normalizeProfessional(row){
@@ -585,6 +652,7 @@
     }
 
     function render(){
+      importClientPortalAppointments();
       const p=currentProfile();
       const name = state.name || p.business;
       const appointments = getAppointments().slice().sort((a,b)=>(a.date + a.time).localeCompare(b.date + b.time));
@@ -592,6 +660,7 @@
       const campaigns = getCampaigns();
       const active = appointments.filter(a => a.status !== 'Cancelada' && a.status !== 'No asistió');
       const pendingCount = appointments.filter(a => a.status === 'Pendiente').length;
+      const portalCount = appointments.filter(a => a.source === 'cliente').length;
       const uniqueClients = new Set(active.map(a => a.client.trim().toLowerCase()).filter(Boolean)).size;
       const revenue = todayRevenue();
 
@@ -610,15 +679,16 @@
       billingAvg.textContent=fmt(active.length ? Math.round(revenue/active.length) : 0);
       phoneCats.innerHTML=p.cats.map(c=>`<div class="cat-card">${p.emoji}<br>${c}</div>`).join('');
 
-      todayList.innerHTML = appointments.length ? appointments.slice(0,5).map(a=>`<div class="item"><div><strong>${a.time} · ${a.client}</strong><small>${a.service} · ${a.professional}</small></div><span class="${statusClass(a.status)}">${a.status}</span></div>`).join('') : `<div class="empty-state">Aún no hay citas registradas. Crea la primera reserva para probar el flujo.</div>`;
+      todayList.innerHTML = appointments.length ? appointments.slice(0,5).map(a=>`<div class="item"><div><strong>${a.time} · ${a.client}</strong><small>${a.service} · ${a.professional}</small>${sourceLabel(a)}</div><span class="${statusClass(a.status)}">${a.status}</span></div>`).join('') : `<div class="empty-state">Aún no hay citas registradas. Crea la primera reserva para probar el flujo.</div>`;
 
       actionsList.innerHTML=[
         ['Confirmar reservas pendientes', pendingCount ? `${pendingCount} cita(s) pendiente(s) por confirmar.` : 'No hay reservas pendientes por ahora.'],
+        ['Reservas desde portal cliente', portalCount ? `${portalCount} reserva(s) entraron desde /cliente/. Revísalas en Agenda.` : 'Aún no hay reservas creadas desde el portal cliente.'],
         ['Pedir reseñas', 'Solicitar valoración a clientes atendidos esta semana.'],
         ['Recuperar clientes', 'Campaña para clientes sin reserva hace 30 días.']
       ].map(x=>`<div class="item"><div><strong>${x[0]}</strong><small>${x[1]}</small></div></div>`).join('');
 
-      agendaTable.innerHTML = appointments.length ? appointments.map(a=>`<tr><td>${a.date}<br><strong>${a.time}</strong></td><td>${a.client}</td><td>${a.service}</td><td>${a.professional}</td><td><span class="${statusClass(a.status)}">${a.status}</span></td><td><div class="row-actions"><button class="mini-btn" data-edit-appt="${a.id}">Editar</button><button class="mini-btn danger" data-delete-appt="${a.id}">Eliminar</button></div></td></tr>`).join('') : `<tr><td colspan="6"><div class="empty-state">Agenda vacía. Usa “Crear cita” para agregar una reserva.</div></td></tr>`;
+      agendaTable.innerHTML = appointments.length ? appointments.map(a=>`<tr><td>${a.date}<br><strong>${a.time}</strong></td><td>${a.client}${sourceLabel(a)}</td><td>${a.service}</td><td>${a.professional}</td><td><span class="${statusClass(a.status)}">${a.status}</span></td><td><div class="row-actions"><button class="mini-btn" data-edit-appt="${a.id}">Editar</button><button class="mini-btn danger" data-delete-appt="${a.id}">Eliminar</button></div></td></tr>`).join('') : `<tr><td colspan="6"><div class="empty-state">Agenda vacía. Usa “Crear cita” para agregar una reserva.</div></td></tr>`;
 
       const clientRows = buildClientsFromAppointments(appointments, p.clients);
       clientsTable.innerHTML=clientRows.map(c=>`<tr><td><strong>${c[0]}</strong></td><td>${c[1]}</td><td>${c[2]}</td><td>${fmt(c[3])}</td></tr>`).join('');
@@ -913,8 +983,23 @@
       sidebar.classList.remove('open');
     }));
 
+    window.addEventListener('storage', (event) => {
+      if (event.key === CLIENT_PORTAL_APPOINTMENTS_KEY) {
+        const imported = importClientPortalAppointments();
+        if (imported > 0) render();
+      }
+    });
+
+    window.addEventListener('focus', () => {
+      const imported = importClientPortalAppointments();
+      if (imported > 0) render();
+    });
+
     fillTypeSelects();
     if(sessionStorage.getItem('kauzeAppV3Auth')==='true') showApp();
+  </script>
+</body>
+</html>
   </script>
 </body>
 </html>
