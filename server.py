@@ -7,6 +7,7 @@ import sys
 # Puerto para desarrollo local o provisto por plataformas como Render/Railway
 PORT = int(os.environ.get("PORT", 8000))
 DB_FILE = "tasks_db.json"
+APP_STATE_FILE = "app_state_db.json"
 
 class KauzeAdminHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -21,6 +22,22 @@ class KauzeAdminHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        # API: Obtener el estado de la aplicación (citas, tema, estado de atención)
+        if self.path == "/api/app-state":
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.end_headers()
+            
+            data = {}
+            if os.path.exists(APP_STATE_FILE):
+                try:
+                    with open(APP_STATE_FILE, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                except Exception as e:
+                    print(f"Error leyendo app-state: {e}")
+            self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+            return
+
         # API: Obtener las tareas completadas desde la base de datos JSON
         if self.path == "/api/tasks":
             self.send_response(200)
@@ -48,6 +65,27 @@ class KauzeAdminHandler(http.server.SimpleHTTPRequestHandler):
         super().do_GET()
 
     def do_POST(self):
+        # API: Guardar el estado de la aplicación
+        if self.path == "/api/app-state":
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            
+            try:
+                data = json.loads(post_data.decode('utf-8'))
+                with open(APP_STATE_FILE, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, indent=4, ensure_ascii=False)
+                
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+            return
+
         # API: Guardar la lista de tareas completadas
         if self.path == "/api/tasks":
             content_length = int(self.headers['Content-Length'])

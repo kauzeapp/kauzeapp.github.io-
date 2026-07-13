@@ -914,6 +914,11 @@
         <div class="step" data-step="4">4. Pago</div>
       </div>
 
+      <!-- Status Notice Banner -->
+      <div id="statusNoticeBanner" style="display:none; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.22); padding: 14px; border-radius: 18px; margin-bottom: 20px; font-size: 13.5px; line-height: 1.6; color: var(--amber); transition: all 0.2s ease;">
+          <!-- Populated via JS -->
+      </div>
+
       <div class="booking-view active" id="bookingStep1">
         <div class="grid-3" id="servicesGrid"></div>
       </div>
@@ -1150,6 +1155,150 @@
 
     const slots = ['10:00','10:30','11:00','11:30','12:00','14:00','14:30','15:00','15:30','16:00','17:00','18:00'];
     const CLIENT_PORTAL_APPOINTMENTS_KEY = 'kauzeSharedAppointmentsV1';
+    
+    // --- CATALOGO DE ESTILOS Y TEMAS (Kauze Design System) ---
+    const THEMES = [
+      { name: 'Brisa Serena', vertical: 'estetica', font: 'Inter', bg: '#E3F2FD', card: '#FFFFFF', text: '#0B1736', muted: '#546E7A', primary: '#0288D1', border: '#CFD8DC' },
+      { name: 'Rubor Esencial', vertical: 'estetica', font: 'Poppins', bg: '#FFF0F5', card: '#FFFFFF', text: '#3E2723', muted: '#8D6E63', primary: '#D4A373', border: '#F8BBD0' },
+      { name: 'Canvas Orgánico', vertical: 'estetica', font: 'Playfair Display', bg: '#FDFBF7', card: '#FFFFFF', text: '#2C3531', muted: '#6C7A72', primary: '#A3B19B', border: '#E5DEC9' },
+      { name: 'Equilibrio Urbano', vertical: 'estetica', font: 'Roboto', bg: '#F8FAF8', card: '#FFFFFF', text: '#1E293B', muted: '#64748B', primary: '#6366F1', border: '#E2E8F0' },
+      { name: 'Botánica Matcha', vertical: 'estetica', font: 'Inter', bg: '#E8F5E9', card: '#FFFFFF', text: '#1B5E20', muted: '#558B2F', primary: '#2E7D32', border: '#C8E6C9' },
+      { name: 'Orquídea Nocturna', vertical: 'estetica', font: 'Playfair Display', bg: '#1E121E', card: '#2D1E2D', text: '#FDFBF7', muted: '#D4C5D4', primary: '#D4A373', border: '#4A354A' },
+      { name: 'Club Náutico', vertical: 'barberia', font: 'Montserrat', bg: '#0F172A', card: '#1E293B', text: '#F8FAF8', muted: '#94A3B8', primary: '#3B82F6', border: '#334155' },
+      { name: 'Oro Imperial', vertical: 'barberia', font: 'Cinzel', bg: '#000000', card: '#121212', text: '#FFFFFF', muted: '#A0A0A0', primary: '#D4AF37', border: '#2C2C2C' },
+      { name: 'Cyber Stealth', vertical: 'barberia', font: 'Space Grotesk', bg: '#0B0F19', card: '#161D30', text: '#F8FAF8', muted: '#94A3B8', primary: '#00F5D4', border: '#202D4A' },
+      { name: 'Gremio del Cuero', vertical: 'barberia', font: 'PT Serif', bg: '#2B1D11', card: '#3E2723', text: '#FFF8E1', muted: '#D7CCC8', primary: '#D4A373', border: '#4E342E' },
+      { name: 'Highland Hunt', vertical: 'barberia', font: 'Montserrat', bg: '#132615', card: '#1C3B20', text: '#F1F8F2', muted: '#A5D6A7', primary: '#D4A373', border: '#2E5A33' },
+      { name: 'Logia del Vino', vertical: 'barberia', font: 'Cormorant Garamond', bg: '#2E0814', card: '#420D20', text: '#FFF0F5', muted: '#F8BBD0', primary: '#D4A373', border: '#5C1330' }
+    ];
+
+    const BACKEND_URL = 'https://admin.kauze.cl';
+
+    function loadGoogleFont(fontName) {
+      if (!fontName) return;
+      const fontId = 'dynamic-google-font';
+      let link = document.getElementById(fontId);
+      if (!link) {
+        link = document.createElement('link');
+        link.id = fontId;
+        link.rel = 'stylesheet';
+        document.head.appendChild(link);
+      }
+      const formattedName = fontName.replace(/\s+/g, '+');
+      link.href = `https://fonts.googleapis.com/css2?family=${formattedName}:wght@400;500;600;700;800&display=swap`;
+    }
+
+    function applyTheme(themeName) {
+      const theme = THEMES.find(t => t.name === themeName) || THEMES[0];
+      
+      loadGoogleFont(theme.font);
+      
+      let styleEl = document.getElementById('dynamic-theme-style');
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = 'dynamic-theme-style';
+        document.head.appendChild(styleEl);
+      }
+      
+      const isDark = theme.bg.startsWith('#0') || theme.bg.startsWith('#1') || theme.bg.startsWith('#2') || theme.bg.startsWith('#3');
+      const contrastText = isDark ? '#000000' : '#FFFFFF';
+      
+      styleEl.innerHTML = `
+        :root {
+          --bg: ${theme.bg} !important;
+          --card: ${theme.card} !important;
+          --text: ${theme.text} !important;
+          --muted: ${theme.muted} !important;
+          --border: ${theme.border} !important;
+          --blue: ${theme.primary} !important;
+          --purple: ${theme.primary} !important;
+          --soft: ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'} !important;
+          --soft-blue: ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'} !important;
+        }
+        body {
+          font-family: '${theme.font}', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+        }
+        .mark {
+          background: ${theme.primary} !important;
+          color: ${contrastText} !important;
+        }
+        .btn.primary {
+          background: ${theme.primary} !important;
+          color: ${contrastText} !important;
+          font-weight: 800 !important;
+          border-color: transparent !important;
+        }
+        ${isDark ? `
+          .card, .step, .service-card, .pro-card, .time-pill, .summary-card {
+            background: ${theme.card} !important;
+            color: ${theme.text} !important;
+            border-color: ${theme.border} !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
+          }
+          .time-pill.selected {
+            background: ${theme.primary} !important;
+            color: #000000 !important;
+            font-weight: 700 !important;
+          }
+          input, select, textarea {
+            background: ${theme.bg} !important;
+            color: ${theme.text} !important;
+            border-color: ${theme.border} !important;
+          }
+          .step.active {
+            border-color: ${theme.primary} !important;
+            color: ${theme.primary} !important;
+          }
+        ` : `
+          .time-pill.selected {
+            background: ${theme.primary} !important;
+            color: #FFFFFF !important;
+            font-weight: 700;
+          }
+        `}
+      `;
+    }
+
+    function showStatusNotice(status, reason) {
+      const banner = document.getElementById('statusNoticeBanner');
+      if (!banner) return;
+      
+      if (status === 'OCUPADO') {
+        banner.style.display = 'block';
+        banner.style.background = 'rgba(239, 68, 68, 0.08)';
+        banner.style.borderColor = 'rgba(239, 68, 68, 0.22)';
+        banner.style.color = 'var(--red)';
+        banner.innerHTML = '⚠️ <strong>Establecimiento ocupado temporalmente:</strong> El profesional está atendiendo a un cliente Walk-In. Las reservas para horarios más tarde siguen disponibles.';
+      } else if (status === 'PAUSADO') {
+        banner.style.display = 'block';
+        banner.style.background = 'rgba(245, 158, 11, 0.08)';
+        banner.style.borderColor = 'rgba(245, 158, 11, 0.22)';
+        banner.style.color = 'var(--amber)';
+        const cleanReason = reason ? ` (${reason})` : '';
+        banner.innerHTML = `⚠️ <strong>Establecimiento en pausa${cleanReason}:</strong> Atención suspendida temporalmente por motivos internos. Las reservas para horarios más tarde siguen disponibles.`;
+      } else {
+        banner.style.display = 'none';
+      }
+    }
+
+    async function loadOnlineState() {
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/app-state`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.type) {
+            if (data.activeTheme) {
+              applyTheme(data.activeTheme);
+            }
+            showStatusNotice(data.businessStatus, data.pausedReason);
+          }
+        }
+      } catch (e) {
+        console.warn('Error cargando estado de Railway:', e);
+      }
+    }
+
+    const CLIENT_PORTAL_APPOINTMENTS_KEY = 'kauzeSharedAppointmentsV1';
 
     function getBusinessContact() {
       try {
@@ -1385,13 +1534,51 @@
       return JSON.parse(localStorage.getItem('kauzeClienteLastAppointment') || 'null');
     }
 
-    function saveAppointment(data) {
+    async function saveAppointment(data) {
       localStorage.setItem('kauzeClienteLastAppointment', JSON.stringify(data));
 
       const list = JSON.parse(localStorage.getItem(CLIENT_PORTAL_APPOINTMENTS_KEY) || '[]');
       const exists = list.some(item => item.id === data.id);
       const nextList = exists ? list.map(item => item.id === data.id ? data : item) : [...list, data];
       localStorage.setItem(CLIENT_PORTAL_APPOINTMENTS_KEY, JSON.stringify(nextList));
+      
+      // Sincronizar en línea con Railway
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/app-state`);
+        if (res.ok) {
+          const appState = await res.json();
+          if (appState && appState.appointments) {
+            if (!appState.appointments[data.type]) {
+              appState.appointments[data.type] = [];
+            }
+            const id = `cliente-${data.id}`;
+            const appt = {
+              id: id,
+              date: data.date,
+              time: data.time,
+              client: data.name,
+              service: data.service,
+              professional: data.professional || 'Cualquiera',
+              status: 'Pendiente',
+              source: 'cliente'
+            };
+            const apptExists = appState.appointments[data.type].some(a => a.id === id);
+            if (apptExists) {
+              appState.appointments[data.type] = appState.appointments[data.type].map(a => a.id === id ? appt : a);
+            } else {
+              appState.appointments[data.type].push(appt);
+            }
+            
+            await fetch(`${BACKEND_URL}/api/app-state`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(appState)
+            });
+          }
+        }
+      } catch (e) {
+        console.warn('Error sincronizando reserva en línea con Railway:', e);
+      }
     }
 
     document.getElementById('businessType').addEventListener('change', (e) => {
@@ -1574,6 +1761,7 @@
 
     renderProfile();
     goStep(1);
+    loadOnlineState();
   </script>
 </body>
 </html>
