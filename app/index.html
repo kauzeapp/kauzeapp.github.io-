@@ -262,6 +262,149 @@
       border-color: rgba(37,99,235,.22);
     }
 
+  
+    .personalization-box {
+      margin: 18px 0;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--soft);
+    }
+
+    .personalization-box h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: 16px;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+
+    .personalization-box p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    .theme-mini-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .theme-chip {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .theme-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,23,42,.10);
+      flex: 0 0 auto;
+    }
+
+    .theme-helper {
+      margin: -5px 0 12px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(37,99,235,.06);
+      border: 1px solid rgba(37,99,235,.14);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+      font-weight: 700;
+    }
+
+    .theme-mini-list {
+      grid-template-columns: 1fr;
+    }
+
+    .theme-chip {
+      justify-content: space-between;
+      text-align: left;
+      min-height: 58px;
+      cursor: pointer;
+    }
+
+    .theme-chip-main {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .theme-chip-meta {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      white-space: nowrap;
+    }
+
+    .theme-chip.active {
+      border-color: rgba(37,99,235,.48);
+      background: rgba(37,99,235,.08);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.06);
+    }
+
+    .palette-preview {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 7px;
+      margin: 10px 0 12px;
+    }
+
+    .palette-swatch {
+      height: 34px;
+      border-radius: 12px;
+      border: 1px solid rgba(15,23,42,.10);
+      box-shadow: 0 5px 13px rgba(15,23,42,.04);
+    }
+
+    .theme-filter-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .theme-filter-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--navy);
+      font-size: 11px;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    @media(max-width:650px){
+      .theme-mini-list{grid-template-columns:1fr}
+      .palette-preview{grid-template-columns:repeat(5,1fr)}
+    }
+
   </style>
 </head>
 <body>
@@ -380,8 +523,51 @@
               <select class="field" id="settingsType"></select>
             </div>
             <div class="field-group">
-              <label>Tema visual (Catálogo Kauze)</label>
+              <label>Tema visual permitido por tipo de negocio</label>
               <select class="field" id="settingsThemeSelector"></select>
+            </div>
+            <div class="theme-helper" id="themePolicyNote">
+              Primero elige el tipo de negocio. Kauze solo mostrará las paletas compatibles con ese rubro.
+            </div>
+            <div class="palette-preview" id="themePalettePreview"></div>
+
+            <div class="personalization-box">
+              <h3>Personalización de página pública</h3>
+              <p>Esto controla cómo se verá el portal del cliente: banner, texto principal, botón y estilo visual. El catálogo se filtra automáticamente para evitar que una barbería use paletas estéticas o que una estética use temas masculinos.</p>
+
+              <div class="field-group">
+                <label>Título del banner</label>
+                <input class="field" id="settingsPageTitle" type="text" placeholder="Ej: Agenda tu próxima hora sin escribir por WhatsApp">
+              </div>
+
+              <div class="field-group">
+                <label>Subtítulo del banner</label>
+                <input class="field" id="settingsPageSubtitle" type="text" placeholder="Ej: Elige servicio, profesional y horario disponible.">
+              </div>
+
+              <div class="form-grid">
+                <div class="field-group">
+                  <label>Texto del botón principal</label>
+                  <input class="field" id="settingsPageCta" type="text" placeholder="Reservar ahora">
+                </div>
+
+                <div class="field-group">
+                  <label>Estilo de banner</label>
+                  <select class="field" id="settingsBannerStyle">
+                    <option value="soft">Suave / claro</option>
+                    <option value="gradient">Degradado premium</option>
+                    <option value="dark">Oscuro elegante</option>
+                    <option value="image">Imagen de fondo</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label>URL de imagen para banner</label>
+                <input class="field" id="settingsBannerImage" type="url" placeholder="https://.../imagen.jpg">
+              </div>
+
+              <div class="theme-mini-list" id="themeMiniList"></div>
             </div>
 
             <h2 style="font-family:Sora,sans-serif;font-size:18px;margin:18px 0 12px">Canales de notificación del dueño</h2>
@@ -451,6 +637,8 @@
                   </div>
                   
                   <div id="preview-card-box" style="background: var(--preview-card, #FFFFFF); border: 1px solid var(--border); border-radius: 18px; padding: 14px; box-shadow: var(--shadow-soft); transition: all 0.2s ease;">
+                    <div id="preview-banner-title" style="font-weight: 900; font-size: 13px; line-height: 1.25; color: var(--preview-text, #111827); margin-bottom: 5px;">Agenda tu próxima hora</div>
+                    <div id="preview-banner-subtitle" style="font-size: 10.5px; line-height: 1.35; color: var(--preview-muted, #64748B); margin-bottom: 12px;">Elige servicio, profesional y horario disponible.</div>
                     <h4 id="preview-title" style="font-size: 14px; margin-bottom: 6px; color: var(--preview-text, #111827); transition: all 0.2s ease;">Corte clásico + Barba</h4>
                     <p id="preview-subtitle" style="font-size: 12px; color: var(--preview-muted, #64748B); margin-bottom: 12px; transition: all 0.2s ease;">Duración: 60 min · CLP $18.000</p>
                     
@@ -708,7 +896,7 @@
   <script>
     const LOGIN_EMAIL = 'demo@kauze.cl';
     const LOGIN_PASSWORD = 'KauzeDemo2026';
-    const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', ownerWhatsapp:'', ownerCalendarEmail:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, appointments:{}, professionals:{}, campaigns:{} };
+    const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', ownerWhatsapp:'', ownerCalendarEmail:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, activeTheme:'Club Náutico', pageTitle:'Agenda tu próxima hora sin escribir por WhatsApp', pageSubtitle:'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.', pageCta:'Reservar ahora', bannerStyle:'soft', bannerImage:'', appointments:{}, professionals:{}, campaigns:{} };
     const CLIENT_PORTAL_APPOINTMENTS_KEY = 'kauzeSharedAppointmentsV1';
     
     // --- CATALOGO DE ESTILOS Y TEMAS (Kauze Design System) ---
@@ -726,6 +914,78 @@
       { name: 'Highland Hunt', vertical: 'barberia', font: 'Montserrat', bg: '#132615', card: '#1C3B20', text: '#F1F8F2', muted: '#A5D6A7', primary: '#D4A373', border: '#2E5A33' },
       { name: 'Logia del Vino', vertical: 'barberia', font: 'Cormorant Garamond', bg: '#2E0814', card: '#420D20', text: '#FFF0F5', muted: '#F8BBD0', primary: '#D4A373', border: '#5C1330' }
     ];
+
+
+    const TYPE_TO_THEME_VERTICAL = {
+      barberia: 'barberia',
+      peluqueria: 'estetica',
+      manicure: 'estetica',
+      pestanas: 'estetica',
+      estetica: 'estetica'
+    };
+
+    function themeVerticalForType(type) {
+      return TYPE_TO_THEME_VERTICAL[type] || 'estetica';
+    }
+
+    function verticalLabel(vertical) {
+      return vertical === 'barberia' ? 'Barbería & estilo masculino' : 'Estética & bienestar';
+    }
+
+    function allowedThemesForType(type) {
+      const vertical = themeVerticalForType(type);
+      return THEMES.filter(t => t.vertical === vertical);
+    }
+
+    function firstThemeForType(type) {
+      const allowed = allowedThemesForType(type);
+      return allowed[0] || THEMES[0];
+    }
+
+    function ensureThemeForType(type, requestedThemeName) {
+      const allowed = allowedThemesForType(type);
+      const valid = allowed.find(t => t.name === requestedThemeName);
+      return valid || allowed[0] || THEMES[0];
+    }
+
+    function setThemeForType(type, requestedThemeName, apply = true) {
+      const theme = ensureThemeForType(type, requestedThemeName);
+      state.activeTheme = theme.name;
+      if (apply) {
+        applyTheme(theme.name);
+      } else {
+        updateMockupPreview(theme);
+      }
+      return theme;
+    }
+
+    function renderThemeSelectorForType(type, selectedThemeName) {
+      if (!settingsThemeSelector) return null;
+      const allowed = allowedThemesForType(type);
+      const selected = ensureThemeForType(type, selectedThemeName);
+      const label = verticalLabel(themeVerticalForType(type));
+      settingsThemeSelector.innerHTML = allowed.map(t => `
+        <option value="${t.name}">
+          ${t.name} · ${t.font}
+        </option>
+      `).join('');
+      settingsThemeSelector.value = selected.name;
+
+      if (themePolicyNote) {
+        themePolicyNote.textContent = `Paletas disponibles para ${profiles[type]?.label || 'este negocio'}: ${allowed.length} tema(s) de ${label}.`;
+      }
+
+      if (themePalettePreview) {
+        themePalettePreview.innerHTML = `
+          <span class="palette-swatch" title="Fondo" style="background:${selected.bg}"></span>
+          <span class="palette-swatch" title="Tarjeta" style="background:${selected.card}"></span>
+          <span class="palette-swatch" title="Texto" style="background:${selected.text}"></span>
+          <span class="palette-swatch" title="Botón principal" style="background:${selected.primary}"></span>
+          <span class="palette-swatch" title="Borde" style="background:${selected.border}"></span>
+        `;
+      }
+      return selected;
+    }
 
     const BACKEND_URL = 'https://admin.kauze.cl';
 
@@ -816,10 +1076,91 @@
         previewMainBtn.style.background = theme.primary;
         previewMainBtn.style.color = contrastText;
       }
+
+      if (themePalettePreview) {
+        themePalettePreview.innerHTML = `
+          <span class="palette-swatch" title="Fondo" style="background:${theme.bg}"></span>
+          <span class="palette-swatch" title="Tarjeta" style="background:${theme.card}"></span>
+          <span class="palette-swatch" title="Texto" style="background:${theme.text}"></span>
+          <span class="palette-swatch" title="Botón principal" style="background:${theme.primary}"></span>
+          <span class="palette-swatch" title="Borde" style="background:${theme.border}"></span>
+        `;
+      }
+
+      document.querySelectorAll('[data-theme-chip]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.themeChip === theme.name);
+      });
+
+      updatePagePreview();
+    }
+
+    function updatePagePreview() {
+      const titleEl = document.getElementById('preview-banner-title');
+      const subEl = document.getElementById('preview-banner-subtitle');
+      const btnEl = document.getElementById('preview-main-btn');
+      const phoneMockup = document.querySelector('.phone-mockup');
+
+      const title = settingsPageTitle ? settingsPageTitle.value : (state.pageTitle || 'Agenda tu próxima hora');
+      const subtitle = settingsPageSubtitle ? settingsPageSubtitle.value : (state.pageSubtitle || 'Elige servicio, profesional y horario disponible.');
+      const cta = settingsPageCta ? settingsPageCta.value : (state.pageCta || 'Reservar ahora');
+      const style = settingsBannerStyle ? settingsBannerStyle.value : (state.bannerStyle || 'soft');
+
+      if (titleEl) titleEl.textContent = title || 'Agenda tu próxima hora';
+      if (subEl) subEl.textContent = subtitle || 'Elige servicio, profesional y horario disponible.';
+      if (btnEl) btnEl.textContent = `${cta || 'Reservar ahora'} (Ejemplo)`;
+
+      if (phoneMockup) {
+        phoneMockup.style.backgroundImage = '';
+        phoneMockup.style.backgroundSize = 'cover';
+        phoneMockup.style.backgroundPosition = 'center';
+
+        if (style === 'gradient') {
+          phoneMockup.style.backgroundImage = 'linear-gradient(145deg, rgba(37,99,235,.18), rgba(99,102,241,.24))';
+        } else if (style === 'dark') {
+          phoneMockup.style.backgroundImage = 'linear-gradient(145deg, rgba(15,23,42,.80), rgba(15,23,42,.55))';
+        } else if (style === 'image' && settingsBannerImage && settingsBannerImage.value.trim()) {
+          phoneMockup.style.backgroundImage = `linear-gradient(rgba(15,23,42,.45), rgba(15,23,42,.20)), url('${settingsBannerImage.value.trim()}')`;
+        }
+      }
+    }
+
+    function renderThemeMiniList() {
+      if (!themeMiniList) return;
+      const activeType = settingsType ? settingsType.value : state.type;
+      const vertical = themeVerticalForType(activeType);
+      const list = allowedThemesForType(activeType);
+      const activeTheme = ensureThemeForType(activeType, settingsThemeSelector ? settingsThemeSelector.value : state.activeTheme);
+
+      themeMiniList.innerHTML = `
+        <div class="theme-filter-head">
+          <span>Paletas permitidas</span>
+          <span class="theme-filter-pill">${vertical === 'barberia' ? '💈' : '🌸'} ${verticalLabel(vertical)}</span>
+        </div>
+        ${list.map(t => `
+          <button type="button" class="theme-chip ${t.name === activeTheme.name ? 'active' : ''}" data-theme-chip="${t.name}">
+            <span class="theme-chip-main">
+              <span class="theme-dot" style="background:${t.primary}"></span>
+              <span>
+                <strong>${t.name}</strong><br>
+                <small style="color:var(--muted);font-weight:700;">${t.font}</small>
+              </span>
+            </span>
+            <span class="theme-chip-meta">${t.vertical === 'barberia' ? 'Barbería' : 'Estética'}</span>
+          </button>
+        `).join('')}
+      `;
+
+      themeMiniList.querySelectorAll('[data-theme-chip]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const selected = ensureThemeForType(activeType, btn.dataset.themeChip);
+          if (settingsThemeSelector) settingsThemeSelector.value = selected.name;
+          updateMockupPreview(selected);
+        });
+      });
     }
 
     function applyTheme(themeName) {
-      const theme = THEMES.find(t => t.name === themeName) || THEMES[0];
+      const theme = ensureThemeForType(state.type, themeName);
       state.activeTheme = theme.name;
       
       loadGoogleFont(theme.font);
@@ -931,6 +1272,13 @@
     if (typeof state.depositPercent === 'undefined') state.depositPercent = 15;
     if (typeof state.depositFixedAmount === 'undefined') state.depositFixedAmount = 1000;
     if (typeof state.depositMinimum === 'undefined') state.depositMinimum = 1000;
+    if (!state.activeTheme) state.activeTheme = firstThemeForType(state.type).name;
+    if (!state.activeTheme) state.activeTheme = state.type === 'barberia' ? 'Club Náutico' : 'Brisa Serena';
+    if (!state.pageTitle) state.pageTitle = 'Agenda tu próxima hora sin escribir por WhatsApp';
+    if (!state.pageSubtitle) state.pageSubtitle = 'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.';
+    if (!state.pageCta) state.pageCta = 'Reservar ahora';
+    if (!state.bannerStyle) state.bannerStyle = 'soft';
+    if (typeof state.bannerImage === 'undefined') state.bannerImage = '';
 
     const fmt = n => Number(n || 0).toLocaleString('es-CL', {style:'currency',currency:'CLP',maximumFractionDigits:0});
     const todayISO = () => new Date().toISOString().slice(0,10);
@@ -956,6 +1304,15 @@
     const settingsDepositPercent = document.getElementById('settingsDepositPercent');
     const settingsDepositFixed = document.getElementById('settingsDepositFixed');
     const settingsDepositMinimum = document.getElementById('settingsDepositMinimum');
+    const settingsThemeSelector = document.getElementById('settingsThemeSelector');
+    const themePolicyNote = document.getElementById('themePolicyNote');
+    const themePalettePreview = document.getElementById('themePalettePreview');
+    const settingsPageTitle = document.getElementById('settingsPageTitle');
+    const settingsPageSubtitle = document.getElementById('settingsPageSubtitle');
+    const settingsPageCta = document.getElementById('settingsPageCta');
+    const settingsBannerStyle = document.getElementById('settingsBannerStyle');
+    const settingsBannerImage = document.getElementById('settingsBannerImage');
+    const themeMiniList = document.getElementById('themeMiniList');
     const notificationCenter = document.getElementById('notificationCenter');
     const navProfessionals = document.getElementById('navProfessionals');
     const professionalsTitle = document.getElementById('professionalsTitle');
@@ -1024,16 +1381,28 @@
       const opts = Object.entries(profiles).map(([k,p])=>`<option value="${k}">${p.emoji} ${p.label}</option>`).join('');
       businessTypeSwitch.innerHTML = opts;
       settingsType.innerHTML = opts;
-      
-      const themeSelector = document.getElementById('settingsThemeSelector');
-      if (themeSelector) {
-        themeSelector.innerHTML = THEMES.map(t => `<option value="${t.name}">${t.name} (${t.vertical === 'barberia' ? 'Barbería' : 'Estética'})</option>`).join('');
-        
-        themeSelector.addEventListener('change', () => {
-          const theme = THEMES.find(t => t.name === themeSelector.value);
-          if (theme) {
-            updateMockupPreview(theme);
-          }
+
+      const selected = renderThemeSelectorForType(state.type, state.activeTheme);
+      if (selected && !state.activeTheme) state.activeTheme = selected.name;
+
+      if (settingsThemeSelector && !settingsThemeSelector.dataset.bound) {
+        settingsThemeSelector.dataset.bound = 'true';
+        settingsThemeSelector.addEventListener('change', () => {
+          const type = settingsType ? settingsType.value : state.type;
+          const theme = ensureThemeForType(type, settingsThemeSelector.value);
+          settingsThemeSelector.value = theme.name;
+          updateMockupPreview(theme);
+          renderThemeMiniList();
+        });
+      }
+
+      if (settingsType && !settingsType.dataset.themeBound) {
+        settingsType.dataset.themeBound = 'true';
+        settingsType.addEventListener('change', () => {
+          const type = settingsType.value;
+          const theme = renderThemeSelectorForType(type, state.activeTheme);
+          if (theme) updateMockupPreview(theme);
+          renderThemeMiniList();
         });
       }
     }
@@ -1138,7 +1507,13 @@
         depositMode: state.depositMode || 'percent',
         depositPercent: Number(state.depositPercent || 0),
         depositFixedAmount: Number(state.depositFixedAmount || 0),
-        depositMinimum: Number(state.depositMinimum || 0)
+        depositMinimum: Number(state.depositMinimum || 0),
+        activeTheme: state.activeTheme || '',
+        pageTitle: state.pageTitle || '',
+        pageSubtitle: state.pageSubtitle || '',
+        pageCta: state.pageCta || '',
+        bannerStyle: state.bannerStyle || 'soft',
+        bannerImage: state.bannerImage || ''
       }));
     }
 
@@ -1222,15 +1597,21 @@
       if (settingsDepositPercent) settingsDepositPercent.value = Number(state.depositPercent || 0);
       if (settingsDepositFixed) settingsDepositFixed.value = Number(state.depositFixedAmount || 0);
       if (settingsDepositMinimum) settingsDepositMinimum.value = Number(state.depositMinimum || 0);
+      if (settingsPageTitle) settingsPageTitle.value = state.pageTitle || '';
+      if (settingsPageSubtitle) settingsPageSubtitle.value = state.pageSubtitle || '';
+      if (settingsPageCta) settingsPageCta.value = state.pageCta || '';
+      if (settingsBannerStyle) settingsBannerStyle.value = state.bannerStyle || 'soft';
+      if (settingsBannerImage) settingsBannerImage.value = state.bannerImage || '';
       
-      const themeSelector = document.getElementById('settingsThemeSelector');
-      if (themeSelector && state.activeTheme) {
-        themeSelector.value = state.activeTheme;
-        const currentTheme = THEMES.find(t => t.name === state.activeTheme);
+      if (settingsThemeSelector) {
+        const currentTheme = renderThemeSelectorForType(state.type, state.activeTheme);
         if (currentTheme) {
+          state.activeTheme = currentTheme.name;
           updateMockupPreview(currentTheme);
         }
       }
+      renderThemeMiniList();
+      updatePagePreview();
       
       navProfessionals.innerHTML=`☷ ${p.proPlural}`;
       professionalsTitle.textContent=p.proPlural;
@@ -1525,11 +1906,12 @@
       loginScreen.style.display='none'; 
       app.style.display='grid'; 
       await syncOnlineState(false);
-      if (state.activeTheme) {
-        applyTheme(state.activeTheme);
-      }
+      const initialTheme = ensureThemeForType(state.type, state.activeTheme);
+      state.activeTheme = initialTheme.name;
+      applyTheme(initialTheme.name);
       updateBusinessStatus(state.businessStatus || 'DISPONIBLE', false);
       render(); 
+      saveState();
     }
 
     loginForm.addEventListener('submit',e=>{
@@ -1544,11 +1926,20 @@
 
     logoutBtn.addEventListener('click',()=>{ sessionStorage.removeItem('kauzeAppV3Auth'); location.reload(); });
     mobileMenu.addEventListener('click',()=>sidebar.classList.toggle('open'));
-    businessTypeSwitch.addEventListener('change',()=>{ state.type=businessTypeSwitch.value; state.name=profiles[state.type].business; saveState(); render(); });
+    businessTypeSwitch.addEventListener('change',()=>{ 
+      state.type = businessTypeSwitch.value; 
+      state.name = profiles[state.type].business;
+      const theme = ensureThemeForType(state.type, state.activeTheme);
+      state.activeTheme = theme.name;
+      saveState(); 
+      render(); 
+      applyTheme(theme.name);
+    });
     
     saveSettings.addEventListener('click',()=>{ 
-      state.name=settingsBusiness.value.trim() || profiles[settingsType.value].business; 
-      state.type=settingsType.value; 
+      const selectedType = settingsType.value;
+      state.name = settingsBusiness.value.trim() || profiles[selectedType].business; 
+      state.type = selectedType; 
       state.ownerWhatsapp = settingsOwnerWhatsapp ? settingsOwnerWhatsapp.value.trim() : ''; 
       state.ownerCalendarEmail = settingsCalendarEmail ? settingsCalendarEmail.value.trim() : ''; 
       state.depositEnabled = settingsDepositEnabled ? settingsDepositEnabled.checked : false; 
@@ -1556,13 +1947,12 @@
       state.depositPercent = settingsDepositPercent ? Number(settingsDepositPercent.value || 0) : 0; 
       state.depositFixedAmount = settingsDepositFixed ? Number(settingsDepositFixed.value || 0) : 0; 
       state.depositMinimum = settingsDepositMinimum ? Number(settingsDepositMinimum.value || 0) : 0; 
-      
-      const themeSelector = document.getElementById('settingsThemeSelector');
-      if (themeSelector) {
-        state.activeTheme = themeSelector.value;
-        applyTheme(state.activeTheme);
-      }
-      
+
+      const selectedTheme = settingsThemeSelector ? settingsThemeSelector.value : state.activeTheme;
+      const theme = ensureThemeForType(state.type, selectedTheme);
+      state.activeTheme = theme.name;
+      applyTheme(theme.name);
+
       saveState(); 
       render(); 
       saveMsg.style.display='block'; 
