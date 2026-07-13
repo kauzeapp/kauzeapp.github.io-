@@ -1525,7 +1525,9 @@
       e.preventDefault();
       const email=document.getElementById('email').value.trim().toLowerCase();
       const pass=document.getElementById('password').value;
-      if(email===LOGIN_EMAIL && pass===LOGIN_PASSWORD){ sessionStorage.setItem('kauzeAppV3Auth','true'); loginError.style.display='none'; showApp(); }
+      const isDemoAuth = (email === LOGIN_EMAIL && pass === LOGIN_PASSWORD);
+      const isAdminAuth = (email === 'admin@kauze.cl' && pass === 'Kauze2026!Fundadores');
+      if(isDemoAuth || isAdminAuth){ sessionStorage.setItem('kauzeAppV3Auth','true'); loginError.style.display='none'; showApp(); }
       else { loginError.style.display='block'; }
     });
 
