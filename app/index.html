@@ -1094,10 +1094,12 @@
       const phoneMockup = previewCard ? previewCard.parentElement.parentElement : null;
       const previewTitle = document.getElementById('preview-title');
       const previewSubtitle = document.getElementById('preview-subtitle');
+      const previewBannerTitle = document.getElementById('preview-banner-title');
+      const previewBannerSubtitle = document.getElementById('preview-banner-subtitle');
 
       const safeButtonText = readableTextOn(theme.primary);
       const safeTextOnBg = readableTextOn(theme.bg, theme.text);
-      const safeTextOnCard = readableTextOn(theme.card, theme.text);
+      const safeTextOnCard = contrastRatio(theme.text, theme.card) >= 4.5 ? theme.text : readableTextOn(theme.card, theme.text);
       const safeMutedOnCard = contrastRatio(theme.muted, theme.card) >= 4.5 ? theme.muted : safeTextOnCard;
 
       const busName = document.getElementById('settingsBusiness') ? document.getElementById('settingsBusiness').value : (state.name || 'Kauze Demo');
@@ -1108,6 +1110,14 @@
         phoneMockup.style.fontFamily = `'${theme.font}', sans-serif`;
       }
       if (previewName) previewName.style.color = safeTextOnBg;
+      if (previewBannerTitle) {
+        previewBannerTitle.textContent = (settingsPageTitle?.value || state.pageTitle || 'Agenda tu próxima hora').split(' ').slice(0, 5).join(' ');
+        previewBannerTitle.style.color = safeTextOnCard;
+      }
+      if (previewBannerSubtitle) {
+        previewBannerSubtitle.textContent = settingsPageSubtitle?.value || state.pageSubtitle || 'Elige servicio, profesional y horario disponible.';
+        previewBannerSubtitle.style.color = safeMutedOnCard;
+      }
       if (previewTitle) previewTitle.style.color = safeTextOnCard;
       if (previewSubtitle) previewSubtitle.style.color = safeMutedOnCard;
       if (previewCard) {
@@ -1149,6 +1159,80 @@
 
       updatePagePreview();
     }
+
+    function updatePagePreview() {
+      const theme = ensureThemeForType(state.type, state.activeTheme);
+      const previewBannerTitle = document.getElementById('preview-banner-title');
+      const previewBannerSubtitle = document.getElementById('preview-banner-subtitle');
+      const previewMainBtn = document.getElementById('preview-main-btn');
+      const previewCard = document.getElementById('preview-card-box');
+      const previewName = document.getElementById('preview-business-name');
+      const previewTitle = document.getElementById('preview-title');
+      const previewSubtitle = document.getElementById('preview-subtitle');
+      const phoneMockup = previewCard ? previewCard.parentElement.parentElement : null;
+
+      const safeButtonText = readableTextOn(theme.primary);
+      const safeTextOnBg = contrastRatio(theme.text, theme.bg) >= 4.5 ? theme.text : readableTextOn(theme.bg, theme.text);
+      const safeTextOnCard = contrastRatio(theme.text, theme.card) >= 4.5 ? theme.text : readableTextOn(theme.card, theme.text);
+      const safeMutedOnCard = contrastRatio(theme.muted, theme.card) >= 4.5 ? theme.muted : safeTextOnCard;
+
+      const pageTitleValue = settingsPageTitle?.value || state.pageTitle || 'Agenda tu próxima hora';
+      const pageSubtitleValue = settingsPageSubtitle?.value || state.pageSubtitle || 'Elige servicio, profesional y horario disponible.';
+      const pageCtaValue = settingsPageCta?.value || state.pageCta || 'Reservar ahora';
+      const bannerStyleValue = settingsBannerStyle?.value || state.bannerStyle || 'soft';
+      const bannerImageValue = settingsBannerImage?.value || state.bannerImage || '';
+
+      if (previewBannerTitle) {
+        previewBannerTitle.textContent = pageTitleValue;
+        previewBannerTitle.style.color = safeTextOnCard;
+      }
+
+      if (previewBannerSubtitle) {
+        previewBannerSubtitle.textContent = pageSubtitleValue;
+        previewBannerSubtitle.style.color = safeMutedOnCard;
+      }
+
+      if (previewMainBtn) {
+        previewMainBtn.textContent = `${pageCtaValue} (Ejemplo)`;
+        previewMainBtn.style.background = theme.primary;
+        previewMainBtn.style.color = safeButtonText;
+      }
+
+      if (previewName) previewName.style.color = safeTextOnBg;
+      if (previewTitle) previewTitle.style.color = safeTextOnCard;
+      if (previewSubtitle) previewSubtitle.style.color = safeMutedOnCard;
+
+      if (previewCard) {
+        previewCard.style.background = theme.card;
+        previewCard.style.borderColor = theme.border;
+        previewCard.style.color = safeTextOnCard;
+
+        if (bannerStyleValue === 'gradient') {
+          previewCard.style.background = `linear-gradient(135deg, ${theme.card}, ${theme.bg})`;
+          previewCard.style.borderColor = theme.primary;
+        } else if (bannerStyleValue === 'dark') {
+          previewCard.style.background = isDarkSurface(theme.card) ? theme.card : '#0B1736';
+          previewCard.style.color = '#FFFFFF';
+          previewCard.style.borderColor = theme.primary;
+          if (previewBannerTitle) previewBannerTitle.style.color = '#FFFFFF';
+          if (previewBannerSubtitle) previewBannerSubtitle.style.color = 'rgba(255,255,255,.78)';
+          if (previewTitle) previewTitle.style.color = '#FFFFFF';
+          if (previewSubtitle) previewSubtitle.style.color = 'rgba(255,255,255,.78)';
+        } else if (bannerStyleValue === 'image' && bannerImageValue) {
+          previewCard.style.background = `linear-gradient(rgba(11,23,54,.74), rgba(11,23,54,.74)), url('${bannerImageValue}') center/cover`;
+          previewCard.style.borderColor = theme.primary;
+          if (previewBannerTitle) previewBannerTitle.style.color = '#FFFFFF';
+          if (previewBannerSubtitle) previewBannerSubtitle.style.color = 'rgba(255,255,255,.82)';
+          if (previewTitle) previewTitle.style.color = '#FFFFFF';
+          if (previewSubtitle) previewSubtitle.style.color = 'rgba(255,255,255,.82)';
+        }
+      }
+
+      if (phoneMockup) {
+        phoneMockup.style.background = theme.bg;
+      }
+    }
+
 
     function applyTheme(themeName) {
       const theme = ensureThemeForType(state.type, themeName);
@@ -1238,7 +1322,6 @@
         .field-group label,
         th,
         .user-chip strong,
-        .business-mini strong,
         .theme-chip strong,
         .personalization-box h3,
         .notification-item strong {
@@ -1337,6 +1420,34 @@
 
         .chart-grid {
           stroke: ${theme.border} !important;
+        }
+
+        .sidebar,
+        .sidebar * {
+          color: rgba(255,255,255,.82) !important;
+        }
+
+        .sidebar .side-logo span,
+        .sidebar .side-mark,
+        .sidebar .business-mini strong,
+        .sidebar .nav button.active,
+        .sidebar .nav button:hover {
+          color: #FFFFFF !important;
+        }
+
+        .sidebar .business-mini {
+          background: rgba(255,255,255,.10) !important;
+          border-color: rgba(255,255,255,.18) !important;
+        }
+
+        .sidebar .business-mini small {
+          color: rgba(255,255,255,.76) !important;
+        }
+
+        .sidebar .side-bottom .btn {
+          background: rgba(255,255,255,.95) !important;
+          color: #0B1736 !important;
+          border-color: rgba(255,255,255,.18) !important;
         }
 
         .phone-preview {
@@ -2061,6 +2172,11 @@
       applyTheme(theme.name);
     });
     
+    [settingsPageTitle, settingsPageSubtitle, settingsPageCta, settingsBannerStyle, settingsBannerImage].filter(Boolean).forEach(input => {
+      const eventName = input.tagName === 'SELECT' ? 'change' : 'input';
+      input.addEventListener(eventName, () => updatePagePreview());
+    });
+
     saveSettings.addEventListener('click',()=>{ 
       const selectedType = settingsType.value;
       state.name = settingsBusiness.value.trim() || profiles[selectedType].business; 
@@ -2072,6 +2188,11 @@
       state.depositPercent = settingsDepositPercent ? Number(settingsDepositPercent.value || 0) : 0; 
       state.depositFixedAmount = settingsDepositFixed ? Number(settingsDepositFixed.value || 0) : 0; 
       state.depositMinimum = settingsDepositMinimum ? Number(settingsDepositMinimum.value || 0) : 0; 
+      state.pageTitle = settingsPageTitle ? settingsPageTitle.value.trim() : state.pageTitle;
+      state.pageSubtitle = settingsPageSubtitle ? settingsPageSubtitle.value.trim() : state.pageSubtitle;
+      state.pageCta = settingsPageCta ? settingsPageCta.value.trim() : state.pageCta;
+      state.bannerStyle = settingsBannerStyle ? settingsBannerStyle.value : (state.bannerStyle || 'soft');
+      state.bannerImage = settingsBannerImage ? settingsBannerImage.value.trim() : (state.bannerImage || '');
 
       const selectedTheme = settingsThemeSelector ? settingsThemeSelector.value : state.activeTheme;
       const theme = ensureThemeForType(state.type, selectedTheme);
