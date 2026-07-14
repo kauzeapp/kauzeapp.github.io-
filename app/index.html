@@ -902,15 +902,15 @@
     // --- CATALOGO DE ESTILOS Y TEMAS (Kauze Design System) ---
     const THEMES = [
       { name: 'Kauze Base', vertical: 'base', font: 'Inter', bg: '#F7F9FC', card: '#FFFFFF', text: '#0B1736', muted: '#64748B', primary: '#2563EB', border: '#E2E8F0' },
-      { name: 'Brisa Serena', vertical: 'estetica', font: 'Inter', bg: '#E3F2FD', card: '#FFFFFF', text: '#0B1736', muted: '#546E7A', primary: '#0288D1', border: '#CFD8DC' },
-      { name: 'Rubor Esencial', vertical: 'estetica', font: 'Poppins', bg: '#FFF0F5', card: '#FFFFFF', text: '#3E2723', muted: '#8D6E63', primary: '#D4A373', border: '#F8BBD0' },
-      { name: 'Canvas Orgánico', vertical: 'estetica', font: 'Playfair Display', bg: '#FDFBF7', card: '#FFFFFF', text: '#2C3531', muted: '#6C7A72', primary: '#A3B19B', border: '#E5DEC9' },
+      { name: 'Brisa Serena', vertical: 'estetica', font: 'Inter', bg: '#E3F2FD', card: '#FFFFFF', text: '#0B1736', muted: '#546E7A', primary: '#0277BD', border: '#CFD8DC' },
+      { name: 'Rubor Esencial', vertical: 'estetica', font: 'Poppins', bg: '#FFF0F5', card: '#FFFFFF', text: '#3E2723', muted: '#8D6E63', primary: '#C98A4A', border: '#F8BBD0' },
+      { name: 'Canvas Orgánico', vertical: 'estetica', font: 'Playfair Display', bg: '#FDFBF7', card: '#FFFFFF', text: '#2C3531', muted: '#6C7A72', primary: '#7F9278', border: '#E5DEC9' },
       { name: 'Equilibrio Urbano', vertical: 'estetica', font: 'Roboto', bg: '#F8FAF8', card: '#FFFFFF', text: '#1E293B', muted: '#64748B', primary: '#6366F1', border: '#E2E8F0' },
       { name: 'Botánica Matcha', vertical: 'estetica', font: 'Inter', bg: '#E8F5E9', card: '#FFFFFF', text: '#1B5E20', muted: '#558B2F', primary: '#2E7D32', border: '#C8E6C9' },
       { name: 'Orquídea Nocturna', vertical: 'estetica', font: 'Playfair Display', bg: '#1E121E', card: '#2D1E2D', text: '#FDFBF7', muted: '#D4C5D4', primary: '#D4A373', border: '#4A354A' },
-      { name: 'Club Náutico', vertical: 'barberia', font: 'Montserrat', bg: '#0F172A', card: '#1E293B', text: '#F8FAF8', muted: '#94A3B8', primary: '#3B82F6', border: '#334155' },
+      { name: 'Club Náutico', vertical: 'barberia', font: 'Montserrat', bg: '#0F172A', card: '#1E293B', text: '#F8FAF8', muted: '#94A3B8', primary: '#2563EB', border: '#334155' },
       { name: 'Oro Imperial', vertical: 'barberia', font: 'Cinzel', bg: '#000000', card: '#121212', text: '#FFFFFF', muted: '#A0A0A0', primary: '#D4AF37', border: '#2C2C2C' },
-      { name: 'Cyber Stealth', vertical: 'barberia', font: 'Space Grotesk', bg: '#0B0F19', card: '#161D30', text: '#F8FAF8', muted: '#94A3B8', primary: '#00F5D4', border: '#202D4A' },
+      { name: 'Cyber Stealth', vertical: 'barberia', font: 'Space Grotesk', bg: '#0B0F19', card: '#161D30', text: '#F8FAF8', muted: '#94A3B8', primary: '#00D7C0', border: '#202D4A' },
       { name: 'Gremio del Cuero', vertical: 'barberia', font: 'PT Serif', bg: '#2B1D11', card: '#3E2723', text: '#FFF8E1', muted: '#D7CCC8', primary: '#D4A373', border: '#4E342E' },
       { name: 'Highland Hunt', vertical: 'barberia', font: 'Montserrat', bg: '#132615', card: '#1C3B20', text: '#F1F8F2', muted: '#A5D6A7', primary: '#D4A373', border: '#2E5A33' },
       { name: 'Logia del Vino', vertical: 'barberia', font: 'Cormorant Garamond', bg: '#2E0814', card: '#420D20', text: '#FFF0F5', muted: '#F8BBD0', primary: '#D4A373', border: '#5C1330' }
@@ -1033,6 +1033,57 @@
       link.href = `https://fonts.googleapis.com/css2?family=${formattedName}:wght@400;500;600;700;800&display=swap`;
     }
 
+    function hexToRgb(hex) {
+      const clean = String(hex || '').replace('#', '').trim();
+      if (clean.length !== 6) return { r: 255, g: 255, b: 255 };
+      return {
+        r: parseInt(clean.slice(0, 2), 16),
+        g: parseInt(clean.slice(2, 4), 16),
+        b: parseInt(clean.slice(4, 6), 16)
+      };
+    }
+
+    function relativeLuminance(hex) {
+      const { r, g, b } = hexToRgb(hex);
+      const channel = value => {
+        const c = value / 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      };
+      return (0.2126 * channel(r)) + (0.7152 * channel(g)) + (0.0722 * channel(b));
+    }
+
+    function contrastRatio(colorA, colorB) {
+      const a = relativeLuminance(colorA);
+      const b = relativeLuminance(colorB);
+      const lighter = Math.max(a, b);
+      const darker = Math.min(a, b);
+      return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    function readableTextOn(background, preferred = '#FFFFFF') {
+      const white = '#FFFFFF';
+      const dark = '#0B1736';
+      const black = '#000000';
+      const preferredScore = contrastRatio(preferred, background);
+      const whiteScore = contrastRatio(white, background);
+      const darkScore = contrastRatio(dark, background);
+      const blackScore = contrastRatio(black, background);
+
+      if (preferredScore >= 4.5) return preferred;
+      if (whiteScore >= 4.5 && whiteScore >= darkScore) return white;
+      if (darkScore >= 4.5) return dark;
+      return blackScore > whiteScore ? black : white;
+    }
+
+    function isDarkSurface(hex) {
+      return relativeLuminance(hex) < 0.22;
+    }
+
+    function themeSurfaceSoft(theme) {
+      return isDarkSurface(theme.bg) ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.045)';
+    }
+
+
     function updateMockupPreview(theme) {
       const previewName = document.getElementById('preview-business-name');
       const previewLogo = document.getElementById('preview-logo-badge');
@@ -1043,41 +1094,43 @@
       const phoneMockup = previewCard ? previewCard.parentElement.parentElement : null;
       const previewTitle = document.getElementById('preview-title');
       const previewSubtitle = document.getElementById('preview-subtitle');
-      
+
+      const safeButtonText = readableTextOn(theme.primary);
+      const safeTextOnBg = readableTextOn(theme.bg, theme.text);
+      const safeTextOnCard = readableTextOn(theme.card, theme.text);
+      const safeMutedOnCard = contrastRatio(theme.muted, theme.card) >= 4.5 ? theme.muted : safeTextOnCard;
+
       const busName = document.getElementById('settingsBusiness') ? document.getElementById('settingsBusiness').value : (state.name || 'Kauze Demo');
       if (previewName) previewName.textContent = busName;
-      
+
       if (phoneMockup) {
         phoneMockup.style.background = theme.bg;
         phoneMockup.style.fontFamily = `'${theme.font}', sans-serif`;
       }
-      if (previewName) previewName.style.color = theme.text;
-      if (previewTitle) previewTitle.style.color = theme.text;
-      if (previewSubtitle) previewSubtitle.style.color = theme.muted;
+      if (previewName) previewName.style.color = safeTextOnBg;
+      if (previewTitle) previewTitle.style.color = safeTextOnCard;
+      if (previewSubtitle) previewSubtitle.style.color = safeMutedOnCard;
       if (previewCard) {
         previewCard.style.background = theme.card;
         previewCard.style.borderColor = theme.border;
       }
-      
-      const isDark = theme.bg.startsWith('#0') || theme.bg.startsWith('#1') || theme.bg.startsWith('#2') || theme.bg.startsWith('#3');
-      const contrastText = isDark ? '#000000' : '#FFFFFF';
-      
+
       if (previewLogo) {
         previewLogo.style.background = theme.primary;
-        previewLogo.style.color = contrastText;
+        previewLogo.style.color = safeButtonText;
       }
       if (previewPill1) {
         previewPill1.style.background = theme.primary;
-        previewPill1.style.color = contrastText;
+        previewPill1.style.color = safeButtonText;
       }
       if (previewPill2) {
         previewPill2.style.background = theme.bg;
-        previewPill2.style.color = theme.text;
+        previewPill2.style.color = safeTextOnBg;
         previewPill2.style.borderColor = theme.border;
       }
       if (previewMainBtn) {
         previewMainBtn.style.background = theme.primary;
-        previewMainBtn.style.color = contrastText;
+        previewMainBtn.style.color = safeButtonText;
       }
 
       if (themePalettePreview) {
@@ -1097,130 +1150,200 @@
       updatePagePreview();
     }
 
-    function updatePagePreview() {
-      const titleEl = document.getElementById('preview-banner-title');
-      const subEl = document.getElementById('preview-banner-subtitle');
-      const btnEl = document.getElementById('preview-main-btn');
-      const phoneMockup = document.querySelector('.phone-mockup');
-
-      const title = settingsPageTitle ? settingsPageTitle.value : (state.pageTitle || 'Agenda tu próxima hora');
-      const subtitle = settingsPageSubtitle ? settingsPageSubtitle.value : (state.pageSubtitle || 'Elige servicio, profesional y horario disponible.');
-      const cta = settingsPageCta ? settingsPageCta.value : (state.pageCta || 'Reservar ahora');
-      const style = settingsBannerStyle ? settingsBannerStyle.value : (state.bannerStyle || 'soft');
-
-      if (titleEl) titleEl.textContent = title || 'Agenda tu próxima hora';
-      if (subEl) subEl.textContent = subtitle || 'Elige servicio, profesional y horario disponible.';
-      if (btnEl) btnEl.textContent = `${cta || 'Reservar ahora'} (Ejemplo)`;
-
-      if (phoneMockup) {
-        phoneMockup.style.backgroundImage = '';
-        phoneMockup.style.backgroundSize = 'cover';
-        phoneMockup.style.backgroundPosition = 'center';
-
-        if (style === 'gradient') {
-          phoneMockup.style.backgroundImage = 'linear-gradient(145deg, rgba(37,99,235,.18), rgba(99,102,241,.24))';
-        } else if (style === 'dark') {
-          phoneMockup.style.backgroundImage = 'linear-gradient(145deg, rgba(15,23,42,.80), rgba(15,23,42,.55))';
-        } else if (style === 'image' && settingsBannerImage && settingsBannerImage.value.trim()) {
-          phoneMockup.style.backgroundImage = `linear-gradient(rgba(15,23,42,.45), rgba(15,23,42,.20)), url('${settingsBannerImage.value.trim()}')`;
-        }
-      }
-    }
-
-    function renderThemeMiniList() {
-      if (!themeMiniList) return;
-      const activeType = settingsType ? settingsType.value : state.type;
-      const vertical = themeVerticalForType(activeType);
-      const list = allowedThemesForType(activeType);
-      const activeTheme = ensureThemeForType(activeType, settingsThemeSelector ? settingsThemeSelector.value : state.activeTheme);
-
-      themeMiniList.innerHTML = `
-        <div class="theme-filter-head">
-          <span>Paletas permitidas · Kauze Base siempre disponible</span>
-          <span class="theme-filter-pill">${vertical === 'barberia' ? '💈' : '🌸'} ${verticalLabel(vertical)}</span>
-        </div>
-        ${list.map(t => `
-          <button type="button" class="theme-chip ${t.name === activeTheme.name ? 'active' : ''}" data-theme-chip="${t.name}">
-            <span class="theme-chip-main">
-              <span class="theme-dot" style="background:${t.primary}"></span>
-              <span>
-                <strong>${t.name}</strong><br>
-                <small style="color:var(--muted);font-weight:700;">${t.font}</small>
-              </span>
-            </span>
-            <span class="theme-chip-meta">${t.vertical === 'base' ? 'Default' : (t.vertical === 'barberia' ? 'Barbería' : 'Estética')}</span>
-          </button>
-        `).join('')}
-      `;
-
-      themeMiniList.querySelectorAll('[data-theme-chip]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const selected = ensureThemeForType(activeType, btn.dataset.themeChip);
-          if (settingsThemeSelector) settingsThemeSelector.value = selected.name;
-          updateMockupPreview(selected);
-        });
-      });
-    }
-
     function applyTheme(themeName) {
       const theme = ensureThemeForType(state.type, themeName);
       state.activeTheme = theme.name;
-      
+
       loadGoogleFont(theme.font);
-      
+
       let styleEl = document.getElementById('dynamic-theme-style');
       if (!styleEl) {
         styleEl = document.createElement('style');
         styleEl.id = 'dynamic-theme-style';
         document.head.appendChild(styleEl);
       }
-      
-      const isDark = theme.bg.startsWith('#0') || theme.bg.startsWith('#1') || theme.bg.startsWith('#2') || theme.bg.startsWith('#3');
-      const contrastText = isDark ? '#000000' : '#FFFFFF';
-      
+
+      const darkBg = isDarkSurface(theme.bg);
+      const darkCard = isDarkSurface(theme.card);
+      const safePrimaryText = readableTextOn(theme.primary);
+      const safeTextOnBg = contrastRatio(theme.text, theme.bg) >= 4.5 ? theme.text : readableTextOn(theme.bg, theme.text);
+      const safeTextOnCard = contrastRatio(theme.text, theme.card) >= 4.5 ? theme.text : readableTextOn(theme.card, theme.text);
+      const safeMutedOnBg = contrastRatio(theme.muted, theme.bg) >= 4.5 ? theme.muted : safeTextOnBg;
+      const safeMutedOnCard = contrastRatio(theme.muted, theme.card) >= 4.5 ? theme.muted : safeTextOnCard;
+      const inputBg = darkBg ? theme.card : '#FFFFFF';
+      const tableRowBg = darkBg ? 'rgba(255,255,255,0.045)' : 'rgba(255,255,255,0.76)';
+
       styleEl.innerHTML = `
         :root {
           --bg: ${theme.bg} !important;
           --card: ${theme.card} !important;
-          --text: ${theme.text} !important;
-          --muted: ${theme.muted} !important;
+          --surface: ${theme.card} !important;
+          --text: ${safeTextOnBg} !important;
+          --muted: ${safeMutedOnBg} !important;
           --border: ${theme.border} !important;
           --blue: ${theme.primary} !important;
+          --blue-2: ${theme.primary} !important;
           --purple: ${theme.primary} !important;
-          --soft: ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'} !important;
-          --soft-blue: ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'} !important;
+          --soft: ${themeSurfaceSoft(theme)} !important;
+          --soft-blue: ${darkBg ? 'rgba(255,255,255,0.10)' : 'rgba(37,99,235,0.08)'} !important;
+          --theme-card-text: ${safeTextOnCard} !important;
+          --theme-card-muted: ${safeMutedOnCard} !important;
+          --theme-primary-text: ${safePrimaryText} !important;
         }
+
         body {
+          color: ${safeTextOnBg} !important;
           font-family: '${theme.font}', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
         }
-        ${isDark ? `
-          .sidebar {
-            background: ${theme.card} !important;
-            border-right: 1px solid ${theme.border} !important;
-          }
-          .sidebar .btn, .side-bottom .btn {
-            background: rgba(255,255,255,0.05) !important;
-            color: #fff !important;
-          }
-          .card {
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
-          }
-          input, select, textarea {
-            background: ${theme.bg} !important;
-            color: ${theme.text} !important;
-            border-color: ${theme.border} !important;
-          }
-          .btn.primary {
-            color: #000000 !important;
-            font-weight: 800 !important;
-          }
-        ` : `
-          .btn.primary {
-            color: #FFFFFF !important;
-          }
-        `}
+
+        .sidebar {
+          background: linear-gradient(180deg, #0B1736, #071025) !important;
+          color: #FFFFFF !important;
+        }
+
+        .side-logo span,
+        .side-mark,
+        .business-mini strong {
+          color: #FFFFFF !important;
+        }
+
+        .business-mini small,
+        .nav button,
+        .side-bottom .btn {
+          color: rgba(255,255,255,.74) !important;
+        }
+
+        .nav button:hover,
+        .nav button.active {
+          color: #FFFFFF !important;
+        }
+
+        .main,
+        .view,
+        .title p,
+        .section-head p {
+          color: ${safeMutedOnBg} !important;
+        }
+
+        .title h1,
+        .section-head h2,
+        .card h1,
+        .card h2,
+        .card h3,
+        .metric .value,
+        .item strong,
+        .service-card h3,
+        .pro-card h3,
+        .campaign h3,
+        .field-group label,
+        th,
+        .user-chip strong,
+        .business-mini strong,
+        .theme-chip strong,
+        .personalization-box h3,
+        .notification-item strong {
+          color: ${safeTextOnCard} !important;
+        }
+
+        .card,
+        .login-card,
+        .item,
+        .user-chip,
+        .theme-chip,
+        .notification-item,
+        .modal-card,
+        .credential,
+        .personalization-box {
+          background: ${theme.card} !important;
+          color: ${safeTextOnCard} !important;
+          border-color: ${theme.border} !important;
+        }
+
+        .item,
+        .empty-state,
+        .demo-login,
+        .notice,
+        .integration-card {
+          background: ${tableRowBg} !important;
+          color: ${safeTextOnCard} !important;
+        }
+
+        .card p,
+        .item small,
+        .service-card p,
+        .pro-card p,
+        .campaign p,
+        td,
+        .muted-small,
+        .theme-helper,
+        .personalization-box p,
+        .notification-item small,
+        .credential small,
+        .user-chip small,
+        .field::placeholder {
+          color: ${safeMutedOnCard} !important;
+        }
+
+        input,
+        select,
+        textarea,
+        .field,
+        .type-switch {
+          background: ${inputBg} !important;
+          color: ${safeTextOnCard} !important;
+          border-color: ${theme.border} !important;
+        }
+
+        .btn.primary,
+        .mini-btn.primary,
+        button.btn.primary,
+        a.btn.primary {
+          background: ${theme.primary} !important;
+          color: ${safePrimaryText} !important;
+          border-color: ${theme.primary} !important;
+          font-weight: 900 !important;
+          text-shadow: none !important;
+        }
+
+        .btn:not(.primary),
+        .mini-btn:not(.danger),
+        .close-modal {
+          background: ${darkBg ? 'rgba(255,255,255,0.07)' : '#FFFFFF'} !important;
+          color: ${darkBg ? '#FFFFFF' : '#0B1736'} !important;
+          border-color: ${theme.border} !important;
+        }
+
+        .source-pill,
+        .notify-tag.info,
+        .integration-status.ready {
+          background: ${darkBg ? 'rgba(255,255,255,0.08)' : 'rgba(37,99,235,.08)'} !important;
+          color: ${darkBg ? '#FFFFFF' : '#0B1736'} !important;
+          border-color: ${theme.border} !important;
+        }
+
+        .avatar,
+        .side-mark,
+        .preview-logo-badge {
+          background: ${theme.primary} !important;
+          color: ${safePrimaryText} !important;
+        }
+
+        table,
+        tr,
+        th,
+        td {
+          border-color: ${theme.border} !important;
+        }
+
+        .chart-grid {
+          stroke: ${theme.border} !important;
+        }
+
+        .phone-preview {
+          background: #0B1736 !important;
+        }
       `;
-      
+
       updateMockupPreview(theme);
     }
 
