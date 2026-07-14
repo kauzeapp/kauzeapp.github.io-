@@ -639,6 +639,43 @@
       display: none !important;
     }
 
+    #clientWelcome.hero-centered {
+      grid-template-columns: minmax(0, 660px);
+      justify-content: center;
+      align-items: center;
+      min-height: calc(100vh - 176px);
+      margin-bottom: 0;
+    }
+
+    #clientWelcome.hero-centered .hero-card {
+      width: 100%;
+      max-width: 660px;
+      padding: 42px 36px 32px;
+    }
+
+    #clientWelcome.hero-centered .kicker {
+      margin-bottom: 18px;
+    }
+
+    #clientWelcome.hero-centered h1 {
+      max-width: 520px;
+      margin-bottom: 18px;
+    }
+
+    #clientWelcome.hero-centered #heroSubtitle {
+      max-width: 520px;
+    }
+
+    #clientWelcome.hero-centered .welcome-actions {
+      gap: 16px;
+      margin-top: 26px;
+    }
+
+    #clientWelcome.hero-centered .welcome-option {
+      min-height: 218px;
+    }
+
+
     .welcome-actions {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -654,7 +691,7 @@
       box-shadow: var(--shadow-soft);
       display: grid;
       gap: 12px;
-      min-height: 228px;
+      min-height: 220px;
       align-content: start;
       transition: .18s ease;
     }
@@ -926,20 +963,63 @@
     @media (max-width: 640px) {
       .shell {
         width: min(100% - 24px, 1120px);
-        padding-top: 16px;
+        padding-top: 14px;
       }
 
       .topbar {
-        align-items: flex-start;
-        flex-direction: column;
+        align-items: center;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+
+      .brand {
+        flex: 0 0 auto;
+        min-width: 0;
+      }
+
+      .mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 13px;
+      }
+
+      .brand span {
+        font-size: 22px;
+        letter-spacing: -.8px;
       }
 
       .top-actions {
-        width: 100%;
+        width: auto;
+        margin-left: auto;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: nowrap;
       }
 
       .top-actions .btn {
-        width: 100%;
+        width: auto;
+        min-height: 38px;
+        padding: 8px 11px;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      #clientWelcome.hero-centered {
+        min-height: auto;
+        margin-top: 8px;
+      }
+
+      #clientWelcome.hero-centered .hero-card {
+        padding: 24px 20px 22px;
+      }
+
+      #clientWelcome.hero-centered h1 {
+        font-size: clamp(34px, 12vw, 48px);
+        letter-spacing: -1.7px;
       }
 
       .hero-card, .booking {
@@ -957,6 +1037,12 @@
 
       .welcome-actions {
         grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .welcome-option {
+        min-height: auto;
+        padding: 18px;
       }
 
       .steps {
@@ -978,6 +1064,21 @@
 
       .date-row {
         grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .brand span {
+        font-size: 20px;
+      }
+
+      .top-actions {
+        gap: 6px;
+      }
+
+      .top-actions .btn {
+        padding: 8px 9px;
+        font-size: 11px;
       }
     }
     .payment-card {
@@ -1730,6 +1831,10 @@
       const booking = document.getElementById('booking');
       const appointmentManagement = document.getElementById('appointmentManagement');
 
+      if (welcome) {
+        welcome.classList.toggle('flow-hidden', flow === 'appointment');
+        welcome.classList.toggle('hero-centered', flow === 'inicio');
+      }
       if (welcomeActions) welcomeActions.classList.toggle('flow-hidden', flow !== 'inicio');
       if (businessPanel) businessPanel.classList.toggle('flow-hidden', flow !== 'booking');
       if (explore) explore.classList.toggle('flow-hidden', flow !== 'booking');
