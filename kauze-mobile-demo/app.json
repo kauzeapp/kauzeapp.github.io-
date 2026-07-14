@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Kauze Demo",
+    "slug": "kauze-mobile-demo",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "kauze",
+    "newArchEnabled": true,
+    "android": {
+      "package": "cl.kauze.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#0B1736"
+      }
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "cl.kauze.app",
+      "buildNumber": "1"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "extra": {
+      "apiBaseUrl": "",
+      "demoMode": true
+    }
+  }
+}
