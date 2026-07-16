@@ -632,6 +632,591 @@
       margin-top: 26px;
     }
 
+
+
+
+    .flow-hidden {
+      display: none !important;
+    }
+
+    #clientWelcome.hero-centered {
+      grid-template-columns: minmax(0, 660px);
+      justify-content: center;
+      align-items: center;
+      min-height: calc(100vh - 176px);
+      margin-bottom: 0;
+    }
+
+    #clientWelcome.hero-centered .hero-card {
+      width: 100%;
+      max-width: 660px;
+      padding: 42px 36px 32px;
+    }
+
+    #clientWelcome.hero-centered .kicker {
+      margin-bottom: 18px;
+    }
+
+    #clientWelcome.hero-centered h1 {
+      max-width: 520px;
+      margin-bottom: 18px;
+    }
+
+    #clientWelcome.hero-centered #heroSubtitle {
+      max-width: 520px;
+    }
+
+    #clientWelcome.hero-centered .welcome-actions {
+      gap: 16px;
+      margin-top: 26px;
+    }
+
+    #clientWelcome.hero-centered .welcome-option {
+      min-height: 218px;
+    }
+
+
+    .welcome-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .welcome-option {
+      background: rgba(255,255,255,.86);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: var(--shadow-soft);
+      display: grid;
+      gap: 12px;
+      min-height: 220px;
+      align-content: start;
+      transition: .18s ease;
+    }
+
+    .welcome-option:hover {
+      transform: translateY(-2px);
+      border-color: rgba(37,99,235,.28);
+      box-shadow: var(--shadow);
+    }
+
+    .welcome-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: var(--soft-blue);
+      color: var(--blue);
+      font-size: 22px;
+    }
+
+    .welcome-option h3 {
+      font-family: 'Sora', sans-serif;
+      color: var(--navy);
+      font-size: 21px;
+      letter-spacing: -.6px;
+      line-height: 1.15;
+    }
+
+    .welcome-option p {
+      color: var(--muted);
+      line-height: 1.62;
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .welcome-option .btn {
+      margin-top: auto;
+      width: 100%;
+    }
+
+    .explore {
+      margin-top: 8px;
+    }
+
+    .discovery-hero {
+      position: relative;
+      overflow: hidden;
+      color: #fff;
+      background: linear-gradient(118deg, #10224e 0%, #183a82 58%, #315ed5 100%);
+      border-radius: 34px;
+      padding: 42px 34px 34px;
+      box-shadow: var(--shadow);
+    }
+
+    .discovery-hero::after {
+      content: none;
+    }
+
+    .discovery-kicker {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid rgba(255,255,255,.20);
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      color: #dbeafe;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .discovery-hero h1 {
+      max-width: 760px;
+      color: #fff;
+      margin-bottom: 14px;
+    }
+
+    .discovery-copy {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+      color: #dbeafe;
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .location-panel {
+      position: relative;
+      z-index: 2;
+      width: min(940px, 100%);
+      padding: 17px;
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 22px;
+      background: rgba(255,255,255,.96);
+      color: var(--navy);
+      box-shadow: 0 22px 50px rgba(4,12,32,.24);
+    }
+
+    .location-panel-title {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 11px;
+      font-size: 13px;
+    }
+
+    .location-panel-title strong {
+      font-weight: 900;
+    }
+
+    .location-panel-title span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .location-search-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 9px;
+    }
+
+    .location-input-wrap {
+      position: relative;
+    }
+
+    .location-input-wrap::before {
+      content: "⌕";
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-52%);
+      color: var(--blue);
+      font-size: 22px;
+      font-weight: 900;
+      pointer-events: none;
+    }
+
+    .location-input {
+      width: 100%;
+      min-height: 50px;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 12px 14px 12px 44px;
+      color: var(--navy);
+      background: #fff;
+      outline: none;
+    }
+
+    .location-input:focus {
+      border-color: rgba(37,99,235,.55);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.10);
+    }
+
+    .location-search-row .btn {
+      min-height: 50px;
+      border-radius: 15px;
+      white-space: nowrap;
+    }
+
+    .location-button {
+      color: var(--blue);
+      background: var(--soft-blue);
+      border-color: rgba(37,99,235,.20);
+    }
+
+    .location-status {
+      min-height: 18px;
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .explore-results {
+      margin-top: 18px;
+      padding: 26px;
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      background: rgba(255,255,255,.95);
+      box-shadow: var(--shadow);
+    }
+
+    .explore-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .explore-head h2 {
+      font-family: 'Sora', sans-serif;
+      color: var(--navy);
+      font-size: 28px;
+      letter-spacing: -1px;
+      margin-bottom: 6px;
+    }
+
+    .explore-head p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.65;
+      max-width: 720px;
+    }
+
+    .result-count {
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: var(--blue);
+      background: var(--soft-blue);
+      border: 1px solid rgba(37,99,235,.14);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .explore-toolbar {
+      margin-bottom: 18px;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 3px;
+      scrollbar-width: none;
+    }
+
+    .chip-row::-webkit-scrollbar { display: none; }
+
+    .chip {
+      min-height: 42px;
+      border-radius: 999px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 800;
+      transition: .18s ease;
+    }
+
+    .chip.active {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border-color: transparent;
+      color: #fff;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .business-grid {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(310px, 1fr);
+      gap: 14px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-inline: contain;
+      padding: 4px 4px 16px;
+      scrollbar-color: rgba(37,99,235,.35) transparent;
+    }
+
+    .business-item {
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 24px;
+      padding: 18px;
+      transition: .18s ease;
+      display: grid;
+      gap: 12px;
+      scroll-snap-align: start;
+    }
+
+    .business-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-soft);
+      border-color: rgba(37,99,235,.26);
+    }
+
+    .business-item.selected {
+      border-color: rgba(37,99,235,.58);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.10);
+    }
+
+    .business-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .business-logo {
+      flex: 0 0 auto;
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--logo-a, var(--blue)), var(--logo-b, var(--purple)));
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      font-weight: 900;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .business-title {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .business-top h3 {
+      font-family: 'Sora', sans-serif;
+      color: var(--navy);
+      font-size: 18px;
+      margin-bottom: 4px;
+      letter-spacing: -.5px;
+    }
+
+    .business-top p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .business-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 25px;
+      height: 25px;
+      border-radius: 999px;
+      background: var(--blue);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 900;
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .business-meta-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .business-meta-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--muted);
+      border-bottom: 1px dashed var(--border);
+      padding-bottom: 8px;
+    }
+
+    .business-meta-row:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .business-meta-row strong {
+      color: var(--navy);
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .business-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .business-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      border: 1px solid var(--border);
+      background: var(--soft);
+      color: var(--muted);
+    }
+
+    .business-tag.good {
+      background: rgba(16,185,129,.08);
+      border-color: rgba(16,185,129,.18);
+      color: #047857;
+    }
+
+    .business-tag.warn {
+      background: rgba(245,158,11,.10);
+      border-color: rgba(245,158,11,.22);
+      color: #9a6700;
+    }
+
+    .business-cta {
+      width: 100%;
+      border-radius: 15px;
+    }
+
+    .business-detail {
+      display: none;
+      grid-template-columns: 1.08fr .92fr;
+      gap: 24px;
+      margin-top: 8px;
+      padding: 22px;
+      border: 1px solid rgba(37,99,235,.28);
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(37,99,235,.06), #fff 54%);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .business-detail.active {
+      display: grid;
+      animation: fade .18s ease;
+    }
+
+    .detail-brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 14px;
+    }
+
+    .detail-logo {
+      width: 58px;
+      height: 58px;
+      font-size: 16px;
+    }
+
+    .detail-brand h3 {
+      font-family: 'Sora', sans-serif;
+      color: var(--navy);
+      font-size: 22px;
+      letter-spacing: -.7px;
+      margin-bottom: 4px;
+    }
+
+    .detail-brand p,
+    .detail-description {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .detail-pills,
+    .detail-times {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .detail-pill,
+    .detail-time {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: var(--soft-blue);
+      color: var(--navy);
+      border: 1px solid rgba(37,99,235,.14);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .detail-description { margin: 14px 0; }
+
+    .detail-side h4 {
+      color: var(--navy);
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .detail-services {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .detail-service {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed var(--border);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .detail-service strong { color: var(--navy); }
+    .detail-time { color: var(--blue); background: #fff; }
+
+    .detail-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .detail-actions .btn:first-child { flex: 1; }
+
+    .subdomain-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .empty-businesses {
+      border: 1px dashed var(--border);
+      border-radius: 22px;
+      padding: 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.65;
+      background: var(--soft);
+    }
+
+
     @media (max-width: 900px) {
       .hero, .portal-section {
         grid-template-columns: 1fr;
@@ -640,25 +1225,76 @@
       .grid-3 {
         grid-template-columns: 1fr 1fr;
       }
+
+      .business-grid {
+        grid-auto-columns: minmax(290px, 48%);
+      }
+
+      .business-detail {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 640px) {
       .shell {
         width: min(100% - 24px, 1120px);
-        padding-top: 16px;
+        padding-top: 14px;
       }
 
       .topbar {
-        align-items: flex-start;
-        flex-direction: column;
+        align-items: center;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+
+      .brand {
+        flex: 0 0 auto;
+        min-width: 0;
+      }
+
+      .mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 13px;
+      }
+
+      .brand span {
+        font-size: 22px;
+        letter-spacing: -.8px;
       }
 
       .top-actions {
-        width: 100%;
+        width: auto;
+        margin-left: auto;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: nowrap;
       }
 
       .top-actions .btn {
-        width: 100%;
+        width: auto;
+        min-height: 38px;
+        padding: 8px 11px;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      #clientWelcome.hero-centered {
+        min-height: auto;
+        margin-top: 8px;
+      }
+
+      #clientWelcome.hero-centered .hero-card {
+        padding: 24px 20px 22px;
+      }
+
+      #clientWelcome.hero-centered h1 {
+        font-size: clamp(34px, 12vw, 48px);
+        letter-spacing: -1.7px;
       }
 
       .hero-card, .booking {
@@ -668,6 +1304,75 @@
 
       .grid-3, .grid-2 {
         grid-template-columns: 1fr;
+      }
+
+      .discovery-hero {
+        padding: 30px 20px 22px;
+        border-radius: 26px;
+      }
+
+      .discovery-hero h1 {
+        font-size: clamp(34px, 12vw, 48px);
+        letter-spacing: -1.7px;
+      }
+
+      .location-panel {
+        padding: 14px;
+        border-radius: 19px;
+      }
+
+      .location-panel-title span {
+        display: none;
+      }
+
+      .location-search-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .location-input-wrap {
+        grid-column: 1 / -1;
+      }
+
+      .location-search-row .btn {
+        width: 100%;
+        padding-inline: 10px;
+        font-size: 12px;
+      }
+
+      .explore-results {
+        padding: 20px;
+        border-radius: 26px;
+      }
+
+      .explore-head {
+        align-items: flex-start;
+      }
+
+      .result-count {
+        font-size: 10px;
+      }
+
+      .business-grid {
+        grid-auto-columns: minmax(278px, 88%);
+      }
+
+      .business-detail {
+        padding: 18px;
+      }
+
+      .detail-actions {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .welcome-actions {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .welcome-option {
+        min-height: auto;
+        padding: 18px;
       }
 
       .steps {
@@ -689,6 +1394,21 @@
 
       .date-row {
         grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .brand span {
+        font-size: 20px;
+      }
+
+      .top-actions {
+        gap: 6px;
+      }
+
+      .top-actions .btn {
+        padding: 8px 9px;
+        font-size: 11px;
       }
     }
     .payment-card {
@@ -852,20 +1572,36 @@
 
       <div class="top-actions">
         <a class="btn" href="/app/">Panel negocio</a>
-        <button class="btn primary" type="button" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Reservar ahora</button>
+        <button class="btn primary" type="button" id="topStartBtn" onclick="showClientFlow('inicio')">Comenzar</button>
       </div>
     </header>
 
-    <section class="hero">
+    <section class="hero" id="clientWelcome">
       <article class="hero-card">
         <div class="kicker">⚡ Reserva online con Kauze</div>
-        <h1 id="heroTitle">Agenda tu próxima hora sin esperar respuesta por WhatsApp.</h1>
+        <h1 id="heroTitle">¿Qué quieres hacer hoy?</h1>
         <p id="heroSubtitle">
-          Elige servicio, profesional y horario disponible. Recibirás una confirmación simulada para esta demo.
+          Agenda una nueva cita o administra una reserva existente desde un solo lugar.
         </p>
+
+        <div class="welcome-actions" id="welcomeActions">
+          <article class="welcome-option">
+            <div class="welcome-icon">📅</div>
+            <h3>Necesito agendar una cita</h3>
+            <p>Buscar un negocio, elegir un profesional y reservar una hora.</p>
+            <button class="btn primary" type="button" id="startBookingFlow">Comenzar</button>
+          </article>
+
+          <article class="welcome-option">
+            <div class="welcome-icon">✅</div>
+            <h3>Ya tengo una cita</h3>
+            <p>Ver mi reserva, confirmar asistencia, reprogramar o cancelar.</p>
+            <button class="btn" type="button" id="startAppointmentFlow">Ver mi cita</button>
+          </article>
+        </div>
       </article>
 
-      <aside class="business-panel">
+      <aside class="business-panel flow-hidden" id="businessPanel">
         <article class="business-card">
           <h2 id="businessName">Barbería Corte Fino</h2>
           <p id="businessDescription">Agenda cortes, barba y servicios premium directamente desde este portal.</p>
@@ -879,26 +1615,71 @@
           </select>
 
           <div class="business-meta" style="margin-top:14px">
-            <div class="meta-row"><span>Horario</span><span>Lun a Sáb · 10:00 a 19:00</span></div>
-            <div class="meta-row"><span>Confirmación</span><span>WhatsApp + App</span></div>
-            <div class="meta-row"><span>Calendar</span><span>Evento automático demo</span></div>
-            <div class="meta-row"><span>Evaluación</span><span>Puntos Kauze</span></div>
+            <div class="meta-row"><span>Ubicación</span><span id="businessLocation">Providencia</span></div>
+            <div class="meta-row"><span>Disponibilidad</span><span id="businessAvailability">Disponible hoy</span></div>
+            <div class="meta-row"><span>Valoración</span><span id="businessRating">4.9 · 120 reseñas</span></div>
+            <div class="meta-row"><span>Kauze</span><span id="businessAssociation">Asociado verificado</span></div>
           </div>
           <div class="flow-explain">
             <strong>Flujo Kauze</strong>
-            El cliente reserva. Si el negocio activó abono, paga antes de solicitar la hora; si no, reserva sin pago previo. Kauze avisa en la app, crea evento Calendar demo y programa WhatsApp de confirmación 5 horas antes.
+            Aquí solo se muestran negocios asociados a Kauze. El cliente explora locales, elige uno, reserva y Kauze actualiza App, Calendar y WhatsApp demo.
           </div>
         </article>
 
         <article class="quick-card">
           <h3>¿Ya tienes una cita?</h3>
           <p>Consulta tus reservas activas con tu código de acceso. En la versión real sería OTP por WhatsApp.</p>
-          <button class="btn full" type="button" onclick="document.getElementById('myAppointmentPanel').scrollIntoView({behavior:'smooth'})">Ver mi cita</button>
+          <button class="btn full" type="button" onclick="showClientFlow('appointment')">Ver mi cita</button>
         </article>
       </aside>
     </section>
 
-    <section class="booking" id="booking">
+
+    <section class="explore flow-hidden" id="explorar">
+      <div class="discovery-hero">
+        <div class="discovery-kicker">⚡ Tu próxima reserva comienza aquí</div>
+        <h1>Encuentra tu negocio ideal cerca de ti.</h1>
+        <p class="discovery-copy">
+          Descubre barberías, peluquerías y centros de belleza asociados a Kauze.
+          Compara servicios, precios y horas disponibles antes de reservar.
+        </p>
+
+        <div class="location-panel">
+          <div class="location-panel-title">
+            <strong>📍 ¿Dónde quieres buscar?</strong>
+            <span>Usaremos tu sector solamente para ordenar los negocios más cercanos.</span>
+          </div>
+          <div class="location-search-row">
+            <div class="location-input-wrap">
+              <input class="location-input" id="businessSearch" type="text" value="Providencia, Santiago" placeholder="Comuna, sector o dirección" autocomplete="street-address">
+            </div>
+            <button class="btn primary" type="button" id="searchBusinessLocation">Buscar negocios</button>
+            <button class="btn location-button" type="button" id="useMyLocation">◎ Mi ubicación</button>
+          </div>
+          <p class="location-status" id="locationStatus" aria-live="polite">Puedes escribir tu comuna o permitir el acceso a tu ubicación.</p>
+        </div>
+      </div>
+
+      <div class="explore-results">
+        <div class="explore-head">
+          <div>
+            <h2>Negocios cercanos</h2>
+            <p id="businessResultContext">Ordenados por cercanía a Providencia, Santiago.</p>
+          </div>
+          <span class="result-count" id="businessResultCount">6 negocios</span>
+        </div>
+
+        <div class="explore-toolbar">
+          <div class="chip-row" id="exploreTypeChips"></div>
+        </div>
+
+        <div class="business-grid" id="businessGrid"></div>
+        <div class="business-detail" id="businessDetail" aria-live="polite"></div>
+      </div>
+    </section>
+
+
+    <section class="booking flow-hidden" id="booking">
       <div class="booking-head">
         <div>
           <h2>Reserva tu hora</h2>
@@ -912,11 +1693,6 @@
         <div class="step" data-step="2">2. Profesional</div>
         <div class="step" data-step="3">3. Horario</div>
         <div class="step" data-step="4">4. Pago</div>
-      </div>
-
-      <!-- Status Notice Banner -->
-      <div id="statusNoticeBanner" style="display:none; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.22); padding: 14px; border-radius: 18px; margin-bottom: 20px; font-size: 13.5px; line-height: 1.6; color: var(--amber); transition: all 0.2s ease;">
-          <!-- Populated via JS -->
       </div>
 
       <div class="booking-view active" id="bookingStep1">
@@ -1005,7 +1781,7 @@
       </div>
     </section>
 
-    <section class="portal-section">
+    <section class="portal-section flow-hidden" id="appointmentManagement">
       <article class="mini-panel" id="myAppointmentPanel">
         <h2>Ya tengo cita</h2>
         <p>En producción, el cliente ingresaría su código OTP recibido por WhatsApp. En esta demo puedes consultar la última cita creada.</p>
@@ -1050,6 +1826,147 @@
   </main>
 
   <script>
+
+    const featuredBusinesses = [
+      {
+        id: 'biz-corte-fino',
+        type: 'barberia',
+        name: 'Barbería Corte Fino',
+        description: 'Cortes, barba y experiencia premium en un formato rápido y ordenado.',
+        location: 'Providencia',
+        distance: '0.8 km',
+        address: 'Av. Nueva Providencia 1881',
+        lat: -33.4267,
+        lng: -70.6122,
+        route: 'cortefino.kauze.cl',
+        nextSlots: ['12:30', '13:45', '16:00', '18:15'],
+        logoColors: ['#172554', '#2563EB'],
+        rating: '4.9',
+        reviews: 128,
+        statusLabel: 'Disponible hoy',
+        statusTone: 'good',
+        hero: 'Reserva tu corte en una barbería Kauze cerca de ti.',
+        subtitle: 'Explora negocios asociados, compara disponibilidad y agenda en segundos.',
+        tags: ['💈 Asociado Kauze', '⚡ Confirmación automática', '💳 Abono configurable']
+      },
+      {
+        id: 'biz-norte-fade-club',
+        type: 'barberia',
+        name: 'Norte Fade Club',
+        description: 'Degradados, perfilados y atención express para hombres.',
+        location: 'Recoleta',
+        distance: '1.6 km',
+        address: 'Av. Recoleta 690',
+        lat: -33.4194,
+        lng: -70.6413,
+        route: 'nortefadeclub.kauze.cl',
+        nextSlots: ['13:00', '14:30', '17:20'],
+        logoColors: ['#0F172A', '#475569'],
+        rating: '4.8',
+        reviews: 84,
+        statusLabel: 'Últimas horas',
+        statusTone: 'warn',
+        hero: 'Elige tu barbería Kauze ideal y agenda al instante.',
+        subtitle: 'Reserva con tu barbero favorito, sin perseguir mensajes por WhatsApp.',
+        tags: ['💈 Fade & beard', '📍 Recoleta', '🕘 Pocas horas libres']
+      },
+      {
+        id: 'biz-nails-valentina',
+        type: 'manicure',
+        name: 'Studio Nails Valentina',
+        description: 'Esmaltado, soft gel y manicure con atención boutique.',
+        location: 'Ñuñoa',
+        distance: '2.1 km',
+        address: 'Av. Irarrázaval 2821',
+        lat: -33.4549,
+        lng: -70.5978,
+        route: 'studionailsvalentina.kauze.cl',
+        nextSlots: ['14:00', '15:20', '17:40', '19:10'],
+        logoColors: ['#DB2777', '#F59E0B'],
+        rating: '4.9',
+        reviews: 96,
+        statusLabel: 'Disponible hoy',
+        statusTone: 'good',
+        hero: 'Encuentra tu estudio de uñas Kauze y reserva sin fricción.',
+        subtitle: 'Compara opciones asociadas y agenda la que mejor se adapte a ti.',
+        tags: ['💅 Uñas & soft gel', '✨ Buena valoración', '📲 Recordatorios Kauze']
+      },
+      {
+        id: 'biz-lash-room-camila',
+        type: 'pestanas',
+        name: 'Lash Room Camila',
+        description: 'Lifting, extensiones y retoques en un espacio especializado.',
+        location: 'Las Condes',
+        distance: '3.7 km',
+        address: 'Isidora Goyenechea 2939',
+        lat: -33.4141,
+        lng: -70.6005,
+        route: 'lashroomcamila.kauze.cl',
+        nextSlots: ['13:15', '15:00', '16:30'],
+        logoColors: ['#7C3AED', '#EC4899'],
+        rating: '4.8',
+        reviews: 75,
+        statusLabel: 'Disponible hoy',
+        statusTone: 'good',
+        hero: 'Reserva tus pestañas con negocios asociados a Kauze.',
+        subtitle: 'Elige lashista, horario y confirma tu hora desde el mismo portal.',
+        tags: ['👁️ Lifting & extensiones', '💬 Confirmación WhatsApp', '📅 Calendar demo']
+      },
+      {
+        id: 'biz-estetica-glow',
+        type: 'estetica',
+        name: 'Estética Glow',
+        description: 'Tratamientos faciales, masajes y bienestar con agenda online.',
+        location: 'Santiago Centro',
+        distance: '2.9 km',
+        address: 'Merced 838',
+        lat: -33.4375,
+        lng: -70.6491,
+        route: 'esteticaglow.kauze.cl',
+        nextSlots: ['15:30', '16:45', '18:00'],
+        logoColors: ['#0F766E', '#06B6D4'],
+        rating: '4.7',
+        reviews: 64,
+        statusLabel: 'Alta demanda',
+        statusTone: 'warn',
+        hero: 'Descubre centros de estética Kauze y reserva con un flujo simple.',
+        subtitle: 'Servicios, profesionales y confirmaciones en un solo lugar.',
+        tags: ['💆 Bienestar', '🌿 Tratamientos', '🕒 Alta demanda']
+      },
+      {
+        id: 'biz-peluqueria-studio',
+        type: 'peluqueria',
+        name: 'Peluquería Studio',
+        description: 'Coloración, brushing y peinados con especialistas por bloque horario.',
+        location: 'La Reina',
+        distance: '4.2 km',
+        address: 'Av. Príncipe de Gales 7154',
+        lat: -33.4397,
+        lng: -70.5425,
+        route: 'peluqueriastudio.kauze.cl',
+        nextSlots: ['12:45', '15:15', '18:30'],
+        logoColors: ['#2563EB', '#6366F1'],
+        rating: '4.8',
+        reviews: 88,
+        statusLabel: 'Disponible hoy',
+        statusTone: 'good',
+        hero: 'Reserva tu peluquería Kauze sin perder tiempo por DM.',
+        subtitle: 'Mira disponibilidad, elige estilista y confirma tu hora fácilmente.',
+        tags: ['💇 Color & peinado', '⭐ 4.8 rating', '📍 La Reina']
+      }
+    ];
+
+    const exploreTypeOptions = [
+      { key: 'todos', label: 'Todos' },
+      { key: 'barberia', label: 'Barbería' },
+      { key: 'manicure', label: 'Manicure' },
+      { key: 'pestanas', label: 'Pestañas' },
+      { key: 'estetica', label: 'Estética' },
+      { key: 'peluqueria', label: 'Peluquería' }
+    ];
+
+    const SELECTED_BUSINESS_KEY = 'kauzeSelectedBusinessId';
+
     const profiles = {
       barberia: {
         business: 'Barbería Corte Fino',
@@ -1155,150 +2072,6 @@
 
     const slots = ['10:00','10:30','11:00','11:30','12:00','14:00','14:30','15:00','15:30','16:00','17:00','18:00'];
     const CLIENT_PORTAL_APPOINTMENTS_KEY = 'kauzeSharedAppointmentsV1';
-    
-    // --- CATALOGO DE ESTILOS Y TEMAS (Kauze Design System) ---
-    const THEMES = [
-      { name: 'Brisa Serena', vertical: 'estetica', font: 'Inter', bg: '#E3F2FD', card: '#FFFFFF', text: '#0B1736', muted: '#546E7A', primary: '#0288D1', border: '#CFD8DC' },
-      { name: 'Rubor Esencial', vertical: 'estetica', font: 'Poppins', bg: '#FFF0F5', card: '#FFFFFF', text: '#3E2723', muted: '#8D6E63', primary: '#D4A373', border: '#F8BBD0' },
-      { name: 'Canvas Orgánico', vertical: 'estetica', font: 'Playfair Display', bg: '#FDFBF7', card: '#FFFFFF', text: '#2C3531', muted: '#6C7A72', primary: '#A3B19B', border: '#E5DEC9' },
-      { name: 'Equilibrio Urbano', vertical: 'estetica', font: 'Roboto', bg: '#F8FAF8', card: '#FFFFFF', text: '#1E293B', muted: '#64748B', primary: '#6366F1', border: '#E2E8F0' },
-      { name: 'Botánica Matcha', vertical: 'estetica', font: 'Inter', bg: '#E8F5E9', card: '#FFFFFF', text: '#1B5E20', muted: '#558B2F', primary: '#2E7D32', border: '#C8E6C9' },
-      { name: 'Orquídea Nocturna', vertical: 'estetica', font: 'Playfair Display', bg: '#1E121E', card: '#2D1E2D', text: '#FDFBF7', muted: '#D4C5D4', primary: '#D4A373', border: '#4A354A' },
-      { name: 'Club Náutico', vertical: 'barberia', font: 'Montserrat', bg: '#0F172A', card: '#1E293B', text: '#F8FAF8', muted: '#94A3B8', primary: '#3B82F6', border: '#334155' },
-      { name: 'Oro Imperial', vertical: 'barberia', font: 'Cinzel', bg: '#000000', card: '#121212', text: '#FFFFFF', muted: '#A0A0A0', primary: '#D4AF37', border: '#2C2C2C' },
-      { name: 'Cyber Stealth', vertical: 'barberia', font: 'Space Grotesk', bg: '#0B0F19', card: '#161D30', text: '#F8FAF8', muted: '#94A3B8', primary: '#00F5D4', border: '#202D4A' },
-      { name: 'Gremio del Cuero', vertical: 'barberia', font: 'PT Serif', bg: '#2B1D11', card: '#3E2723', text: '#FFF8E1', muted: '#D7CCC8', primary: '#D4A373', border: '#4E342E' },
-      { name: 'Highland Hunt', vertical: 'barberia', font: 'Montserrat', bg: '#132615', card: '#1C3B20', text: '#F1F8F2', muted: '#A5D6A7', primary: '#D4A373', border: '#2E5A33' },
-      { name: 'Logia del Vino', vertical: 'barberia', font: 'Cormorant Garamond', bg: '#2E0814', card: '#420D20', text: '#FFF0F5', muted: '#F8BBD0', primary: '#D4A373', border: '#5C1330' }
-    ];
-
-    const BACKEND_URL = 'https://admin.kauze.cl';
-
-    function loadGoogleFont(fontName) {
-      if (!fontName) return;
-      const fontId = 'dynamic-google-font';
-      let link = document.getElementById(fontId);
-      if (!link) {
-        link = document.createElement('link');
-        link.id = fontId;
-        link.rel = 'stylesheet';
-        document.head.appendChild(link);
-      }
-      const formattedName = fontName.replace(/\s+/g, '+');
-      link.href = `https://fonts.googleapis.com/css2?family=${formattedName}:wght@400;500;600;700;800&display=swap`;
-    }
-
-    function applyTheme(themeName) {
-      const theme = THEMES.find(t => t.name === themeName) || THEMES[0];
-      
-      loadGoogleFont(theme.font);
-      
-      let styleEl = document.getElementById('dynamic-theme-style');
-      if (!styleEl) {
-        styleEl = document.createElement('style');
-        styleEl.id = 'dynamic-theme-style';
-        document.head.appendChild(styleEl);
-      }
-      
-      const isDark = theme.bg.startsWith('#0') || theme.bg.startsWith('#1') || theme.bg.startsWith('#2') || theme.bg.startsWith('#3');
-      const contrastText = isDark ? '#000000' : '#FFFFFF';
-      
-      styleEl.innerHTML = `
-        :root {
-          --bg: ${theme.bg} !important;
-          --card: ${theme.card} !important;
-          --text: ${theme.text} !important;
-          --muted: ${theme.muted} !important;
-          --border: ${theme.border} !important;
-          --blue: ${theme.primary} !important;
-          --purple: ${theme.primary} !important;
-          --soft: ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'} !important;
-          --soft-blue: ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'} !important;
-        }
-        body {
-          font-family: '${theme.font}', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
-        }
-        .mark {
-          background: ${theme.primary} !important;
-          color: ${contrastText} !important;
-        }
-        .btn.primary {
-          background: ${theme.primary} !important;
-          color: ${contrastText} !important;
-          font-weight: 800 !important;
-          border-color: transparent !important;
-        }
-        ${isDark ? `
-          .card, .step, .service-card, .pro-card, .time-pill, .summary-card {
-            background: ${theme.card} !important;
-            color: ${theme.text} !important;
-            border-color: ${theme.border} !important;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
-          }
-          .time-pill.selected {
-            background: ${theme.primary} !important;
-            color: #000000 !important;
-            font-weight: 700 !important;
-          }
-          input, select, textarea {
-            background: ${theme.bg} !important;
-            color: ${theme.text} !important;
-            border-color: ${theme.border} !important;
-          }
-          .step.active {
-            border-color: ${theme.primary} !important;
-            color: ${theme.primary} !important;
-          }
-        ` : `
-          .time-pill.selected {
-            background: ${theme.primary} !important;
-            color: #FFFFFF !important;
-            font-weight: 700;
-          }
-        `}
-      `;
-    }
-
-    function showStatusNotice(status, reason) {
-      const banner = document.getElementById('statusNoticeBanner');
-      if (!banner) return;
-      
-      if (status === 'OCUPADO') {
-        banner.style.display = 'block';
-        banner.style.background = 'rgba(239, 68, 68, 0.08)';
-        banner.style.borderColor = 'rgba(239, 68, 68, 0.22)';
-        banner.style.color = 'var(--red)';
-        banner.innerHTML = '⚠️ <strong>Establecimiento ocupado temporalmente:</strong> El profesional está atendiendo a un cliente Walk-In. Las reservas para horarios más tarde siguen disponibles.';
-      } else if (status === 'PAUSADO') {
-        banner.style.display = 'block';
-        banner.style.background = 'rgba(245, 158, 11, 0.08)';
-        banner.style.borderColor = 'rgba(245, 158, 11, 0.22)';
-        banner.style.color = 'var(--amber)';
-        const cleanReason = reason ? ` (${reason})` : '';
-        banner.innerHTML = `⚠️ <strong>Establecimiento en pausa${cleanReason}:</strong> Atención suspendida temporalmente por motivos internos. Las reservas para horarios más tarde siguen disponibles.`;
-      } else {
-        banner.style.display = 'none';
-      }
-    }
-
-    async function loadOnlineState() {
-      try {
-        const res = await fetch(`${BACKEND_URL}/api/app-state`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.type) {
-            if (data.activeTheme) {
-              applyTheme(data.activeTheme);
-            }
-            showStatusNotice(data.businessStatus, data.pausedReason);
-          }
-        }
-      } catch (e) {
-        console.warn('Error cargando estado de Railway:', e);
-      }
-    }
-
-    const CLIENT_PORTAL_APPOINTMENTS_KEY = 'kauzeSharedAppointmentsV1';
 
     function getBusinessContact() {
       try {
@@ -1336,13 +2109,30 @@
         { channel:'whatsapp_owner', status:'scheduled', text:'Aviso al dueño cuando el cliente confirme', target:ownerWhatsapp, at:new Date().toISOString() }
       ];
     }
-    let currentType = localStorage.getItem('kauzeClienteType') || 'barberia';
+    let selectedBusinessId = localStorage.getItem(SELECTED_BUSINESS_KEY) || 'biz-corte-fino';
+    let currentType = (featuredBusinesses.find(b => b.id === selectedBusinessId)?.type) || localStorage.getItem('kauzeClienteType') || 'barberia';
+    let explorerType = 'todos';
+    let businessSearchTerm = '';
+    let explorerLocationLabel = 'Providencia, Santiago';
+    let explorerCoords = { lat: -33.4326, lng: -70.6161 };
+    let selectedPreviewBusinessId = null;
+    let bookingStarted = false;
+    let customerFlow = 'inicio';
     let currentStep = 1;
     let selectedService = null;
     let selectedProfessional = null;
     let selectedSlot = null;
     let selectedRating = 0;
     let selectedPaymentMethod = 'Mercado Pago Demo';
+
+    const locationPresets = [
+      { terms: ['providencia'], label: 'Providencia, Santiago', lat: -33.4326, lng: -70.6161 },
+      { terms: ['las condes'], label: 'Las Condes, Santiago', lat: -33.4088, lng: -70.5671 },
+      { terms: ['nunoa', 'ñuñoa'], label: 'Ñuñoa, Santiago', lat: -33.4569, lng: -70.5979 },
+      { terms: ['recoleta'], label: 'Recoleta, Santiago', lat: -33.4064, lng: -70.6403 },
+      { terms: ['la reina'], label: 'La Reina, Santiago', lat: -33.4411, lng: -70.5345 },
+      { terms: ['santiago centro', 'santiago'], label: 'Santiago Centro', lat: -33.4489, lng: -70.6693 }
+    ];
 
     const money = (value) => value.toLocaleString('es-CL', { style:'currency', currency:'CLP', maximumFractionDigits:0 });
 
@@ -1402,22 +2192,367 @@
       return d.toISOString().split('T')[0];
     }
 
+    function currentBusiness() {
+      let business = featuredBusinesses.find(item => item.id === selectedBusinessId);
+      if (!business) {
+        business = featuredBusinesses.find(item => item.type === currentType) || featuredBusinesses[0];
+        selectedBusinessId = business.id;
+      }
+      return business;
+    }
+
     function profile() {
-      return profiles[currentType] || profiles.barberia;
+      const business = currentBusiness();
+      const base = profiles[business.type] || profiles.barberia;
+
+      return {
+        ...base,
+        business: business.name,
+        description: business.description || base.description,
+        hero: business.hero || base.hero,
+        subtitle: business.subtitle || base.subtitle,
+        location: business.location || 'Santiago',
+        distance: business.distance || '—',
+        rating: business.rating || '4.8',
+        reviews: business.reviews || 0,
+        statusLabel: business.statusLabel || 'Disponible',
+        statusTone: business.statusTone || 'good',
+        tags: business.tags || []
+      };
+    }
+
+    function showClientFlow(flow = 'inicio', shouldScroll = true) {
+      customerFlow = flow;
+
+      if (flow === 'booking') {
+        bookingStarted = false;
+        selectedPreviewBusinessId = null;
+        explorerType = 'todos';
+      }
+
+      const welcome = document.getElementById('clientWelcome');
+      const welcomeActions = document.getElementById('welcomeActions');
+      const businessPanel = document.getElementById('businessPanel');
+      const explore = document.getElementById('explorar');
+      const booking = document.getElementById('booking');
+      const appointmentManagement = document.getElementById('appointmentManagement');
+
+      if (welcome) {
+        welcome.classList.toggle('flow-hidden', flow !== 'inicio');
+        welcome.classList.toggle('hero-centered', flow === 'inicio');
+      }
+      if (welcomeActions) welcomeActions.classList.toggle('flow-hidden', flow !== 'inicio');
+      if (businessPanel) businessPanel.classList.add('flow-hidden');
+      if (explore) explore.classList.toggle('flow-hidden', flow !== 'booking');
+      if (booking) booking.classList.toggle('flow-hidden', flow !== 'booking' || !bookingStarted);
+      if (appointmentManagement) appointmentManagement.classList.toggle('flow-hidden', flow !== 'appointment');
+
+      renderProfile();
+      renderBusinessExplorer();
+
+      if (!shouldScroll) return;
+
+      if (flow === 'inicio' && welcome) {
+        welcome.scrollIntoView({ behavior: 'smooth' });
+      }
+
+      if (flow === 'booking' && explore) {
+        explore.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      if (flow === 'appointment') {
+        const appointmentPanel = document.getElementById('myAppointmentPanel');
+        if (appointmentPanel) appointmentPanel.scrollIntoView({ behavior: 'smooth' });
+      }
     }
 
     function renderProfile() {
       const p = profile();
       document.getElementById('businessName').textContent = p.business;
       document.getElementById('businessDescription').textContent = p.description;
-      document.getElementById('heroTitle').textContent = p.hero;
-      document.getElementById('heroSubtitle').textContent = p.subtitle;
+      if (customerFlow === 'booking') {
+        document.getElementById('heroTitle').textContent = p.hero;
+        document.getElementById('heroSubtitle').textContent = p.subtitle;
+      } else {
+        document.getElementById('heroTitle').textContent = '¿Qué quieres hacer hoy?';
+        document.getElementById('heroSubtitle').textContent = 'Agenda una nueva cita o administra una reserva existente desde un solo lugar.';
+      }
       document.getElementById('businessType').value = currentType;
+      document.getElementById('businessLocation').textContent = `${p.location} · ${p.distance}`;
+      document.getElementById('businessAvailability').textContent = p.statusLabel;
+      document.getElementById('businessRating').textContent = `${p.rating} · ${p.reviews} reseñas`;
+      document.getElementById('businessAssociation').textContent = 'Asociado verificado';
 
       renderServices();
       renderProfessionals();
       renderSlots();
       updateSummary();
+    }
+
+    function renderExploreChips() {
+      const holder = document.getElementById('exploreTypeChips');
+      if (!holder) return;
+
+      holder.innerHTML = exploreTypeOptions.map(option => `
+        <button class="chip ${explorerType === option.key ? 'active' : ''}" type="button" data-explore-type="${option.key}">
+          ${option.label}
+        </button>
+      `).join('');
+
+      document.querySelectorAll('[data-explore-type]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          explorerType = btn.dataset.exploreType;
+          selectedPreviewBusinessId = null;
+          renderBusinessExplorer();
+        });
+      });
+    }
+
+    function normalizeExplorerText(value = '') {
+      return value
+        .toString()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+    }
+
+    function calculateDistanceKm(from, to) {
+      if (!from || !to) return null;
+      const earthRadius = 6371;
+      const toRadians = degrees => degrees * Math.PI / 180;
+      const latDelta = toRadians(to.lat - from.lat);
+      const lngDelta = toRadians(to.lng - from.lng);
+      const a = Math.sin(latDelta / 2) ** 2
+        + Math.cos(toRadians(from.lat)) * Math.cos(toRadians(to.lat)) * Math.sin(lngDelta / 2) ** 2;
+      return earthRadius * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+    }
+
+    function businessDistance(item) {
+      const calculated = calculateDistanceKm(explorerCoords, { lat: item.lat, lng: item.lng });
+      return calculated === null ? Number.parseFloat(item.distance) || 99 : calculated;
+    }
+
+    function businessDistanceLabel(item) {
+      const distance = businessDistance(item);
+      return `${distance < 10 ? distance.toFixed(1) : Math.round(distance)} km`.replace('.', ',');
+    }
+
+    function businessInitials(name = '') {
+      return name.split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0]).join('').toUpperCase();
+    }
+
+    function businessStartingPrice(item) {
+      const services = (profiles[item.type]?.services || []);
+      const prices = services.map(service => Number(service[2]) || 0).filter(Boolean);
+      return prices.length ? Math.min(...prices) : 0;
+    }
+
+    function applyLocationSearch() {
+      const input = document.getElementById('businessSearch');
+      const status = document.getElementById('locationStatus');
+      const value = input.value.trim();
+
+      if (!value) {
+        status.textContent = 'Escribe una comuna, un sector o una dirección para buscar.';
+        input.focus();
+        return;
+      }
+
+      businessSearchTerm = value;
+      const normalized = normalizeExplorerText(value);
+      const preset = locationPresets.find(option => option.terms.some(term => normalized.includes(normalizeExplorerText(term))));
+
+      if (preset) {
+        explorerCoords = { lat: preset.lat, lng: preset.lng };
+        explorerLocationLabel = preset.label;
+        status.textContent = `Ubicación lista: ${preset.label}.`;
+      } else {
+        explorerCoords = null;
+        explorerLocationLabel = value;
+        status.textContent = 'Sector guardado. En producción, Kauze lo ubicará con precisión mediante el servicio de mapas.';
+      }
+
+      selectedPreviewBusinessId = null;
+      renderBusinessExplorer();
+    }
+
+    function useMyLocation() {
+      const status = document.getElementById('locationStatus');
+      const button = document.getElementById('useMyLocation');
+
+      if (!navigator.geolocation) {
+        status.textContent = 'Este navegador no permite detectar la ubicación. Puedes escribirla manualmente.';
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = 'Buscando…';
+      status.textContent = 'Esperando autorización para usar tu ubicación…';
+
+      navigator.geolocation.getCurrentPosition(position => {
+        explorerCoords = { lat: position.coords.latitude, lng: position.coords.longitude };
+        explorerLocationLabel = 'tu ubicación actual';
+        businessSearchTerm = '';
+        document.getElementById('businessSearch').value = 'Ubicación actual detectada';
+        status.textContent = 'Ubicación detectada. Los negocios ya están ordenados por cercanía.';
+        button.disabled = false;
+        button.textContent = '◎ Mi ubicación';
+        selectedPreviewBusinessId = null;
+        renderBusinessExplorer();
+      }, error => {
+        button.disabled = false;
+        button.textContent = '◎ Mi ubicación';
+        status.textContent = error.code === 1
+          ? 'No autorizaste la ubicación. Puedes escribir tu comuna o dirección manualmente.'
+          : 'No pudimos detectar tu ubicación. Intenta nuevamente o escríbela manualmente.';
+      }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
+    }
+
+    function renderBusinessDetail() {
+      const holder = document.getElementById('businessDetail');
+      if (!holder) return;
+
+      const item = featuredBusinesses.find(business => business.id === selectedPreviewBusinessId);
+      if (!item) {
+        holder.classList.remove('active');
+        holder.innerHTML = '';
+        return;
+      }
+
+      const base = profiles[item.type] || profiles.barberia;
+      const services = (base.services || []).slice(0, 3);
+      const colors = item.logoColors || ['#2563EB', '#6366F1'];
+
+      holder.innerHTML = `
+        <div>
+          <div class="detail-brand">
+            <div class="business-logo detail-logo" style="--logo-a:${colors[0]};--logo-b:${colors[1]}">${businessInitials(item.name)}</div>
+            <div>
+              <h3>${item.name}</h3>
+              <p>${item.location} · Negocio verificado por Kauze</p>
+            </div>
+          </div>
+          <p class="detail-description">${item.description}</p>
+          <div class="detail-pills">
+            <span class="detail-pill">📍 ${item.address}, ${item.location}</span>
+            <span class="detail-pill">A ${businessDistanceLabel(item)} de tu sector</span>
+            <span class="detail-pill">⭐ ${item.rating} · ${item.reviews} reseñas</span>
+          </div>
+        </div>
+        <div class="detail-side">
+          <h4>Servicios destacados</h4>
+          <div class="detail-services">
+            ${services.map(service => `<div class="detail-service"><span>${service[0]}</span><strong>${money(service[2])}</strong></div>`).join('')}
+          </div>
+          <h4>Próximas horas disponibles</h4>
+          <div class="detail-times">
+            ${(item.nextSlots || []).map(time => `<span class="detail-time">${time}</span>`).join('')}
+          </div>
+          <div class="detail-actions">
+            <button class="btn primary" type="button" data-reserve-business="${item.id}">Reservar en este negocio</button>
+            <button class="btn" type="button" id="closeBusinessDetail">Cerrar</button>
+          </div>
+          <p class="subdomain-note">La reserva continuará con este negocio. Más adelante esta dirección será <strong>${item.route}</strong>.</p>
+        </div>
+      `;
+
+      holder.classList.add('active');
+      holder.querySelector('[data-reserve-business]').addEventListener('click', event => {
+        selectBusiness(event.currentTarget.dataset.reserveBusiness, { focusBooking: true });
+      });
+      holder.querySelector('#closeBusinessDetail').addEventListener('click', () => {
+        selectedPreviewBusinessId = null;
+        renderBusinessExplorer();
+      });
+    }
+
+    function renderBusinessExplorer() {
+      renderExploreChips();
+
+      const list = featuredBusinesses
+        .filter(item => explorerType === 'todos' || item.type === explorerType)
+        .sort((a, b) => businessDistance(a) - businessDistance(b));
+
+      const grid = document.getElementById('businessGrid');
+      if (!grid) return;
+
+      const resultCount = document.getElementById('businessResultCount');
+      const resultContext = document.getElementById('businessResultContext');
+      if (resultCount) resultCount.textContent = `${list.length} ${list.length === 1 ? 'negocio' : 'negocios'}`;
+      if (resultContext) resultContext.textContent = `Ordenados por cercanía a ${explorerLocationLabel}.`;
+
+      if (!list.length) {
+        grid.innerHTML = `<div class="empty-businesses">No encontramos negocios con ese filtro. Prueba otra categoría o cambia la búsqueda.</div>`;
+        renderBusinessDetail();
+        return;
+      }
+
+      grid.innerHTML = list.map(item => {
+        const base = profiles[item.type] || profiles.barberia;
+        const services = (base.services || []).slice(0, 2).map(service => service[0]).join(' · ');
+        const colors = item.logoColors || ['#2563EB', '#6366F1'];
+        const detailOpen = selectedPreviewBusinessId === item.id;
+        return `
+          <article class="business-item ${detailOpen ? 'selected' : ''}">
+            <div class="business-top">
+              <div class="business-logo" style="--logo-a:${colors[0]};--logo-b:${colors[1]}">${businessInitials(item.name)}</div>
+              <div class="business-title">
+                <h3>${item.name}</h3>
+                <p>${exploreTypeOptions.find(option => option.key === item.type)?.label || item.type} · ${item.location}</p>
+              </div>
+              <span class="business-badge" title="Negocio verificado por Kauze">✓</span>
+            </div>
+
+            <div class="business-meta-grid">
+              <div class="business-meta-row"><span>Ubicación</span><strong>${item.address}</strong></div>
+              <div class="business-meta-row"><span>Distancia</span><strong>${businessDistanceLabel(item)}</strong></div>
+              <div class="business-meta-row"><span>Precio</span><strong>Desde ${money(businessStartingPrice(item))}</strong></div>
+              <div class="business-meta-row"><span>Próxima hora</span><strong>${item.nextSlots?.[0] || item.statusLabel}</strong></div>
+              <div class="business-meta-row"><span>Servicios</span><strong>${services}</strong></div>
+            </div>
+
+            <div class="business-tags">
+              <span class="business-tag ${item.statusTone === 'warn' ? 'warn' : 'good'}">${item.statusLabel}</span>
+              <span class="business-tag">⭐ ${item.rating} · ${item.reviews} reseñas</span>
+            </div>
+
+            <button class="btn business-cta ${detailOpen ? 'primary' : ''}" type="button" data-business-detail="${item.id}">
+              ${detailOpen ? 'Detalles abiertos' : 'Ver detalles'}
+            </button>
+          </article>
+        `;
+      }).join('');
+
+      document.querySelectorAll('[data-business-detail]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedPreviewBusinessId = btn.dataset.businessDetail;
+          renderBusinessExplorer();
+          document.getElementById('businessDetail')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+      });
+
+      renderBusinessDetail();
+    }
+
+    function selectBusiness(id, options = {}) {
+      const business = featuredBusinesses.find(item => item.id === id);
+      if (!business) return;
+
+      selectedBusinessId = business.id;
+      currentType = business.type;
+      explorerType = business.type;
+      bookingStarted = true;
+      localStorage.setItem(SELECTED_BUSINESS_KEY, selectedBusinessId);
+      localStorage.setItem('kauzeClienteType', currentType);
+
+      resetBooking();
+      renderBusinessExplorer();
+
+      if (options.focusBooking) {
+        document.getElementById('booking').classList.remove('flow-hidden');
+        document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
+      }
     }
 
     function renderServices() {
@@ -1490,6 +2625,7 @@
 
     function updateSummary() {
       const p = profile();
+      const selectedBusiness = currentBusiness();
       const service = selectedService !== null ? p.services[selectedService] : null;
       const pro = selectedProfessional !== null ? p.pros[selectedProfessional] : null;
       const date = document.getElementById('bookingDate').value || todayISO();
@@ -1512,20 +2648,19 @@
       selectedService = null;
       selectedProfessional = null;
       selectedSlot = null;
+      selectedPaymentMethod = 'Mercado Pago Demo';
       document.getElementById('bookingDate').value = todayISO();
-
-    document.querySelectorAll('[data-pay-method]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        selectedPaymentMethod = btn.dataset.payMethod;
-        document.querySelectorAll('[data-pay-method]').forEach(item => item.classList.remove('selected'));
-        btn.classList.add('selected');
-      });
-    });
-
       document.getElementById('clientName').value = '';
       document.getElementById('clientPhone').value = '';
       document.getElementById('clientEmail').value = '';
       document.getElementById('bookingSuccess').classList.remove('active');
+      document.getElementById('paymentStatus').className = isDepositRequired() ? 'pay-status' : 'pay-status ok';
+      document.getElementById('paymentStatus').textContent = isDepositRequired()
+        ? '🟡 Pago pendiente de simulación'
+        : '🟢 Sin abono requerido por el negocio';
+      document.querySelectorAll('[data-pay-method]').forEach(item => {
+        item.classList.toggle('selected', item.dataset.payMethod === 'Mercado Pago Demo');
+      });
       renderProfile();
       goStep(1);
     }
@@ -1534,57 +2669,33 @@
       return JSON.parse(localStorage.getItem('kauzeClienteLastAppointment') || 'null');
     }
 
-    async function saveAppointment(data) {
+    function saveAppointment(data) {
       localStorage.setItem('kauzeClienteLastAppointment', JSON.stringify(data));
 
       const list = JSON.parse(localStorage.getItem(CLIENT_PORTAL_APPOINTMENTS_KEY) || '[]');
       const exists = list.some(item => item.id === data.id);
       const nextList = exists ? list.map(item => item.id === data.id ? data : item) : [...list, data];
       localStorage.setItem(CLIENT_PORTAL_APPOINTMENTS_KEY, JSON.stringify(nextList));
-      
-      // Sincronizar en línea con Railway
-      try {
-        const res = await fetch(`${BACKEND_URL}/api/app-state`);
-        if (res.ok) {
-          const appState = await res.json();
-          if (appState && appState.appointments) {
-            if (!appState.appointments[data.type]) {
-              appState.appointments[data.type] = [];
-            }
-            const id = `cliente-${data.id}`;
-            const appt = {
-              id: id,
-              date: data.date,
-              time: data.time,
-              client: data.name,
-              service: data.service,
-              professional: data.professional || 'Cualquiera',
-              status: 'Pendiente',
-              source: 'cliente'
-            };
-            const apptExists = appState.appointments[data.type].some(a => a.id === id);
-            if (apptExists) {
-              appState.appointments[data.type] = appState.appointments[data.type].map(a => a.id === id ? appt : a);
-            } else {
-              appState.appointments[data.type].push(appt);
-            }
-            
-            await fetch(`${BACKEND_URL}/api/app-state`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(appState)
-            });
-          }
-        }
-      } catch (e) {
-        console.warn('Error sincronizando reserva en línea con Railway:', e);
-      }
     }
 
     document.getElementById('businessType').addEventListener('change', (e) => {
-      currentType = e.target.value;
+      const nextType = e.target.value;
+      const firstMatch = featuredBusinesses.find(item => item.type === nextType);
+      explorerType = nextType;
+      if (firstMatch) {
+        selectedBusinessId = firstMatch.id;
+        localStorage.setItem(SELECTED_BUSINESS_KEY, selectedBusinessId);
+      }
+      currentType = nextType;
       localStorage.setItem('kauzeClienteType', currentType);
       resetBooking();
+      renderBusinessExplorer();
+    });
+
+    document.getElementById('searchBusinessLocation').addEventListener('click', applyLocationSearch);
+    document.getElementById('useMyLocation').addEventListener('click', useMyLocation);
+    document.getElementById('businessSearch').addEventListener('keydown', event => {
+      if (event.key === 'Enter') applyLocationSearch();
     });
 
     document.getElementById('bookingDate').value = todayISO();
@@ -1599,19 +2710,14 @@
 
     document.getElementById('todayBtn').addEventListener('click', () => {
       document.getElementById('bookingDate').value = todayISO();
-
-    document.querySelectorAll('[data-pay-method]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        selectedPaymentMethod = btn.dataset.payMethod;
-        document.querySelectorAll('[data-pay-method]').forEach(item => item.classList.remove('selected'));
-        btn.classList.add('selected');
-      });
-    });
-
       updateSummary();
     });
 
     document.getElementById('bookingDate').addEventListener('input', updateSummary);
+
+    document.getElementById('startBookingFlow').addEventListener('click', () => showClientFlow('booking'));
+
+    document.getElementById('startAppointmentFlow').addEventListener('click', () => showClientFlow('appointment'));
 
     document.getElementById('prevStep').addEventListener('click', () => goStep(currentStep - 1));
 
@@ -1652,6 +2758,9 @@
         remainingAmount: Math.max(service[2] - calculatedDeposit, 0),
         createdAt: new Date().toISOString(),
         business: p.business,
+        businessId: selectedBusiness.id,
+        businessLocation: selectedBusiness.location,
+        businessDistance: selectedBusiness.distance,
         service: service[0],
         duration: service[1],
         price: service[2],
@@ -1680,7 +2789,7 @@
         ? `Pagaste un abono demo de ${money(data.depositAmount)} para ${data.service}.`
         : `Solicitaste ${data.service} sin abono porque este negocio no lo exige.`;
 
-      document.getElementById('successText').textContent = `Listo, ${data.name}. ${paymentMessage} La reserva quedó esperando confirmación de asistencia. Código demo: ${data.code}. También quedará visible en el panel del negocio cuando abras /app/ en este mismo navegador. Kauze deja programado el WhatsApp al cliente, el aviso al dueño, el evento Calendar demo y la actualización en app.`;
+      document.getElementById('successText').textContent = `Listo, ${data.name}. Tu reserva fue enviada a ${data.business}.  ${paymentMessage} La reserva quedó esperando confirmación de asistencia. Código demo: ${data.code}. También quedará visible en el panel del negocio cuando abras /app/ en este mismo navegador. Kauze deja programado el WhatsApp al cliente, el aviso al dueño, el evento Calendar demo y la actualización en app.`;
       document.getElementById('bookingSuccess').classList.add('active');
       document.getElementById('bookingSuccess').scrollIntoView({ behavior:'smooth', block:'center' });
     });
@@ -1708,7 +2817,7 @@
         <div class="appointment-card">
           <strong>${data.service} · ${data.date} a las ${data.time}</strong>
           <small>
-            ${data.business}<br>
+            ${data.business}${data.businessLocation ? ` · ${data.businessLocation}` : ''}<br>
             Profesional: ${data.professional}<br>
             Cliente: ${data.name}<br>
             Estado: ${data.status || 'Esperando confirmación'} · Código demo: ${data.code}<br>
@@ -1759,9 +2868,14 @@
       document.getElementById('reviewSuccess').classList.add('active');
     });
 
+    const initialBusiness = featuredBusinesses.find(item => item.id === selectedBusinessId) || featuredBusinesses[0];
+    selectedBusinessId = initialBusiness.id;
+    currentType = initialBusiness.type;
+    explorerType = currentType;
     renderProfile();
+    renderBusinessExplorer();
     goStep(1);
-    loadOnlineState();
+    showClientFlow('inicio', false);
   </script>
 </body>
 </html>
