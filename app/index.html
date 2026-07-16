@@ -262,149 +262,6 @@
       border-color: rgba(37,99,235,.22);
     }
 
-  
-    .personalization-box {
-      margin: 18px 0;
-      padding: 16px;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      background: var(--soft);
-    }
-
-    .personalization-box h3 {
-      font-family: 'Sora', sans-serif;
-      font-size: 16px;
-      color: var(--navy);
-      margin-bottom: 6px;
-    }
-
-    .personalization-box p {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.55;
-      margin-bottom: 12px;
-    }
-
-    .theme-mini-list {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .theme-chip {
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 10px;
-      background: #fff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--text);
-    }
-
-    .theme-dot {
-      width: 16px;
-      height: 16px;
-      border-radius: 999px;
-      border: 1px solid rgba(15,23,42,.10);
-      flex: 0 0 auto;
-    }
-
-    .theme-helper {
-      margin: -5px 0 12px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(37,99,235,.06);
-      border: 1px solid rgba(37,99,235,.14);
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.55;
-      font-weight: 700;
-    }
-
-    .theme-mini-list {
-      grid-template-columns: 1fr;
-    }
-
-    .theme-chip {
-      justify-content: space-between;
-      text-align: left;
-      min-height: 58px;
-      cursor: pointer;
-    }
-
-    .theme-chip-main {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      min-width: 0;
-    }
-
-    .theme-chip-meta {
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: .4px;
-      white-space: nowrap;
-    }
-
-    .theme-chip.active {
-      border-color: rgba(37,99,235,.48);
-      background: rgba(37,99,235,.08);
-      box-shadow: 0 0 0 4px rgba(37,99,235,.06);
-    }
-
-    .palette-preview {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 7px;
-      margin: 10px 0 12px;
-    }
-
-    .palette-swatch {
-      height: 34px;
-      border-radius: 12px;
-      border: 1px solid rgba(15,23,42,.10);
-      box-shadow: 0 5px 13px rgba(15,23,42,.04);
-    }
-
-    .theme-filter-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-top: 12px;
-      margin-bottom: 8px;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-    }
-
-    .theme-filter-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 9px;
-      border-radius: 999px;
-      background: #fff;
-      border: 1px solid var(--border);
-      color: var(--navy);
-      font-size: 11px;
-      text-transform: none;
-      letter-spacing: 0;
-    }
-
-    @media(max-width:650px){
-      .theme-mini-list{grid-template-columns:1fr}
-      .palette-preview{grid-template-columns:repeat(5,1fr)}
-    }
-
   </style>
 </head>
 <body>
@@ -523,51 +380,8 @@
               <select class="field" id="settingsType"></select>
             </div>
             <div class="field-group">
-              <label>Tema visual permitido por tipo de negocio</label>
+              <label>Tema visual (Catálogo Kauze)</label>
               <select class="field" id="settingsThemeSelector"></select>
-            </div>
-            <div class="theme-helper" id="themePolicyNote">
-              Primero elige el tipo de negocio. Kauze solo mostrará las paletas compatibles con ese rubro.
-            </div>
-            <div class="palette-preview" id="themePalettePreview"></div>
-
-            <div class="personalization-box">
-              <h3>Personalización de página pública</h3>
-              <p>Esto controla cómo se verá el portal del cliente: banner, texto principal, botón y estilo visual. El catálogo se filtra automáticamente para evitar que una barbería use paletas estéticas o que una estética use temas masculinos.</p>
-
-              <div class="field-group">
-                <label>Título del banner</label>
-                <input class="field" id="settingsPageTitle" type="text" placeholder="Ej: Agenda tu próxima hora sin escribir por WhatsApp">
-              </div>
-
-              <div class="field-group">
-                <label>Subtítulo del banner</label>
-                <input class="field" id="settingsPageSubtitle" type="text" placeholder="Ej: Elige servicio, profesional y horario disponible.">
-              </div>
-
-              <div class="form-grid">
-                <div class="field-group">
-                  <label>Texto del botón principal</label>
-                  <input class="field" id="settingsPageCta" type="text" placeholder="Reservar ahora">
-                </div>
-
-                <div class="field-group">
-                  <label>Estilo de banner</label>
-                  <select class="field" id="settingsBannerStyle">
-                    <option value="soft">Suave / claro</option>
-                    <option value="gradient">Degradado premium</option>
-                    <option value="dark">Oscuro elegante</option>
-                    <option value="image">Imagen de fondo</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="field-group">
-                <label>URL de imagen para banner</label>
-                <input class="field" id="settingsBannerImage" type="url" placeholder="https://.../imagen.jpg">
-              </div>
-
-              <div class="theme-mini-list" id="themeMiniList"></div>
             </div>
 
             <h2 style="font-family:Sora,sans-serif;font-size:18px;margin:18px 0 12px">Canales de notificación del dueño</h2>
@@ -637,8 +451,6 @@
                   </div>
                   
                   <div id="preview-card-box" style="background: var(--preview-card, #FFFFFF); border: 1px solid var(--border); border-radius: 18px; padding: 14px; box-shadow: var(--shadow-soft); transition: all 0.2s ease;">
-                    <div id="preview-banner-title" style="font-weight: 900; font-size: 13px; line-height: 1.25; color: var(--preview-text, #111827); margin-bottom: 5px;">Agenda tu próxima hora</div>
-                    <div id="preview-banner-subtitle" style="font-size: 10.5px; line-height: 1.35; color: var(--preview-muted, #64748B); margin-bottom: 12px;">Elige servicio, profesional y horario disponible.</div>
                     <h4 id="preview-title" style="font-size: 14px; margin-bottom: 6px; color: var(--preview-text, #111827); transition: all 0.2s ease;">Corte clásico + Barba</h4>
                     <p id="preview-subtitle" style="font-size: 12px; color: var(--preview-muted, #64748B); margin-bottom: 12px; transition: all 0.2s ease;">Duración: 60 min · CLP $18.000</p>
                     
@@ -896,99 +708,24 @@
   <script>
     const LOGIN_EMAIL = 'demo@kauze.cl';
     const LOGIN_PASSWORD = 'KauzeDemo2026';
-    const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', ownerWhatsapp:'', ownerCalendarEmail:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, activeTheme:'Kauze Base', pageTitle:'Agenda tu próxima hora sin escribir por WhatsApp', pageSubtitle:'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.', pageCta:'Reservar ahora', bannerStyle:'soft', bannerImage:'', appointments:{}, professionals:{}, campaigns:{} };
+    const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', ownerWhatsapp:'', ownerCalendarEmail:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, appointments:{}, professionals:{}, campaigns:{} };
     const CLIENT_PORTAL_APPOINTMENTS_KEY = 'kauzeSharedAppointmentsV1';
     
     // --- CATALOGO DE ESTILOS Y TEMAS (Kauze Design System) ---
     const THEMES = [
-      { name: 'Kauze Base', vertical: 'base', font: 'Inter', bg: '#F7F9FC', card: '#FFFFFF', text: '#0B1736', muted: '#64748B', primary: '#2563EB', border: '#E2E8F0' },
-      { name: 'Brisa Serena', vertical: 'estetica', font: 'Inter', bg: '#E3F2FD', card: '#FFFFFF', text: '#0B1736', muted: '#546E7A', primary: '#0277BD', border: '#CFD8DC' },
-      { name: 'Rubor Esencial', vertical: 'estetica', font: 'Poppins', bg: '#FFF0F5', card: '#FFFFFF', text: '#3E2723', muted: '#8D6E63', primary: '#C98A4A', border: '#F8BBD0' },
-      { name: 'Canvas Orgánico', vertical: 'estetica', font: 'Playfair Display', bg: '#FDFBF7', card: '#FFFFFF', text: '#2C3531', muted: '#6C7A72', primary: '#7F9278', border: '#E5DEC9' },
+      { name: 'Brisa Serena', vertical: 'estetica', font: 'Inter', bg: '#E3F2FD', card: '#FFFFFF', text: '#0B1736', muted: '#546E7A', primary: '#0288D1', border: '#CFD8DC' },
+      { name: 'Rubor Esencial', vertical: 'estetica', font: 'Poppins', bg: '#FFF0F5', card: '#FFFFFF', text: '#3E2723', muted: '#8D6E63', primary: '#D4A373', border: '#F8BBD0' },
+      { name: 'Canvas Orgánico', vertical: 'estetica', font: 'Playfair Display', bg: '#FDFBF7', card: '#FFFFFF', text: '#2C3531', muted: '#6C7A72', primary: '#A3B19B', border: '#E5DEC9' },
       { name: 'Equilibrio Urbano', vertical: 'estetica', font: 'Roboto', bg: '#F8FAF8', card: '#FFFFFF', text: '#1E293B', muted: '#64748B', primary: '#6366F1', border: '#E2E8F0' },
       { name: 'Botánica Matcha', vertical: 'estetica', font: 'Inter', bg: '#E8F5E9', card: '#FFFFFF', text: '#1B5E20', muted: '#558B2F', primary: '#2E7D32', border: '#C8E6C9' },
       { name: 'Orquídea Nocturna', vertical: 'estetica', font: 'Playfair Display', bg: '#1E121E', card: '#2D1E2D', text: '#FDFBF7', muted: '#D4C5D4', primary: '#D4A373', border: '#4A354A' },
-      { name: 'Club Náutico', vertical: 'barberia', font: 'Montserrat', bg: '#0F172A', card: '#1E293B', text: '#F8FAF8', muted: '#94A3B8', primary: '#2563EB', border: '#334155' },
+      { name: 'Club Náutico', vertical: 'barberia', font: 'Montserrat', bg: '#0F172A', card: '#1E293B', text: '#F8FAF8', muted: '#94A3B8', primary: '#3B82F6', border: '#334155' },
       { name: 'Oro Imperial', vertical: 'barberia', font: 'Cinzel', bg: '#000000', card: '#121212', text: '#FFFFFF', muted: '#A0A0A0', primary: '#D4AF37', border: '#2C2C2C' },
-      { name: 'Cyber Stealth', vertical: 'barberia', font: 'Space Grotesk', bg: '#0B0F19', card: '#161D30', text: '#F8FAF8', muted: '#94A3B8', primary: '#00D7C0', border: '#202D4A' },
+      { name: 'Cyber Stealth', vertical: 'barberia', font: 'Space Grotesk', bg: '#0B0F19', card: '#161D30', text: '#F8FAF8', muted: '#94A3B8', primary: '#00F5D4', border: '#202D4A' },
       { name: 'Gremio del Cuero', vertical: 'barberia', font: 'PT Serif', bg: '#2B1D11', card: '#3E2723', text: '#FFF8E1', muted: '#D7CCC8', primary: '#D4A373', border: '#4E342E' },
       { name: 'Highland Hunt', vertical: 'barberia', font: 'Montserrat', bg: '#132615', card: '#1C3B20', text: '#F1F8F2', muted: '#A5D6A7', primary: '#D4A373', border: '#2E5A33' },
       { name: 'Logia del Vino', vertical: 'barberia', font: 'Cormorant Garamond', bg: '#2E0814', card: '#420D20', text: '#FFF0F5', muted: '#F8BBD0', primary: '#D4A373', border: '#5C1330' }
     ];
-
-
-    const TYPE_TO_THEME_VERTICAL = {
-      barberia: 'barberia',
-      peluqueria: 'estetica',
-      manicure: 'estetica',
-      pestanas: 'estetica',
-      estetica: 'estetica'
-    };
-
-    function themeVerticalForType(type) {
-      return TYPE_TO_THEME_VERTICAL[type] || 'estetica';
-    }
-
-    function verticalLabel(vertical) {
-      return vertical === 'barberia' ? 'Barbería & estilo masculino' : 'Estética & bienestar';
-    }
-
-    function allowedThemesForType(type) {
-      const vertical = themeVerticalForType(type);
-      return THEMES.filter(t => t.vertical === 'base' || t.vertical === vertical);
-    }
-
-    function firstThemeForType(type) {
-      const allowed = allowedThemesForType(type);
-      return allowed[0] || THEMES[0];
-    }
-
-    function ensureThemeForType(type, requestedThemeName) {
-      const allowed = allowedThemesForType(type);
-      const valid = allowed.find(t => t.name === requestedThemeName);
-      return valid || allowed[0] || THEMES[0];
-    }
-
-    function setThemeForType(type, requestedThemeName, apply = true) {
-      const theme = ensureThemeForType(type, requestedThemeName);
-      state.activeTheme = theme.name;
-      if (apply) {
-        applyTheme(theme.name);
-      } else {
-        updateMockupPreview(theme);
-      }
-      return theme;
-    }
-
-    function renderThemeSelectorForType(type, selectedThemeName) {
-      if (!settingsThemeSelector) return null;
-      const allowed = allowedThemesForType(type);
-      const selected = ensureThemeForType(type, selectedThemeName);
-      const label = verticalLabel(themeVerticalForType(type));
-      settingsThemeSelector.innerHTML = allowed.map(t => `
-        <option value="${t.name}">
-          ${t.vertical === 'base' ? '⭐ ' : ''}${t.name} · ${t.font}
-        </option>
-      `).join('');
-      settingsThemeSelector.value = selected.name;
-
-      if (themePolicyNote) {
-        const baseCount = allowed.filter(t => t.vertical === 'base').length;
-        const verticalCount = allowed.length - baseCount;
-        themePolicyNote.textContent = `Paletas disponibles para ${profiles[type]?.label || 'este negocio'}: Kauze Base por defecto + ${verticalCount} tema(s) de ${label}.`;
-      }
-
-      if (themePalettePreview) {
-        themePalettePreview.innerHTML = `
-          <span class="palette-swatch" title="Fondo" style="background:${selected.bg}"></span>
-          <span class="palette-swatch" title="Tarjeta" style="background:${selected.card}"></span>
-          <span class="palette-swatch" title="Texto" style="background:${selected.text}"></span>
-          <span class="palette-swatch" title="Botón principal" style="background:${selected.primary}"></span>
-          <span class="palette-swatch" title="Borde" style="background:${selected.border}"></span>
-        `;
-      }
-      return selected;
-    }
 
     const BACKEND_URL = 'https://admin.kauze.cl';
 
@@ -1033,57 +770,6 @@
       link.href = `https://fonts.googleapis.com/css2?family=${formattedName}:wght@400;500;600;700;800&display=swap`;
     }
 
-    function hexToRgb(hex) {
-      const clean = String(hex || '').replace('#', '').trim();
-      if (clean.length !== 6) return { r: 255, g: 255, b: 255 };
-      return {
-        r: parseInt(clean.slice(0, 2), 16),
-        g: parseInt(clean.slice(2, 4), 16),
-        b: parseInt(clean.slice(4, 6), 16)
-      };
-    }
-
-    function relativeLuminance(hex) {
-      const { r, g, b } = hexToRgb(hex);
-      const channel = value => {
-        const c = value / 255;
-        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-      };
-      return (0.2126 * channel(r)) + (0.7152 * channel(g)) + (0.0722 * channel(b));
-    }
-
-    function contrastRatio(colorA, colorB) {
-      const a = relativeLuminance(colorA);
-      const b = relativeLuminance(colorB);
-      const lighter = Math.max(a, b);
-      const darker = Math.min(a, b);
-      return (lighter + 0.05) / (darker + 0.05);
-    }
-
-    function readableTextOn(background, preferred = '#FFFFFF') {
-      const white = '#FFFFFF';
-      const dark = '#0B1736';
-      const black = '#000000';
-      const preferredScore = contrastRatio(preferred, background);
-      const whiteScore = contrastRatio(white, background);
-      const darkScore = contrastRatio(dark, background);
-      const blackScore = contrastRatio(black, background);
-
-      if (preferredScore >= 4.5) return preferred;
-      if (whiteScore >= 4.5 && whiteScore >= darkScore) return white;
-      if (darkScore >= 4.5) return dark;
-      return blackScore > whiteScore ? black : white;
-    }
-
-    function isDarkSurface(hex) {
-      return relativeLuminance(hex) < 0.22;
-    }
-
-    function themeSurfaceSoft(theme) {
-      return isDarkSurface(theme.bg) ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.045)';
-    }
-
-
     function updateMockupPreview(theme) {
       const previewName = document.getElementById('preview-business-name');
       const previewLogo = document.getElementById('preview-logo-badge');
@@ -1094,367 +780,103 @@
       const phoneMockup = previewCard ? previewCard.parentElement.parentElement : null;
       const previewTitle = document.getElementById('preview-title');
       const previewSubtitle = document.getElementById('preview-subtitle');
-      const previewBannerTitle = document.getElementById('preview-banner-title');
-      const previewBannerSubtitle = document.getElementById('preview-banner-subtitle');
-
-      const safeButtonText = readableTextOn(theme.primary);
-      const safeTextOnBg = readableTextOn(theme.bg, theme.text);
-      const safeTextOnCard = contrastRatio(theme.text, theme.card) >= 4.5 ? theme.text : readableTextOn(theme.card, theme.text);
-      const safeMutedOnCard = contrastRatio(theme.muted, theme.card) >= 4.5 ? theme.muted : safeTextOnCard;
-
+      
       const busName = document.getElementById('settingsBusiness') ? document.getElementById('settingsBusiness').value : (state.name || 'Kauze Demo');
       if (previewName) previewName.textContent = busName;
-
+      
       if (phoneMockup) {
         phoneMockup.style.background = theme.bg;
         phoneMockup.style.fontFamily = `'${theme.font}', sans-serif`;
       }
-      if (previewName) previewName.style.color = safeTextOnBg;
-      if (previewBannerTitle) {
-        previewBannerTitle.textContent = (settingsPageTitle?.value || state.pageTitle || 'Agenda tu próxima hora').split(' ').slice(0, 5).join(' ');
-        previewBannerTitle.style.color = safeTextOnCard;
-      }
-      if (previewBannerSubtitle) {
-        previewBannerSubtitle.textContent = settingsPageSubtitle?.value || state.pageSubtitle || 'Elige servicio, profesional y horario disponible.';
-        previewBannerSubtitle.style.color = safeMutedOnCard;
-      }
-      if (previewTitle) previewTitle.style.color = safeTextOnCard;
-      if (previewSubtitle) previewSubtitle.style.color = safeMutedOnCard;
+      if (previewName) previewName.style.color = theme.text;
+      if (previewTitle) previewTitle.style.color = theme.text;
+      if (previewSubtitle) previewSubtitle.style.color = theme.muted;
       if (previewCard) {
         previewCard.style.background = theme.card;
         previewCard.style.borderColor = theme.border;
       }
-
+      
+      const isDark = theme.bg.startsWith('#0') || theme.bg.startsWith('#1') || theme.bg.startsWith('#2') || theme.bg.startsWith('#3');
+      const contrastText = isDark ? '#000000' : '#FFFFFF';
+      
       if (previewLogo) {
         previewLogo.style.background = theme.primary;
-        previewLogo.style.color = safeButtonText;
+        previewLogo.style.color = contrastText;
       }
       if (previewPill1) {
         previewPill1.style.background = theme.primary;
-        previewPill1.style.color = safeButtonText;
+        previewPill1.style.color = contrastText;
       }
       if (previewPill2) {
         previewPill2.style.background = theme.bg;
-        previewPill2.style.color = safeTextOnBg;
+        previewPill2.style.color = theme.text;
         previewPill2.style.borderColor = theme.border;
       }
       if (previewMainBtn) {
         previewMainBtn.style.background = theme.primary;
-        previewMainBtn.style.color = safeButtonText;
-      }
-
-      if (themePalettePreview) {
-        themePalettePreview.innerHTML = `
-          <span class="palette-swatch" title="Fondo" style="background:${theme.bg}"></span>
-          <span class="palette-swatch" title="Tarjeta" style="background:${theme.card}"></span>
-          <span class="palette-swatch" title="Texto" style="background:${theme.text}"></span>
-          <span class="palette-swatch" title="Botón principal" style="background:${theme.primary}"></span>
-          <span class="palette-swatch" title="Borde" style="background:${theme.border}"></span>
-        `;
-      }
-
-      document.querySelectorAll('[data-theme-chip]').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.themeChip === theme.name);
-      });
-
-      updatePagePreview();
-    }
-
-    function updatePagePreview() {
-      const theme = ensureThemeForType(state.type, state.activeTheme);
-      const previewBannerTitle = document.getElementById('preview-banner-title');
-      const previewBannerSubtitle = document.getElementById('preview-banner-subtitle');
-      const previewMainBtn = document.getElementById('preview-main-btn');
-      const previewCard = document.getElementById('preview-card-box');
-      const previewName = document.getElementById('preview-business-name');
-      const previewTitle = document.getElementById('preview-title');
-      const previewSubtitle = document.getElementById('preview-subtitle');
-      const phoneMockup = previewCard ? previewCard.parentElement.parentElement : null;
-
-      const safeButtonText = readableTextOn(theme.primary);
-      const safeTextOnBg = contrastRatio(theme.text, theme.bg) >= 4.5 ? theme.text : readableTextOn(theme.bg, theme.text);
-      const safeTextOnCard = contrastRatio(theme.text, theme.card) >= 4.5 ? theme.text : readableTextOn(theme.card, theme.text);
-      const safeMutedOnCard = contrastRatio(theme.muted, theme.card) >= 4.5 ? theme.muted : safeTextOnCard;
-
-      const pageTitleValue = settingsPageTitle?.value || state.pageTitle || 'Agenda tu próxima hora';
-      const pageSubtitleValue = settingsPageSubtitle?.value || state.pageSubtitle || 'Elige servicio, profesional y horario disponible.';
-      const pageCtaValue = settingsPageCta?.value || state.pageCta || 'Reservar ahora';
-      const bannerStyleValue = settingsBannerStyle?.value || state.bannerStyle || 'soft';
-      const bannerImageValue = settingsBannerImage?.value || state.bannerImage || '';
-
-      if (previewBannerTitle) {
-        previewBannerTitle.textContent = pageTitleValue;
-        previewBannerTitle.style.color = safeTextOnCard;
-      }
-
-      if (previewBannerSubtitle) {
-        previewBannerSubtitle.textContent = pageSubtitleValue;
-        previewBannerSubtitle.style.color = safeMutedOnCard;
-      }
-
-      if (previewMainBtn) {
-        previewMainBtn.textContent = `${pageCtaValue} (Ejemplo)`;
-        previewMainBtn.style.background = theme.primary;
-        previewMainBtn.style.color = safeButtonText;
-      }
-
-      if (previewName) previewName.style.color = safeTextOnBg;
-      if (previewTitle) previewTitle.style.color = safeTextOnCard;
-      if (previewSubtitle) previewSubtitle.style.color = safeMutedOnCard;
-
-      if (previewCard) {
-        previewCard.style.background = theme.card;
-        previewCard.style.borderColor = theme.border;
-        previewCard.style.color = safeTextOnCard;
-
-        if (bannerStyleValue === 'gradient') {
-          previewCard.style.background = `linear-gradient(135deg, ${theme.card}, ${theme.bg})`;
-          previewCard.style.borderColor = theme.primary;
-        } else if (bannerStyleValue === 'dark') {
-          previewCard.style.background = isDarkSurface(theme.card) ? theme.card : '#0B1736';
-          previewCard.style.color = '#FFFFFF';
-          previewCard.style.borderColor = theme.primary;
-          if (previewBannerTitle) previewBannerTitle.style.color = '#FFFFFF';
-          if (previewBannerSubtitle) previewBannerSubtitle.style.color = 'rgba(255,255,255,.78)';
-          if (previewTitle) previewTitle.style.color = '#FFFFFF';
-          if (previewSubtitle) previewSubtitle.style.color = 'rgba(255,255,255,.78)';
-        } else if (bannerStyleValue === 'image' && bannerImageValue) {
-          previewCard.style.background = `linear-gradient(rgba(11,23,54,.74), rgba(11,23,54,.74)), url('${bannerImageValue}') center/cover`;
-          previewCard.style.borderColor = theme.primary;
-          if (previewBannerTitle) previewBannerTitle.style.color = '#FFFFFF';
-          if (previewBannerSubtitle) previewBannerSubtitle.style.color = 'rgba(255,255,255,.82)';
-          if (previewTitle) previewTitle.style.color = '#FFFFFF';
-          if (previewSubtitle) previewSubtitle.style.color = 'rgba(255,255,255,.82)';
-        }
-      }
-
-      if (phoneMockup) {
-        phoneMockup.style.background = theme.bg;
+        previewMainBtn.style.color = contrastText;
       }
     }
-
 
     function applyTheme(themeName) {
-      const theme = ensureThemeForType(state.type, themeName);
+      const theme = THEMES.find(t => t.name === themeName) || THEMES[0];
       state.activeTheme = theme.name;
-
+      
       loadGoogleFont(theme.font);
-
+      
       let styleEl = document.getElementById('dynamic-theme-style');
       if (!styleEl) {
         styleEl = document.createElement('style');
         styleEl.id = 'dynamic-theme-style';
         document.head.appendChild(styleEl);
       }
-
-      const darkBg = isDarkSurface(theme.bg);
-      const darkCard = isDarkSurface(theme.card);
-      const safePrimaryText = readableTextOn(theme.primary);
-      const safeTextOnBg = contrastRatio(theme.text, theme.bg) >= 4.5 ? theme.text : readableTextOn(theme.bg, theme.text);
-      const safeTextOnCard = contrastRatio(theme.text, theme.card) >= 4.5 ? theme.text : readableTextOn(theme.card, theme.text);
-      const safeMutedOnBg = contrastRatio(theme.muted, theme.bg) >= 4.5 ? theme.muted : safeTextOnBg;
-      const safeMutedOnCard = contrastRatio(theme.muted, theme.card) >= 4.5 ? theme.muted : safeTextOnCard;
-      const inputBg = darkBg ? theme.card : '#FFFFFF';
-      const tableRowBg = darkBg ? 'rgba(255,255,255,0.045)' : 'rgba(255,255,255,0.76)';
-
+      
+      const isDark = theme.bg.startsWith('#0') || theme.bg.startsWith('#1') || theme.bg.startsWith('#2') || theme.bg.startsWith('#3');
+      const contrastText = isDark ? '#000000' : '#FFFFFF';
+      
       styleEl.innerHTML = `
         :root {
           --bg: ${theme.bg} !important;
           --card: ${theme.card} !important;
-          --surface: ${theme.card} !important;
-          --text: ${safeTextOnBg} !important;
-          --muted: ${safeMutedOnBg} !important;
+          --text: ${theme.text} !important;
+          --muted: ${theme.muted} !important;
           --border: ${theme.border} !important;
           --blue: ${theme.primary} !important;
-          --blue-2: ${theme.primary} !important;
           --purple: ${theme.primary} !important;
-          --soft: ${themeSurfaceSoft(theme)} !important;
-          --soft-blue: ${darkBg ? 'rgba(255,255,255,0.10)' : 'rgba(37,99,235,0.08)'} !important;
-          --theme-card-text: ${safeTextOnCard} !important;
-          --theme-card-muted: ${safeMutedOnCard} !important;
-          --theme-primary-text: ${safePrimaryText} !important;
+          --soft: ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'} !important;
+          --soft-blue: ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'} !important;
         }
-
         body {
-          color: ${safeTextOnBg} !important;
           font-family: '${theme.font}', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
         }
-
-        .sidebar {
-          background: linear-gradient(180deg, #0B1736, #071025) !important;
-          color: #FFFFFF !important;
-        }
-
-        .side-logo span,
-        .side-mark,
-        .business-mini strong {
-          color: #FFFFFF !important;
-        }
-
-        .business-mini small,
-        .nav button,
-        .side-bottom .btn {
-          color: rgba(255,255,255,.74) !important;
-        }
-
-        .nav button:hover,
-        .nav button.active {
-          color: #FFFFFF !important;
-        }
-
-        .main,
-        .view,
-        .title p,
-        .section-head p {
-          color: ${safeMutedOnBg} !important;
-        }
-
-        .title h1,
-        .section-head h2,
-        .card h1,
-        .card h2,
-        .card h3,
-        .metric .value,
-        .item strong,
-        .service-card h3,
-        .pro-card h3,
-        .campaign h3,
-        .field-group label,
-        th,
-        .user-chip strong,
-        .theme-chip strong,
-        .personalization-box h3,
-        .notification-item strong {
-          color: ${safeTextOnCard} !important;
-        }
-
-        .card,
-        .login-card,
-        .item,
-        .user-chip,
-        .theme-chip,
-        .notification-item,
-        .modal-card,
-        .credential,
-        .personalization-box {
-          background: ${theme.card} !important;
-          color: ${safeTextOnCard} !important;
-          border-color: ${theme.border} !important;
-        }
-
-        .item,
-        .empty-state,
-        .demo-login,
-        .notice,
-        .integration-card {
-          background: ${tableRowBg} !important;
-          color: ${safeTextOnCard} !important;
-        }
-
-        .card p,
-        .item small,
-        .service-card p,
-        .pro-card p,
-        .campaign p,
-        td,
-        .muted-small,
-        .theme-helper,
-        .personalization-box p,
-        .notification-item small,
-        .credential small,
-        .user-chip small,
-        .field::placeholder {
-          color: ${safeMutedOnCard} !important;
-        }
-
-        input,
-        select,
-        textarea,
-        .field,
-        .type-switch {
-          background: ${inputBg} !important;
-          color: ${safeTextOnCard} !important;
-          border-color: ${theme.border} !important;
-        }
-
-        .btn.primary,
-        .mini-btn.primary,
-        button.btn.primary,
-        a.btn.primary {
-          background: ${theme.primary} !important;
-          color: ${safePrimaryText} !important;
-          border-color: ${theme.primary} !important;
-          font-weight: 900 !important;
-          text-shadow: none !important;
-        }
-
-        .btn:not(.primary),
-        .mini-btn:not(.danger),
-        .close-modal {
-          background: ${darkBg ? 'rgba(255,255,255,0.07)' : '#FFFFFF'} !important;
-          color: ${darkBg ? '#FFFFFF' : '#0B1736'} !important;
-          border-color: ${theme.border} !important;
-        }
-
-        .source-pill,
-        .notify-tag.info,
-        .integration-status.ready {
-          background: ${darkBg ? 'rgba(255,255,255,0.08)' : 'rgba(37,99,235,.08)'} !important;
-          color: ${darkBg ? '#FFFFFF' : '#0B1736'} !important;
-          border-color: ${theme.border} !important;
-        }
-
-        .avatar,
-        .side-mark,
-        .preview-logo-badge {
-          background: ${theme.primary} !important;
-          color: ${safePrimaryText} !important;
-        }
-
-        table,
-        tr,
-        th,
-        td {
-          border-color: ${theme.border} !important;
-        }
-
-        .chart-grid {
-          stroke: ${theme.border} !important;
-        }
-
-        .sidebar,
-        .sidebar * {
-          color: rgba(255,255,255,.82) !important;
-        }
-
-        .sidebar .side-logo span,
-        .sidebar .side-mark,
-        .sidebar .business-mini strong,
-        .sidebar .nav button.active,
-        .sidebar .nav button:hover {
-          color: #FFFFFF !important;
-        }
-
-        .sidebar .business-mini {
-          background: rgba(255,255,255,.10) !important;
-          border-color: rgba(255,255,255,.18) !important;
-        }
-
-        .sidebar .business-mini small {
-          color: rgba(255,255,255,.76) !important;
-        }
-
-        .sidebar .side-bottom .btn {
-          background: rgba(255,255,255,.95) !important;
-          color: #0B1736 !important;
-          border-color: rgba(255,255,255,.18) !important;
-        }
-
-        .phone-preview {
-          background: #0B1736 !important;
-        }
+        ${isDark ? `
+          .sidebar {
+            background: ${theme.card} !important;
+            border-right: 1px solid ${theme.border} !important;
+          }
+          .sidebar .btn, .side-bottom .btn {
+            background: rgba(255,255,255,0.05) !important;
+            color: #fff !important;
+          }
+          .card {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
+          }
+          input, select, textarea {
+            background: ${theme.bg} !important;
+            color: ${theme.text} !important;
+            border-color: ${theme.border} !important;
+          }
+          .btn.primary {
+            color: #000000 !important;
+            font-weight: 800 !important;
+          }
+        ` : `
+          .btn.primary {
+            color: #FFFFFF !important;
+          }
+        `}
       `;
-
+      
       updateMockupPreview(theme);
     }
 
@@ -1509,12 +931,6 @@
     if (typeof state.depositPercent === 'undefined') state.depositPercent = 15;
     if (typeof state.depositFixedAmount === 'undefined') state.depositFixedAmount = 1000;
     if (typeof state.depositMinimum === 'undefined') state.depositMinimum = 1000;
-    if (!state.activeTheme || state.activeTheme === 'Club Náutico' || state.activeTheme === 'Brisa Serena') state.activeTheme = 'Kauze Base';
-    if (!state.pageTitle) state.pageTitle = 'Agenda tu próxima hora sin escribir por WhatsApp';
-    if (!state.pageSubtitle) state.pageSubtitle = 'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.';
-    if (!state.pageCta) state.pageCta = 'Reservar ahora';
-    if (!state.bannerStyle) state.bannerStyle = 'soft';
-    if (typeof state.bannerImage === 'undefined') state.bannerImage = '';
 
     const fmt = n => Number(n || 0).toLocaleString('es-CL', {style:'currency',currency:'CLP',maximumFractionDigits:0});
     const todayISO = () => new Date().toISOString().slice(0,10);
@@ -1540,15 +956,6 @@
     const settingsDepositPercent = document.getElementById('settingsDepositPercent');
     const settingsDepositFixed = document.getElementById('settingsDepositFixed');
     const settingsDepositMinimum = document.getElementById('settingsDepositMinimum');
-    const settingsThemeSelector = document.getElementById('settingsThemeSelector');
-    const themePolicyNote = document.getElementById('themePolicyNote');
-    const themePalettePreview = document.getElementById('themePalettePreview');
-    const settingsPageTitle = document.getElementById('settingsPageTitle');
-    const settingsPageSubtitle = document.getElementById('settingsPageSubtitle');
-    const settingsPageCta = document.getElementById('settingsPageCta');
-    const settingsBannerStyle = document.getElementById('settingsBannerStyle');
-    const settingsBannerImage = document.getElementById('settingsBannerImage');
-    const themeMiniList = document.getElementById('themeMiniList');
     const notificationCenter = document.getElementById('notificationCenter');
     const navProfessionals = document.getElementById('navProfessionals');
     const professionalsTitle = document.getElementById('professionalsTitle');
@@ -1617,28 +1024,16 @@
       const opts = Object.entries(profiles).map(([k,p])=>`<option value="${k}">${p.emoji} ${p.label}</option>`).join('');
       businessTypeSwitch.innerHTML = opts;
       settingsType.innerHTML = opts;
-
-      const selected = renderThemeSelectorForType(state.type, state.activeTheme);
-      if (selected && !state.activeTheme) state.activeTheme = selected.name;
-
-      if (settingsThemeSelector && !settingsThemeSelector.dataset.bound) {
-        settingsThemeSelector.dataset.bound = 'true';
-        settingsThemeSelector.addEventListener('change', () => {
-          const type = settingsType ? settingsType.value : state.type;
-          const theme = ensureThemeForType(type, settingsThemeSelector.value);
-          settingsThemeSelector.value = theme.name;
-          updateMockupPreview(theme);
-          renderThemeMiniList();
-        });
-      }
-
-      if (settingsType && !settingsType.dataset.themeBound) {
-        settingsType.dataset.themeBound = 'true';
-        settingsType.addEventListener('change', () => {
-          const type = settingsType.value;
-          const theme = renderThemeSelectorForType(type, state.activeTheme);
-          if (theme) updateMockupPreview(theme);
-          renderThemeMiniList();
+      
+      const themeSelector = document.getElementById('settingsThemeSelector');
+      if (themeSelector) {
+        themeSelector.innerHTML = THEMES.map(t => `<option value="${t.name}">${t.name} (${t.vertical === 'barberia' ? 'Barbería' : 'Estética'})</option>`).join('');
+        
+        themeSelector.addEventListener('change', () => {
+          const theme = THEMES.find(t => t.name === themeSelector.value);
+          if (theme) {
+            updateMockupPreview(theme);
+          }
         });
       }
     }
@@ -1743,13 +1138,7 @@
         depositMode: state.depositMode || 'percent',
         depositPercent: Number(state.depositPercent || 0),
         depositFixedAmount: Number(state.depositFixedAmount || 0),
-        depositMinimum: Number(state.depositMinimum || 0),
-        activeTheme: state.activeTheme || '',
-        pageTitle: state.pageTitle || '',
-        pageSubtitle: state.pageSubtitle || '',
-        pageCta: state.pageCta || '',
-        bannerStyle: state.bannerStyle || 'soft',
-        bannerImage: state.bannerImage || ''
+        depositMinimum: Number(state.depositMinimum || 0)
       }));
     }
 
@@ -1833,21 +1222,15 @@
       if (settingsDepositPercent) settingsDepositPercent.value = Number(state.depositPercent || 0);
       if (settingsDepositFixed) settingsDepositFixed.value = Number(state.depositFixedAmount || 0);
       if (settingsDepositMinimum) settingsDepositMinimum.value = Number(state.depositMinimum || 0);
-      if (settingsPageTitle) settingsPageTitle.value = state.pageTitle || '';
-      if (settingsPageSubtitle) settingsPageSubtitle.value = state.pageSubtitle || '';
-      if (settingsPageCta) settingsPageCta.value = state.pageCta || '';
-      if (settingsBannerStyle) settingsBannerStyle.value = state.bannerStyle || 'soft';
-      if (settingsBannerImage) settingsBannerImage.value = state.bannerImage || '';
       
-      if (settingsThemeSelector) {
-        const currentTheme = renderThemeSelectorForType(state.type, state.activeTheme);
+      const themeSelector = document.getElementById('settingsThemeSelector');
+      if (themeSelector && state.activeTheme) {
+        themeSelector.value = state.activeTheme;
+        const currentTheme = THEMES.find(t => t.name === state.activeTheme);
         if (currentTheme) {
-          state.activeTheme = currentTheme.name;
           updateMockupPreview(currentTheme);
         }
       }
-      renderThemeMiniList();
-      updatePagePreview();
       
       navProfessionals.innerHTML=`☷ ${p.proPlural}`;
       professionalsTitle.textContent=p.proPlural;
@@ -2142,12 +1525,11 @@
       loginScreen.style.display='none'; 
       app.style.display='grid'; 
       await syncOnlineState(false);
-      const initialTheme = ensureThemeForType(state.type, state.activeTheme);
-      state.activeTheme = initialTheme.name;
-      applyTheme(initialTheme.name);
+      if (state.activeTheme) {
+        applyTheme(state.activeTheme);
+      }
       updateBusinessStatus(state.businessStatus || 'DISPONIBLE', false);
       render(); 
-      saveState();
     }
 
     loginForm.addEventListener('submit',e=>{
@@ -2162,25 +1544,11 @@
 
     logoutBtn.addEventListener('click',()=>{ sessionStorage.removeItem('kauzeAppV3Auth'); location.reload(); });
     mobileMenu.addEventListener('click',()=>sidebar.classList.toggle('open'));
-    businessTypeSwitch.addEventListener('change',()=>{ 
-      state.type = businessTypeSwitch.value; 
-      state.name = profiles[state.type].business;
-      const theme = ensureThemeForType(state.type, state.activeTheme);
-      state.activeTheme = theme.name;
-      saveState(); 
-      render(); 
-      applyTheme(theme.name);
-    });
+    businessTypeSwitch.addEventListener('change',()=>{ state.type=businessTypeSwitch.value; state.name=profiles[state.type].business; saveState(); render(); });
     
-    [settingsPageTitle, settingsPageSubtitle, settingsPageCta, settingsBannerStyle, settingsBannerImage].filter(Boolean).forEach(input => {
-      const eventName = input.tagName === 'SELECT' ? 'change' : 'input';
-      input.addEventListener(eventName, () => updatePagePreview());
-    });
-
     saveSettings.addEventListener('click',()=>{ 
-      const selectedType = settingsType.value;
-      state.name = settingsBusiness.value.trim() || profiles[selectedType].business; 
-      state.type = selectedType; 
+      state.name=settingsBusiness.value.trim() || profiles[settingsType.value].business; 
+      state.type=settingsType.value; 
       state.ownerWhatsapp = settingsOwnerWhatsapp ? settingsOwnerWhatsapp.value.trim() : ''; 
       state.ownerCalendarEmail = settingsCalendarEmail ? settingsCalendarEmail.value.trim() : ''; 
       state.depositEnabled = settingsDepositEnabled ? settingsDepositEnabled.checked : false; 
@@ -2188,17 +1556,13 @@
       state.depositPercent = settingsDepositPercent ? Number(settingsDepositPercent.value || 0) : 0; 
       state.depositFixedAmount = settingsDepositFixed ? Number(settingsDepositFixed.value || 0) : 0; 
       state.depositMinimum = settingsDepositMinimum ? Number(settingsDepositMinimum.value || 0) : 0; 
-      state.pageTitle = settingsPageTitle ? settingsPageTitle.value.trim() : state.pageTitle;
-      state.pageSubtitle = settingsPageSubtitle ? settingsPageSubtitle.value.trim() : state.pageSubtitle;
-      state.pageCta = settingsPageCta ? settingsPageCta.value.trim() : state.pageCta;
-      state.bannerStyle = settingsBannerStyle ? settingsBannerStyle.value : (state.bannerStyle || 'soft');
-      state.bannerImage = settingsBannerImage ? settingsBannerImage.value.trim() : (state.bannerImage || '');
-
-      const selectedTheme = settingsThemeSelector ? settingsThemeSelector.value : state.activeTheme;
-      const theme = ensureThemeForType(state.type, selectedTheme);
-      state.activeTheme = theme.name;
-      applyTheme(theme.name);
-
+      
+      const themeSelector = document.getElementById('settingsThemeSelector');
+      if (themeSelector) {
+        state.activeTheme = themeSelector.value;
+        applyTheme(state.activeTheme);
+      }
+      
       saveState(); 
       render(); 
       saveMsg.style.display='block'; 
