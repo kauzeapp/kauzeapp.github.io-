@@ -1,0 +1,5 @@
+[deploy]
+preDeployCommand = ["python -m backend.migrate"]
+startCommand = "python server.py"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 100
