@@ -1,2 +1,3 @@
-# Este archivo está intencionalmente vacío porque server.py solo utiliza la librería estándar de Python.
-# Railway lo detectará para saber que es un entorno Python.
+argon2-cffi==25.1.0
+psycopg[binary]==3.3.4
+psycopg-pool==3.3.1

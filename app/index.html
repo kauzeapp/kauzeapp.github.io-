@@ -432,8 +432,8 @@
     <main class="login-side">
       <div class="login-card">
         <div class="login-badge">Panel de negocio</div>
-        <h2>Bienvenido a Kauze</h2>
-        <p class="login-intro">Ingresa con la cuenta asignada a tu empresa.</p>
+        <h2 id="loginHeading">Bienvenido a Kauze</h2>
+        <p class="login-intro" id="loginIntro">Ingresa con la cuenta asignada a tu empresa.</p>
         <form id="loginForm">
           <div class="field-group"><label for="email">Correo</label><input class="field" id="email" type="email" placeholder="correo@kauze.cl" required autocomplete="username"></div>
           <div class="field-group">
@@ -443,6 +443,10 @@
               <button class="btn small password-toggle" id="toggleLoginPassword" type="button" aria-label="Mostrar contraseña">Mostrar</button>
             </div>
           </div>
+          <div class="field-group" id="businessChoice" style="display:none">
+            <label for="businessSelect">Negocio</label>
+            <select class="field" id="businessSelect"></select>
+          </div>
           <div class="login-meta">
             <label class="remember-session" for="rememberSession"><input id="rememberSession" type="checkbox"> Recordar mi sesión</label>
             <a class="login-link" id="forgotPassword" href="#">¿Olvidaste tu contraseña?</a>
@@ -450,6 +454,18 @@
           <p class="login-feedback" id="loginFeedback" role="status" aria-live="polite"></p>
           <button class="btn primary" type="submit">Entrar al panel</button>
           <div class="login-error" id="loginError">Credenciales incorrectas.</div>
+        </form>
+        <form id="resetPasswordForm" style="display:none">
+          <div class="field-group">
+            <label for="newPassword">Nueva contraseña</label>
+            <input class="field" id="newPassword" type="password" minlength="12" maxlength="128" autocomplete="new-password" placeholder="Mínimo 12 caracteres" required>
+          </div>
+          <div class="field-group">
+            <label for="confirmNewPassword">Repite la nueva contraseña</label>
+            <input class="field" id="confirmNewPassword" type="password" minlength="12" maxlength="128" autocomplete="new-password" required>
+          </div>
+          <p class="login-feedback" id="resetPasswordFeedback" role="status" aria-live="polite"></p>
+          <button class="btn primary" type="submit">Guardar nueva contraseña</button>
         </form>
         <div class="login-security">🔒 Acceso protegido para cada negocio y su equipo</div>
         <div class="login-support">¿Necesitas ayuda? <a class="login-link" href="mailto:kauzeapp@gmail.com">Contactar al equipo KAUZE</a></div>
@@ -1070,8 +1086,6 @@
 
 
   <script>
-    const LOGIN_EMAIL = 'demo@kauze.cl';
-    const LOGIN_PASSWORD = 'KauzeDemo2026';
     const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', ownerWhatsapp:'', ownerCalendarEmail:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, activeTheme:'Kauze Base', pageTitle:'Agenda tu próxima hora sin escribir por WhatsApp', pageSubtitle:'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.', pageCta:'Reservar ahora', bannerStyle:'soft', bannerImage:'', appointments:{}, professionals:{}, campaigns:{} };
     const CLIENT_PORTAL_APPOINTMENTS_KEY = 'kauzeSharedAppointmentsV1';
     
@@ -1166,9 +1180,7 @@
       return selected;
     }
 
-    const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? window.location.origin
-      : 'https://admin.kauze.cl';
+    const BACKEND_URL = window.location.origin;
 
     async function syncOnlineState(push = false) {
       try {
@@ -1176,15 +1188,21 @@
           await fetch(`${BACKEND_URL}/api/app-state`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
             body: JSON.stringify(state)
           });
         } else {
-          const res = await fetch(`${BACKEND_URL}/api/app-state`);
+          const res = await fetch(`${BACKEND_URL}/api/app-state`, { credentials: 'same-origin' });
           if (res.ok) {
             const data = await res.json();
             if (data && data.type) {
-              state = data;
-              localStorage.setItem('kauzeAppV3State', JSON.stringify(state));
+              state = normalizeBusinessState(data);
+              if (currentAccount?.business) {
+                state.name = currentAccount.business.name;
+                state.type = currentAccount.business.type || state.type;
+              }
+              const key = businessStateStorageKey();
+              if (key) localStorage.setItem(key, JSON.stringify(state));
               if (state.activeTheme) {
                 applyTheme(state.activeTheme);
               }
@@ -1678,21 +1696,44 @@
       peluqueria: { label:'Peluquería', emoji:'💇', business:'Peluquería Studio Demo', proPlural:'Estilistas', newPro:'Agregar estilista', citas:22, ingresos:3920000, clientes:11, cats:['Corte','Color','Peinado','Tratamiento'], services:[['Corte mujer','60 min',18000],['Coloración','120 min',45000],['Brushing','45 min',16000],['Tratamiento capilar','75 min',28000],['Mechas','150 min',65000],['Peinado evento','60 min',25000]], pros:[['Francisca León','Estilista senior','8 citas hoy'],['Romina Tapia','Colorista','5 citas hoy'],['Claudia Vera','Estilista','6 citas hoy']], agenda:[['09:30','María José','Corte mujer','Francisca León','Confirmada'],['11:00','Tamara I.','Coloración','Romina Tapia','Pendiente'],['14:30','Catalina S.','Tratamiento capilar','Claudia Vera','Confirmada'],['16:00','Fernanda C.','Brushing','Francisca León','Confirmada']], clients:[['María José','Corte mujer','Agendar mantención',18000],['Tamara I.','Coloración','Confirmar asistencia',45000],['Catalina S.','Tratamiento capilar','Enviar recomendación',28000]] }
     };
 
-    let state = JSON.parse(localStorage.getItem('kauzeAppV3State') || 'null') || defaultBusiness;
-    if (!state.appointments) state.appointments = {};
-    if (typeof state.ownerWhatsapp === 'undefined') state.ownerWhatsapp = '';
-    if (typeof state.ownerCalendarEmail === 'undefined') state.ownerCalendarEmail = '';
-    if (typeof state.depositEnabled === 'undefined') state.depositEnabled = true;
-    if (!state.depositMode) state.depositMode = 'percent';
-    if (typeof state.depositPercent === 'undefined') state.depositPercent = 15;
-    if (typeof state.depositFixedAmount === 'undefined') state.depositFixedAmount = 1000;
-    if (typeof state.depositMinimum === 'undefined') state.depositMinimum = 1000;
-    if (!state.activeTheme || state.activeTheme === 'Club Náutico' || state.activeTheme === 'Brisa Serena') state.activeTheme = 'Kauze Base';
-    if (!state.pageTitle) state.pageTitle = 'Agenda tu próxima hora sin escribir por WhatsApp';
-    if (!state.pageSubtitle) state.pageSubtitle = 'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.';
-    if (!state.pageCta) state.pageCta = 'Reservar ahora';
-    if (!state.bannerStyle) state.bannerStyle = 'soft';
-    if (typeof state.bannerImage === 'undefined') state.bannerImage = '';
+    let currentAccount = null;
+
+    function normalizeBusinessState(candidate = {}) {
+      const normalized = {...defaultBusiness, ...candidate};
+      if (!normalized.appointments) normalized.appointments = {};
+      if (!normalized.professionals) normalized.professionals = {};
+      if (!normalized.campaigns) normalized.campaigns = {};
+      if (typeof normalized.ownerWhatsapp === 'undefined') normalized.ownerWhatsapp = '';
+      if (typeof normalized.ownerCalendarEmail === 'undefined') normalized.ownerCalendarEmail = '';
+      if (typeof normalized.depositEnabled === 'undefined') normalized.depositEnabled = true;
+      if (!normalized.depositMode) normalized.depositMode = 'percent';
+      if (typeof normalized.depositPercent === 'undefined') normalized.depositPercent = 15;
+      if (typeof normalized.depositFixedAmount === 'undefined') normalized.depositFixedAmount = 1000;
+      if (typeof normalized.depositMinimum === 'undefined') normalized.depositMinimum = 1000;
+      if (!normalized.activeTheme || normalized.activeTheme === 'Club Náutico' || normalized.activeTheme === 'Brisa Serena') normalized.activeTheme = 'Kauze Base';
+      if (!normalized.pageTitle) normalized.pageTitle = 'Agenda tu próxima hora sin escribir por WhatsApp';
+      if (!normalized.pageSubtitle) normalized.pageSubtitle = 'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.';
+      if (!normalized.pageCta) normalized.pageCta = 'Reservar ahora';
+      if (!normalized.bannerStyle) normalized.bannerStyle = 'soft';
+      if (typeof normalized.bannerImage === 'undefined') normalized.bannerImage = '';
+      return normalized;
+    }
+
+    function businessStateStorageKey() {
+      return currentAccount?.business?.id ? `kauzeAppV3State:${currentAccount.business.id}` : null;
+    }
+
+    function hydrateBusinessState(account) {
+      currentAccount = account;
+      const key = businessStateStorageKey();
+      let cached = null;
+      try { cached = key ? JSON.parse(localStorage.getItem(key) || 'null') : null; } catch (e) { cached = null; }
+      state = normalizeBusinessState(cached || {});
+      state.name = account.business.name;
+      state.type = account.business.type || state.type;
+    }
+
+    let state = normalizeBusinessState();
 
     const fmt = n => Number(n || 0).toLocaleString('es-CL', {style:'currency',currency:'CLP',maximumFractionDigits:0});
     const todayISO = () => new Date().toISOString().slice(0,10);
@@ -1709,6 +1750,12 @@
     const rememberSession = document.getElementById('rememberSession');
     const toggleLoginPassword = document.getElementById('toggleLoginPassword');
     const forgotPassword = document.getElementById('forgotPassword');
+    const businessChoice = document.getElementById('businessChoice');
+    const businessSelect = document.getElementById('businessSelect');
+    const loginHeading = document.getElementById('loginHeading');
+    const loginIntro = document.getElementById('loginIntro');
+    const resetPasswordForm = document.getElementById('resetPasswordForm');
+    const resetPasswordFeedback = document.getElementById('resetPasswordFeedback');
     const logoutBtn = document.getElementById('logoutBtn');
     const mobileMenu = document.getElementById('mobileMenu');
     const sidebar = document.getElementById('sidebar');
@@ -1915,7 +1962,8 @@
     }
 
     function saveState(){
-      localStorage.setItem('kauzeAppV3State', JSON.stringify(state));
+      const scopedKey = businessStateStorageKey();
+      if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(state));
       localStorage.setItem('kauzeBusinessContactV1', JSON.stringify({
         businessName: state.name || currentProfile().business,
         businessType: state.type,
@@ -1933,7 +1981,7 @@
         bannerStyle: state.bannerStyle || 'soft',
         bannerImage: state.bannerImage || ''
       }));
-      syncOnlineState(true);
+      if (currentAccount) syncOnlineState(true);
     }
 
     function normalizeProfessional(row){
@@ -2748,7 +2796,8 @@
       setTimeout(closeClientModal, 500);
     }
 
-    async function showApp(){ 
+    async function showApp(account = currentAccount){
+      if (account) hydrateBusinessState(account);
       loginScreen.style.display='none'; 
       app.style.display='grid'; 
       await syncOnlineState(false);
@@ -2768,30 +2817,120 @@
       toggleLoginPassword.setAttribute('aria-label', reveal ? 'Ocultar contraseña' : 'Mostrar contraseña');
     });
 
-    forgotPassword.addEventListener('click',e=>{
+    forgotPassword.addEventListener('click',async e=>{
       e.preventDefault();
       loginError.style.display='none';
-      loginFeedback.textContent='Durante esta etapa, el equipo KAUZE gestionará la recuperación de acceso.';
+      const email=document.getElementById('email').value.trim().toLowerCase();
+      if(!email || !document.getElementById('email').checkValidity()){
+        loginFeedback.textContent='Escribe primero el correo de tu cuenta.';
+        return;
+      }
+      loginFeedback.textContent='Solicitando enlace seguro...';
+      try{
+        const res=await fetch(`${BACKEND_URL}/api/auth/forgot-password`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          credentials:'same-origin',
+          body:JSON.stringify({email})
+        });
+        const data=await res.json().catch(()=>({}));
+        loginFeedback.textContent=data.message || 'Si la cuenta existe, enviaremos un enlace de recuperación.';
+      }catch(e){
+        loginFeedback.textContent='No pudimos procesar la solicitud. Intenta nuevamente.';
+      }
     });
 
-    loginForm.addEventListener('submit',e=>{
+    loginForm.addEventListener('submit',async e=>{
       e.preventDefault();
       loginFeedback.textContent='';
+      loginError.style.display='none';
       const email=document.getElementById('email').value.trim().toLowerCase();
       const pass=document.getElementById('password').value;
-      const isDemoAuth = (email === LOGIN_EMAIL && pass === LOGIN_PASSWORD);
-      const isAdminAuth = (email === 'admin@kauze.cl' && pass === 'Kauze2026!Fundadores');
-      if(isDemoAuth || isAdminAuth){
-        sessionStorage.setItem('kauzeAppV3Auth','true');
-        if(rememberSession.checked) localStorage.setItem('kauzeAppV3RememberedAuth','true');
-        else localStorage.removeItem('kauzeAppV3RememberedAuth');
-        loginError.style.display='none';
-        showApp();
+      const submitButton=loginForm.querySelector('button[type="submit"]');
+      submitButton.disabled=true;
+      submitButton.textContent='Validando acceso...';
+      try{
+        const res=await fetch(`${BACKEND_URL}/api/auth/login`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          credentials:'same-origin',
+          body:JSON.stringify({
+            email,
+            password:pass,
+            remember:rememberSession.checked,
+            localSlug:businessChoice.style.display==='none' ? null : businessSelect.value
+          })
+        });
+        const data=await res.json().catch(()=>({}));
+        if(res.status===409 && Array.isArray(data.businesses)){
+          businessSelect.innerHTML='';
+          data.businesses.forEach(item=>{
+            const option=document.createElement('option');
+            option.value=item.slug;
+            option.textContent=`${item.name} · ${item.role}`;
+            businessSelect.appendChild(option);
+          });
+          businessChoice.style.display='block';
+          loginFeedback.textContent='Tu cuenta tiene más de un negocio. Elige uno y vuelve a entrar.';
+          return;
+        }
+        if(!res.ok){
+          loginError.textContent=data.message || (res.status===503 ? 'El acceso seguro aún no está configurado.' : 'Correo o contraseña incorrectos.');
+          loginError.style.display='block';
+          return;
+        }
+        businessChoice.style.display='none';
+        await showApp(data.account);
+      }catch(e){
+        loginError.textContent='No fue posible conectar con KAUZE. Intenta nuevamente.';
+        loginError.style.display='block';
+      }finally{
+        submitButton.disabled=false;
+        submitButton.textContent='Entrar al panel';
       }
-      else { loginError.style.display='block'; }
     });
 
-    logoutBtn.addEventListener('click',()=>{ sessionStorage.removeItem('kauzeAppV3Auth'); localStorage.removeItem('kauzeAppV3RememberedAuth'); location.reload(); });
+    resetPasswordForm.addEventListener('submit',async e=>{
+      e.preventDefault();
+      const password=document.getElementById('newPassword').value;
+      const confirmation=document.getElementById('confirmNewPassword').value;
+      const token=new URLSearchParams(location.search).get('reset_token');
+      if(password!==confirmation){
+        resetPasswordFeedback.textContent='Las contraseñas no coinciden.';
+        return;
+      }
+      resetPasswordFeedback.textContent='Guardando nueva contraseña...';
+      try{
+        const res=await fetch(`${BACKEND_URL}/api/auth/reset-password`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          credentials:'same-origin',
+          body:JSON.stringify({token,password})
+        });
+        const data=await res.json().catch(()=>({}));
+        if(!res.ok){
+          resetPasswordFeedback.textContent=data.message || 'El enlace venció o no es válido.';
+          return;
+        }
+        history.replaceState({},'',location.pathname);
+        resetPasswordForm.style.display='none';
+        loginForm.style.display='block';
+        loginHeading.textContent='Contraseña actualizada';
+        loginIntro.textContent='Ya puedes ingresar con tu nueva contraseña.';
+        loginFeedback.textContent='Tu acceso quedó protegido y las sesiones anteriores fueron cerradas.';
+      }catch(e){
+        resetPasswordFeedback.textContent='No fue posible actualizar la contraseña.';
+      }
+    });
+
+    logoutBtn.addEventListener('click',async()=>{
+      try{
+        await fetch(`${BACKEND_URL}/api/auth/logout`,{method:'POST',credentials:'same-origin'});
+      }finally{
+        currentAccount=null;
+        location.reload();
+      }
+    });
     mobileMenu.addEventListener('click',()=>sidebar.classList.toggle('open'));
     businessTypeSwitch.addEventListener('change',()=>{ 
       state.type = businessTypeSwitch.value; 
@@ -3059,14 +3198,38 @@
     });
 
     window.addEventListener('focus', async () => {
+      if(!currentAccount) return;
       const imported = importClientPortalAppointments();
       if (imported > 0) render();
       await syncOnlineState(false);
       render();
     });
 
+    async function restoreExistingSession(){
+      loginFeedback.textContent='Comprobando sesión segura...';
+      try{
+        const res=await fetch(`${BACKEND_URL}/api/auth/me`,{credentials:'same-origin'});
+        if(res.ok){
+          const data=await res.json();
+          await showApp(data.account);
+          return;
+        }
+        if(res.status===503) loginFeedback.textContent='El acceso seguro está pendiente de configurar en el servidor.';
+        else loginFeedback.textContent='';
+      }catch(e){
+        loginFeedback.textContent='';
+      }
+    }
+
     fillTypeSelects();
-    if(sessionStorage.getItem('kauzeAppV3Auth')==='true' || localStorage.getItem('kauzeAppV3RememberedAuth')==='true') showApp();
+    if(new URLSearchParams(location.search).get('reset_token')){
+      loginForm.style.display='none';
+      resetPasswordForm.style.display='block';
+      loginHeading.textContent='Crea una nueva contraseña';
+      loginIntro.textContent='Usa al menos 12 caracteres. Al guardar, cerraremos las sesiones anteriores.';
+    }else{
+      restoreExistingSession();
+    }
   </script>
 </body>
 </html>

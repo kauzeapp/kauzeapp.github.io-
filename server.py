@@ -1,218 +1,388 @@
 import http.server
-import socketserver
 import json
 import os
+import socketserver
 import sys
+from http.cookies import SimpleCookie
+from urllib.parse import urlparse
 
-# Puerto para desarrollo local o provisto por plataformas como Render/Railway
+from backend.auth import (
+    AccountUnavailable,
+    BusinessSelectionRequired,
+    InvalidCredentials,
+    current_session,
+    load_business_state,
+    login,
+    logout,
+    request_password_reset,
+    reset_password,
+    save_business_state,
+)
+from backend.db import DatabaseNotConfigured, is_configured
+
+
 PORT = int(os.environ.get("PORT", 8000))
 DB_FILE = "tasks_db.json"
 APP_STATE_FILE = "app_state_db.json"
+MAX_JSON_BYTES = 1_500_000
+COOKIE_SECURE = os.environ.get(
+    "KAUZE_COOKIE_SECURE", "1" if os.environ.get("RAILWAY_ENVIRONMENT") else "0"
+) != "0"
+COOKIE_NAME = "__Host-kauze_session" if COOKIE_SECURE else "kauze_session"
 
-class KauzeAdminHandler(http.server.SimpleHTTPRequestHandler):
+
+class KauzeHandler(http.server.SimpleHTTPRequestHandler):
+    server_version = "KauzeServer/1.0"
+
     def end_headers(self):
-        # Habilitar CORS para permitir llamadas API desde entornos locales o externos
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("Referrer-Policy", "same-origin")
+        self.send_header("X-Frame-Options", "SAMEORIGIN")
+        self.send_header("Permissions-Policy", "geolocation=(self), camera=(), microphone=()")
+        if self.path.startswith("/app"):
+            self.send_header(
+                "Content-Security-Policy",
+                "default-src 'self'; "
+                "base-uri 'self'; "
+                "connect-src 'self'; "
+                "font-src 'self' https://fonts.gstatic.com; "
+                "form-action 'self'; "
+                "frame-ancestors 'self'; "
+                "img-src 'self' data: https:; "
+                "script-src 'self' 'unsafe-inline'; "
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+            )
+        if self.path.startswith("/api/") or self.path.startswith("/app"):
+            self.send_header("Cache-Control", "no-store")
+        if COOKIE_SECURE or self.headers.get("X-Forwarded-Proto") == "https":
+            self.send_header(
+                "Strict-Transport-Security", "max-age=31536000; includeSubDomains"
+            )
         super().end_headers()
 
+    def _json_response(self, status, payload, extra_headers=None):
+        encoded = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(encoded)))
+        for name, value in extra_headers or []:
+            self.send_header(name, value)
+        self.end_headers()
+        self.wfile.write(encoded)
+
+    def _read_json(self):
+        try:
+            content_length = int(self.headers.get("Content-Length", "0"))
+        except ValueError as exc:
+            raise ValueError("Content-Length inválido.") from exc
+        if content_length <= 0 or content_length > MAX_JSON_BYTES:
+            raise ValueError("El contenido está vacío o supera el límite permitido.")
+        raw = self.rfile.read(content_length)
+        try:
+            return json.loads(raw.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise ValueError("JSON inválido.") from exc
+
+    def _cookie_token(self):
+        cookie = SimpleCookie()
+        try:
+            cookie.load(self.headers.get("Cookie", ""))
+        except Exception:
+            return None
+        morsel = cookie.get(COOKIE_NAME)
+        return morsel.value if morsel else None
+
+    def _session(self):
+        return current_session(self._cookie_token())
+
+    def _require_session(self):
+        account = self._session()
+        if not account:
+            self._json_response(401, {"error": "authentication_required"})
+            return None
+        return account
+
+    def _session_cookie(self, token, remember):
+        parts = [f"{COOKIE_NAME}={token}", "Path=/", "HttpOnly", "SameSite=Lax"]
+        if COOKIE_SECURE:
+            parts.append("Secure")
+        if remember:
+            parts.append("Max-Age=2592000")
+        return "; ".join(parts)
+
+    def _clear_session_cookie(self):
+        parts = [
+            f"{COOKIE_NAME}=",
+            "Path=/",
+            "HttpOnly",
+            "SameSite=Lax",
+            "Max-Age=0",
+        ]
+        if COOKIE_SECURE:
+            parts.append("Secure")
+        return "; ".join(parts)
+
+    def _origin_allowed(self):
+        origin = self.headers.get("Origin")
+        if not origin:
+            return True
+        origin_host = urlparse(origin).netloc.lower()
+        request_host = self.headers.get("Host", "").lower()
+        configured = {
+            item.strip().lower()
+            for item in os.environ.get("KAUZE_ALLOWED_ORIGINS", "").split(",")
+            if item.strip()
+        }
+        return origin_host == request_host or origin.rstrip("/").lower() in configured
+
     def do_OPTIONS(self):
-        self.send_response(200)
+        if not self._origin_allowed():
+            self.send_response(403)
+            self.end_headers()
+            return
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Max-Age", "600")
         self.end_headers()
 
     def do_GET(self):
-        # API: Obtener el estado de la aplicación (citas, tema, estado de atención)
-        if self.path == "/api/app-state":
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json; charset=utf-8")
-            self.end_headers()
-            
-            data = {}
-            if os.path.exists(APP_STATE_FILE):
-                try:
-                    with open(APP_STATE_FILE, 'r', encoding='utf-8') as f:
-                        data = json.load(f)
-                except Exception as e:
-                    print(f"Error leyendo app-state: {e}")
-            self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+        path = urlparse(self.path).path
+
+        if path == "/api/health":
+            self._json_response(
+                200,
+                {
+                    "status": "ok",
+                    "databaseConfigured": is_configured(),
+                    "authMode": "postgresql",
+                },
+            )
             return
 
-        # API: Obtener las tareas completadas desde la base de datos JSON
-        if self.path == "/api/tasks":
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json; charset=utf-8")
-            self.end_headers()
-            
-            data = {"checked_tasks": []}
-            if os.path.exists(DB_FILE):
-                try:
-                    with open(DB_FILE, 'r', encoding='utf-8') as f:
-                        data = json.load(f)
-                except Exception as e:
-                    print(f"Error leyendo base de datos: {e}")
-            self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
-            return
-            
-        # API: Obtener la estructura de tareas (fases/objetivos/tareas)
-        if self.path == "/api/tasks-structure":
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json; charset=utf-8")
-            self.end_headers()
-            
-            data = {"status": "default"}
-            struct_file = "tasks_structure.json"
-            if os.path.exists(struct_file):
-                try:
-                    with open(struct_file, 'r', encoding='utf-8') as f:
-                        data = json.load(f)
-                except Exception as e:
-                    print(f"Error leyendo estructura de tareas: {e}")
-            self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+        if path == "/api/auth/me":
+            try:
+                account = self._session()
+            except DatabaseNotConfigured:
+                self._json_response(503, {"error": "database_not_configured"})
+                return
+            if not account:
+                self._json_response(401, {"error": "authentication_required"})
+                return
+            self._json_response(200, {"account": account})
             return
 
-        # API: Obtener las notas internas
-        if self.path == "/api/notes":
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json; charset=utf-8")
-            self.end_headers()
-            
-            data = {"notes": []}
-            notes_file = "notes_db.json"
-            if os.path.exists(notes_file):
-                try:
-                    with open(notes_file, 'r', encoding='utf-8') as f:
-                        data = json.load(f)
-                except Exception as e:
-                    print(f"Error leyendo notas: {e}")
-            self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+        if path == "/api/app-state":
+            try:
+                account = self._require_session()
+                if not account:
+                    return
+                result = load_business_state(account["business"]["id"])
+                self._json_response(200, result["state"])
+            except DatabaseNotConfigured:
+                self._json_response(503, {"error": "database_not_configured"})
             return
 
-            
-        # Si se accede al subdominio admin.kauze.cl, servir el panel de administración en la raíz
-        host = self.headers.get('Host', '')
-        if host.startswith('admin') and (self.path == "/" or self.path == "/index.html"):
+        if path == "/api/tasks":
+            self._json_response(200, self._read_file_json(DB_FILE, {"checked_tasks": []}))
+            return
+
+        if path == "/api/tasks-structure":
+            self._json_response(
+                200, self._read_file_json("tasks_structure.json", {"status": "default"})
+            )
+            return
+
+        if path == "/api/notes":
+            self._json_response(200, self._read_file_json("notes_db.json", {"notes": []}))
+            return
+
+        host = self.headers.get("Host", "").split(":", 1)[0].lower()
+        if host.startswith("admin.") and path in ("/", "/index.html"):
             self.path = "/admin/index.html"
-            
-        # Servir archivos estáticos del proyecto de forma tradicional
+
         super().do_GET()
 
     def do_POST(self):
-        # API: Guardar el estado de la aplicación
-        if self.path == "/api/app-state":
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            
-            try:
-                data = json.loads(post_data.decode('utf-8'))
-                with open(APP_STATE_FILE, 'w', encoding='utf-8') as f:
-                    json.dump(data, f, indent=4, ensure_ascii=False)
-                
-                self.send_response(200)
-                self.send_header("Content-Type", "application/json; charset=utf-8")
-                self.end_headers()
-                self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
-            except Exception as e:
-                self.send_response(500)
-                self.send_header("Content-Type", "application/json")
-                self.end_headers()
-                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+        path = urlparse(self.path).path
+
+        if not self._origin_allowed():
+            self._json_response(403, {"error": "origin_not_allowed"})
             return
 
-        # API: Guardar la lista de tareas completadas
-        if self.path == "/api/tasks":
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            
+        if path == "/api/auth/login":
             try:
-                data = json.loads(post_data.decode('utf-8'))
-                if "checked_tasks" not in data:
-                    # Si envían la lista directo en lugar de un objeto con clave
-                    data = {"checked_tasks": data}
-                    
-                with open(DB_FILE, 'w', encoding='utf-8') as f:
-                    json.dump(data, f, indent=4, ensure_ascii=False)
-                
-                self.send_response(200)
-                self.send_header("Content-Type", "application/json; charset=utf-8")
-                self.end_headers()
-                self.wfile.write(json.dumps({"status": "success", "count": len(data["checked_tasks"])}).encode('utf-8'))
-            except Exception as e:
-                self.send_response(500)
-                self.send_header("Content-Type", "application/json")
-                self.end_headers()
-                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+                data = self._read_json()
+                result = login(
+                    data.get("email"),
+                    data.get("password"),
+                    bool(data.get("remember")),
+                    data.get("localSlug"),
+                    self.headers.get("User-Agent", ""),
+                )
+                self._json_response(
+                    200,
+                    {"status": "success", "account": result["account"]},
+                    [("Set-Cookie", self._session_cookie(result["token"], result["remember"]))],
+                )
+            except BusinessSelectionRequired as exc:
+                self._json_response(
+                    409,
+                    {
+                        "error": "business_selection_required",
+                        "businesses": exc.businesses,
+                    },
+                )
+            except (InvalidCredentials, AccountUnavailable):
+                self._json_response(
+                    401,
+                    {
+                        "error": "invalid_credentials",
+                        "message": "Correo o contraseña incorrectos.",
+                    },
+                )
+            except DatabaseNotConfigured:
+                self._json_response(503, {"error": "database_not_configured"})
+            except ValueError as exc:
+                self._json_response(400, {"error": "invalid_request", "message": str(exc)})
             return
 
-        # API: Guardar la estructura de tareas (fases/objetivos/tareas)
-        if self.path == "/api/tasks-structure":
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            
+        if path == "/api/auth/logout":
             try:
-                data = json.loads(post_data.decode('utf-8'))
-                with open("tasks_structure.json", 'w', encoding='utf-8') as f:
-                    json.dump(data, f, indent=4, ensure_ascii=False)
-                
-                self.send_response(200)
-                self.send_header("Content-Type", "application/json; charset=utf-8")
-                self.end_headers()
-                self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
-            except Exception as e:
-                self.send_response(500)
-                self.send_header("Content-Type", "application/json")
-                self.end_headers()
-                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+                logout(self._cookie_token())
+            except DatabaseNotConfigured:
+                pass
+            self._json_response(
+                200,
+                {"status": "success"},
+                [("Set-Cookie", self._clear_session_cookie())],
+            )
             return
 
-        # API: Guardar las notas internas
-        if self.path == "/api/notes":
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            
+        if path == "/api/auth/forgot-password":
             try:
-                data = json.loads(post_data.decode('utf-8'))
-                with open("notes_db.json", 'w', encoding='utf-8') as f:
-                    json.dump(data, f, indent=4, ensure_ascii=False)
-                
-                self.send_response(200)
-                self.send_header("Content-Type", "application/json; charset=utf-8")
-                self.end_headers()
-                self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
-            except Exception as e:
-                self.send_response(500)
-                self.send_header("Content-Type", "application/json")
-                self.end_headers()
-                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+                data = self._read_json()
+                request_password_reset(data.get("email"))
+            except Exception as exc:
+                print(f"No fue posible enviar la recuperación: {type(exc).__name__}")
+            self._json_response(
+                202,
+                {
+                    "status": "accepted",
+                    "message": "Si la cuenta existe, enviaremos un enlace de recuperación.",
+                },
+            )
             return
-            
-        self.send_response(404)
-        self.end_headers()
+
+        if path == "/api/auth/reset-password":
+            try:
+                data = self._read_json()
+                reset_password(data.get("token"), data.get("password"))
+                self._json_response(
+                    200,
+                    {
+                        "status": "success",
+                        "message": "Contraseña actualizada. Ya puedes iniciar sesión.",
+                    },
+                )
+            except DatabaseNotConfigured:
+                self._json_response(503, {"error": "database_not_configured"})
+            except ValueError as exc:
+                self._json_response(400, {"error": "invalid_reset", "message": str(exc)})
+            return
+
+        if path == "/api/app-state":
+            try:
+                account = self._require_session()
+                if not account:
+                    return
+                data = self._read_json()
+                result = save_business_state(
+                    account["business"]["id"], account["user"]["id"], data
+                )
+                self._json_response(200, {"status": "success", **result})
+            except DatabaseNotConfigured:
+                self._json_response(503, {"error": "database_not_configured"})
+            except ValueError as exc:
+                self._json_response(400, {"error": "invalid_state", "message": str(exc)})
+            return
+
+        if path == "/api/tasks":
+            self._save_tasks()
+            return
+
+        if path == "/api/tasks-structure":
+            self._save_json_endpoint("tasks_structure.json")
+            return
+
+        if path == "/api/notes":
+            self._save_json_endpoint("notes_db.json")
+            return
+
+        self._json_response(404, {"error": "not_found"})
+
+    def _read_file_json(self, filename, fallback):
+        if not os.path.exists(filename):
+            return fallback
+        try:
+            with open(filename, "r", encoding="utf-8") as file:
+                return json.load(file)
+        except Exception as exc:
+            print(f"Error leyendo {filename}: {exc}")
+            return fallback
+
+    def _save_json_endpoint(self, filename):
+        try:
+            data = self._read_json()
+            with open(filename, "w", encoding="utf-8") as file:
+                json.dump(data, file, indent=4, ensure_ascii=False)
+            self._json_response(200, {"status": "success"})
+        except ValueError as exc:
+            self._json_response(400, {"status": "error", "message": str(exc)})
+        except Exception as exc:
+            self._json_response(500, {"status": "error", "message": str(exc)})
+
+    def _save_tasks(self):
+        try:
+            data = self._read_json()
+            if "checked_tasks" not in data:
+                data = {"checked_tasks": data}
+            with open(DB_FILE, "w", encoding="utf-8") as file:
+                json.dump(data, file, indent=4, ensure_ascii=False)
+            self._json_response(
+                200, {"status": "success", "count": len(data["checked_tasks"])}
+            )
+        except ValueError as exc:
+            self._json_response(400, {"status": "error", "message": str(exc)})
+        except Exception as exc:
+            self._json_response(500, {"status": "error", "message": str(exc)})
+
+
+class KauzeThreadingServer(socketserver.ThreadingTCPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
 
 def run():
-    # Ajustar codificación para evitar problemas con emojis en consolas de Windows
     if sys.stdout:
         try:
-            sys.stdout.reconfigure(encoding='utf-8')
+            sys.stdout.reconfigure(encoding="utf-8")
         except AttributeError:
             pass
     if sys.stderr:
         try:
-            sys.stderr.reconfigure(encoding='utf-8')
+            sys.stderr.reconfigure(encoding="utf-8")
         except AttributeError:
             pass
-        
-    print(f"Iniciando servidor de desarrollo Kauze en el puerto {PORT}...")
-    print(f"Accede a la consola de administración en: http://localhost:{PORT}/admin")
-    
-    server_address = ('', PORT)
-    # Habilitar reutilización de dirección para evitar cuelgues rápidos al reiniciar
-    socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(server_address, KauzeAdminHandler) as httpd:
+
+    print(f"Iniciando servidor KAUZE en el puerto {PORT}...")
+    print(f"PostgreSQL configurado: {'sí' if is_configured() else 'no'}")
+    with KauzeThreadingServer(("", PORT), KauzeHandler) as httpd:
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
             print("\nServidor detenido por el usuario.")
+
 
 if __name__ == "__main__":
     run()

@@ -1,1 +1,1 @@
-web: python server.py
+web: python -m backend.migrate && python server.py
