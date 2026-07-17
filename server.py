@@ -54,6 +54,39 @@ class KauzeAdminHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
             return
             
+        # API: Obtener la estructura de tareas (fases/objetivos/tareas)
+        if self.path == "/api/tasks-structure":
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.end_headers()
+            
+            data = {"status": "default"}
+            struct_file = "tasks_structure.json"
+            if os.path.exists(struct_file):
+                try:
+                    with open(struct_file, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                except Exception as e:
+                    print(f"Error leyendo estructura de tareas: {e}")
+            self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+            return
+
+        # API: Obtener las notas internas
+        if self.path == "/api/notes":
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.end_headers()
+            
+            data = {"notes": []}
+            notes_file = "notes_db.json"
+            if os.path.exists(notes_file):
+                try:
+                    with open(notes_file, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                except Exception as e:
+                    print(f"Error leyendo notas: {e}")
+            self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+            return
 
             
         # Si se accede al subdominio admin.kauze.cl, servir el panel de administración en la raíz
@@ -104,6 +137,48 @@ class KauzeAdminHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header("Content-Type", "application/json; charset=utf-8")
                 self.end_headers()
                 self.wfile.write(json.dumps({"status": "success", "count": len(data["checked_tasks"])}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+            return
+
+        # API: Guardar la estructura de tareas (fases/objetivos/tareas)
+        if self.path == "/api/tasks-structure":
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            
+            try:
+                data = json.loads(post_data.decode('utf-8'))
+                with open("tasks_structure.json", 'w', encoding='utf-8') as f:
+                    json.dump(data, f, indent=4, ensure_ascii=False)
+                
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+            return
+
+        # API: Guardar las notas internas
+        if self.path == "/api/notes":
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            
+            try:
+                data = json.loads(post_data.decode('utf-8'))
+                with open("notes_db.json", 'w', encoding='utf-8') as f:
+                    json.dump(data, f, indent=4, ensure_ascii=False)
+                
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
             except Exception as e:
                 self.send_response(500)
                 self.send_header("Content-Type", "application/json")
