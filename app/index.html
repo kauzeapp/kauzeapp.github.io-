@@ -499,9 +499,33 @@
       </section>
 
       <section class="view" id="view-agenda"><div class="section-head"><div><h2>Agenda</h2><p>Reservas, horarios y estados.</p></div><button type="button" class="btn primary" id="openAppointmentFromAgenda" style="width:auto">Crear cita</button></div><article class="card table-wrap"><table><thead><tr><th>Hora</th><th>Cliente</th><th>Servicio</th><th>Profesional</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="agendaTable"></tbody></table></article></section>
-      <section class="view" id="view-clientes"><div class="section-head"><div><h2>Clientes</h2><p>Historial, valor y próxima acción.</p></div><button type="button" class="btn primary" style="width:auto">Agregar cliente</button></div><article class="card table-wrap"><table><thead><tr><th>Cliente</th><th>Último servicio</th><th>Próxima acción</th><th>Valor</th></tr></thead><tbody id="clientsTable"></tbody></table></article></section>
-      <section class="view" id="view-servicios"><div class="section-head"><div><h2>Servicios</h2><p>Catálogo de servicios del negocio.</p></div><button type="button" class="btn primary" style="width:auto">Nuevo servicio</button></div><div class="grid-3" id="servicesGrid"></div></section>
-      <section class="view" id="view-profesionales"><div class="section-head"><div><h2 id="professionalsTitle">Profesionales</h2><p>Equipo, disponibilidad y desempeño.</p></div><button type="button" class="btn primary" id="newProfessionalBtn" style="width:auto">Agregar profesional</button></div><div class="grid-3" id="professionalsGrid"></div><div class="notice" style="margin-top:14px">Los profesionales se guardan localmente en este navegador. Si asignas citas a un profesional y luego lo eliminas, las citas antiguas se mantienen como registro.</div></section>
+      <section class="view" id="view-clientes"><div class="section-head"><div><h2>Clientes</h2><p>Historial, valor y próxima acción.</p></div><button type="button" class="btn primary" id="addClientBtn" style="width:auto">Agregar cliente</button></div><article class="card table-wrap"><table><thead><tr><th>Cliente</th><th>Último servicio</th><th>Próxima acción</th><th>Valor</th></tr></thead><tbody id="clientsTable"></tbody></table></article></section>
+      <section class="view" id="view-servicios"><div class="section-head"><div><h2>Servicios</h2><p>Catálogo de servicios del negocio.</p></div><button type="button" class="btn primary" id="newServiceBtn" style="width:auto">Nuevo servicio</button></div><div class="grid-3" id="servicesGrid"></div></section>
+      <section class="view" id="view-profesionales">
+        <div class="section-head">
+          <div>
+            <h2 id="professionalsTitle">Profesionales</h2>
+            <p>Equipo, disponibilidad y desempeño.</p>
+          </div>
+          <button type="button" class="btn primary" id="newProfessionalBtn" style="width:auto">Agregar profesional</button>
+        </div>
+        <article class="card table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Profesional</th>
+                <th>Comisión</th>
+                <th>Días de Trabajo</th>
+                <th>Turnos / Horarios</th>
+                <th>Servicios Asignados</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="professionalsTableBody"></tbody>
+          </table>
+        </article>
+        <div class="notice" style="margin-top:14px">Los profesionales se guardan localmente en este navegador. Si asignas citas a un profesional y luego lo eliminas, las citas antiguas se mantienen como registro.</div>
+      </section>
       <section class="view" id="view-marketing"><div class="section-head"><div><h2>Marketing</h2><p>Promociones, fidelización y recuperación.</p></div><button type="button" class="btn primary" id="newCampaignBtn" style="width:auto">Crear campaña</button></div><div class="grid-3" id="marketingGrid"></div><div class="section-head"><div><h2>Análisis de integraciones</h2><p>Vista comercial para explicar cómo Kauze conectará WhatsApp e Instagram.</p></div></div><div class="grid-3" id="integrationGrid"></div><article class="card" style="margin-top:14px"><h3 style="font-family:Sora,sans-serif;font-size:18px;color:var(--navy);margin-bottom:8px">Checklist antes de conectar Meta</h3><div class="checklist"><div class="check-item"><span class="check-dot">1</span><span>Número de WhatsApp corporativo libre, sin WhatsApp normal activo en celular.</span></div><div class="check-item"><span class="check-dot">2</span><span>Cuenta de Meta Business verificada y permisos para WhatsApp Business Cloud API.</span></div><div class="check-item"><span class="check-dot">3</span><span>Plantillas de confirmación, recordatorio, reactivación y postventa aprobadas por Meta.</span></div><div class="check-item"><span class="check-dot">4</span><span>Instagram conectado para automatizar respuestas, seguimiento y recuperación de clientes.</span></div></div></article></section>
       <section class="view" id="view-facturacion"><div class="section-head"><div><h2>Facturación</h2><p>Ingresos, métodos de pago y movimientos.</p></div><button type="button" class="btn primary" style="width:auto">Registrar pago</button></div><div class="grid-4"><article class="card metric"><div class="label">Ventas del día</div><div class="value" id="billingToday">$0</div><div class="trend">Registradas</div></article><article class="card metric"><div class="label">Ticket promedio</div><div class="value" id="billingAvg">$0</div><div class="trend">Por atención</div></article><article class="card metric"><div class="label">Pagos pendientes</div><div class="value">2</div><div class="trend warn">Revisar hoy</div></article><article class="card metric"><div class="label">Método principal</div><div class="value">Débito</div><div class="trend">Mayor uso</div></article></div><div class="section-head"><div><h2>Últimos pagos</h2><p>Movimiento temporal para demo.</p></div></div><article class="card table-wrap"><table><thead><tr><th>Cliente</th><th>Servicio</th><th>Método</th><th>Monto</th></tr></thead><tbody id="billingTable"></tbody></table></article></section>
       <section class="view" id="view-ajustes">
@@ -730,30 +754,158 @@
       <div class="modal-head">
         <div>
           <h2 id="professionalModalTitle">Agregar profesional</h2>
-          <p>Agrega o edita miembros del equipo. En barbería se verán como barberos; en otros rubros como técnicas, lashistas, esteticistas o estilistas.</p>
+          <p>Agrega o edita miembros del equipo, comisiones, horarios y servicios autorizados.</p>
         </div>
         <button class="close-modal" type="button" id="closeProfessionalModal">×</button>
       </div>
       <form id="professionalForm" onsubmit="return false;">
         <div class="form-grid">
-          <div class="field-group full">
+          <div class="field-group">
             <label for="proName">Nombre</label>
             <input class="field" id="proName" type="text" placeholder="Ej: Carlos Ríos" required>
           </div>
-          <div class="field-group full">
+          <div class="field-group">
             <label for="proRole">Cargo / especialidad</label>
             <input class="field" id="proRole" type="text" placeholder="Ej: Barbero senior" required>
           </div>
-          <div class="field-group full">
+          <div class="field-group">
+            <label for="proCommission">Porcentaje de Comisión (%)</label>
+            <input class="field" id="proCommission" type="number" min="0" max="100" placeholder="Ej: 45" value="0">
+          </div>
+          <div class="field-group">
             <label for="proNote">Nota visible</label>
-            <input class="field" id="proNote" type="text" placeholder="Ej: Especialista en cortes degradados">
+            <input class="field" id="proNote" type="text" placeholder="Ej: Especialista en degradados">
+          </div>
+
+          
+          <div class="field-group full">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label style="font-weight: 600;">Turnos / Horarios</label>
+              <button class="mini-btn" type="button" id="proAddShiftBtn" style="font-size: 11px;">➕ Agregar turno</button>
+            </div>
+            <div id="proShiftsContainer" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Se inyectarán los turnos dinámicamente -->
+            </div>
+          </div>
+
+          <div class="field-group full">
+            <label style="font-weight: 600; margin-bottom: 6px; display: block;">Servicios Asignados (Si no seleccionas ninguno, se asume disponible para todos)</label>
+            <div id="proServicesChecklist" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 120px; overflow-y: auto; border: 1px solid var(--border); padding: 10px; border-radius: 8px; background: var(--card);">
+              <!-- Se inyectarán los servicios dinámicamente -->
+            </div>
           </div>
         </div>
-        <div class="modal-actions">
+        <div class="modal-actions" style="margin-top: 20px;">
           <button class="btn outline" type="button" id="cancelProfessionalForm">Cancelar</button>
           <button class="btn primary" type="button" style="width:auto" id="saveProfessionalBtn">Guardar profesional</button>
         </div>
         <div class="appointment-created" id="professionalSavedMsg">Profesional guardado correctamente.</div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="clientModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="clientModalTitle">
+      <div class="modal-head">
+        <div>
+          <h2 id="clientModalTitle">Agregar cliente</h2>
+          <p>Registra un cliente manualmente en el historial de la barbería.</p>
+        </div>
+        <button class="close-modal" type="button" id="closeClientModal">×</button>
+      </div>
+      <form id="clientForm" onsubmit="return false;">
+        <div class="form-grid">
+          <div class="field-group">
+            <label for="cliName">Nombre del cliente</label>
+            <input class="field" id="cliName" type="text" placeholder="Ej: Esteban Carrero" required>
+          </div>
+          <div class="field-group">
+            <label for="cliPhone">Número de Teléfono / WhatsApp</label>
+            <input class="field" id="cliPhone" type="tel" placeholder="Ej: +56 9 1234 5678" required>
+          </div>
+          <div class="field-group">
+            <label for="cliLastService">Último servicio</label>
+            <select class="field" id="cliLastService"></select>
+          </div>
+          <div class="field-group">
+            <label for="cliTotalBilling">Valor total pagado ($)</label>
+            <input class="field" id="cliTotalBilling" type="number" min="0" placeholder="Ej: 12000" value="0">
+          </div>
+          <div class="field-group">
+            <label for="cliStars">Valoración / Estrellas</label>
+            <select class="field" id="cliStars">
+              <option value="5">⭐⭐⭐⭐⭐ (Excelente)</option>
+              <option value="4">⭐⭐⭐⭐ (Bueno)</option>
+              <option value="3">⭐⭐⭐ (Regular)</option>
+              <option value="2">⭐⭐ (Mala conducta)</option>
+              <option value="1">⭐ (Conflictivo)</option>
+            </select>
+          </div>
+          <div class="field-group full">
+            <label for="cliNextAction">Próxima acción / Estado</label>
+            <input class="field" id="cliNextAction" type="text" placeholder="Ej: Enviar recordatorio en 21 días">
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn outline" type="button" id="cancelClientForm">Cancelar</button>
+          <button class="btn primary" type="button" style="width:auto" id="saveClientBtn">Guardar cliente</button>
+        </div>
+        <div class="appointment-created" id="clientSavedMsg">Cliente guardado correctamente.</div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="serviceModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="serviceModalTitle">
+      <div class="modal-head">
+        <div>
+          <h2 id="serviceModalTitle">Nuevo servicio</h2>
+          <p>Agrega un servicio al catálogo de tu negocio. Puedes elegir una sugerencia del rubro o escribir uno personalizado.</p>
+        </div>
+        <button class="close-modal" type="button" id="closeServiceModal">×</button>
+      </div>
+      <form id="serviceForm" onsubmit="return false;">
+        <div class="form-grid">
+          <div class="field-group full">
+            <label style="font-weight: 600; margin-bottom: 6px; display: block;">Sugerencias típicas del rubro</label>
+            <div id="serviceSuggestions" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+              <!-- Se inyectarán sugerencias dinámicamente -->
+            </div>
+          </div>
+          
+          <div class="field-group">
+            <label for="serName">Nombre del servicio</label>
+            <input class="field" id="serName" type="text" placeholder="Ej: Perfilado de barba" required>
+          </div>
+          <div class="field-group">
+            <label for="serPrice">Valor ($ CLP)</label>
+            <input class="field" id="serPrice" type="number" min="0" placeholder="Ej: 12000" required>
+          </div>
+          <div class="field-group">
+            <label for="serDuration">Duración estimada</label>
+            <select class="field" id="serDuration" required>
+              <option value="15 min">15 min</option>
+              <option value="20 min">20 min</option>
+              <option value="25 min">25 min</option>
+              <option value="30 min">30 min</option>
+              <option value="45 min">45 min</option>
+              <option value="60 min">60 min (1 hora)</option>
+              <option value="75 min">75 min</option>
+              <option value="90 min">90 min (1.5 horas)</option>
+              <option value="120 min">120 min (2 horas)</option>
+              <option value="150 min">150 min (2.5 horas)</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="serProfessional">Asignar Profesional</label>
+            <select class="field" id="serProfessional"></select>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn outline" type="button" id="cancelServiceForm">Cancelar</button>
+          <button class="btn primary" type="button" style="width:auto" id="saveServiceBtn">Guardar servicio</button>
+        </div>
+        <div class="appointment-created" id="serviceSavedMsg">Servicio guardado correctamente.</div>
       </form>
     </div>
   </div>
@@ -1564,7 +1716,7 @@
     const agendaTable = document.getElementById('agendaTable');
     const clientsTable = document.getElementById('clientsTable');
     const servicesGrid = document.getElementById('servicesGrid');
-    const professionalsGrid = document.getElementById('professionalsGrid');
+    const professionalsTableBody = document.getElementById('professionalsTableBody');
     const marketingGrid = document.getElementById('marketingGrid');
     const billingTable = document.getElementById('billingTable');
     const saveSettings = document.getElementById('saveSettings');
@@ -1754,7 +1906,16 @@
     }
 
     function normalizeProfessional(row){
-      return { id: uid(), name: row[0], role: row[1], note: row[2] || '' };
+      return { 
+        id: uid(), 
+        name: row[0], 
+        role: row[1], 
+        note: row[2] || '',
+        commission: 45,
+        days: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'],
+        shifts: ['09:00 - 18:00'],
+        services: []
+      };
     }
 
     function getProfessionals(){
@@ -1769,6 +1930,63 @@
     function setProfessionals(list){
       if (!state.professionals) state.professionals = {};
       state.professionals[state.type] = list;
+      saveState();
+    }
+
+    function getClients() {
+      if (!state.clients) state.clients = {};
+      if (!state.clients[state.type]) {
+        state.clients[state.type] = currentProfile().clients.map((c, i) => ({
+          id: 'cli-' + i,
+          name: c[0],
+          phone: '+56 9 ' + (87654321 - i * 11111),
+          lastService: c[1],
+          nextAction: c[2],
+          totalBilling: c[3],
+          stars: 5
+        }));
+        saveState();
+      }
+      return state.clients[state.type];
+    }
+
+    function getClientStars(clientName) {
+      if (!clientName) return '⭐⭐⭐⭐⭐';
+      const c = getClients().find(x => x.name.toLowerCase() === clientName.trim().toLowerCase());
+      const starsNum = c ? Number(c.stars || 5) : 5;
+      return '⭐'.repeat(starsNum);
+    }
+
+    function setClients(list) {
+      if (!state.clients) state.clients = {};
+      state.clients[state.type] = list;
+      saveState();
+    }
+
+    function getServices() {
+      if (!state.services) state.services = {};
+      if (!state.services[state.type]) {
+        state.services[state.type] = currentProfile().services.map((s, i) => ({
+          id: 'ser-' + i,
+          name: s[0],
+          duration: s[1],
+          price: s[2],
+          professional: 'Todos'
+        }));
+        saveState();
+      }
+      return state.services[state.type];
+    }
+
+    // Assign price helper from active services
+    window.servicePrice = function(serviceName) {
+      const s = getServices().find(x => x.name.toLowerCase() === serviceName.toLowerCase());
+      return s ? Number(s.price) : 12000;
+    };
+
+    function setServices(list) {
+      if (!state.services) state.services = {};
+      state.services[state.type] = list;
       saveState();
     }
 
@@ -1796,8 +2014,8 @@
     }
 
     function servicePrice(serviceName){
-      const service = currentProfile().services.find(s => s[0] === serviceName);
-      return service ? Number(service[2]) : 0;
+      const service = getServices().find(s => s.name === serviceName);
+      return service ? Number(service.price) : 0;
     }
 
     function activeAppointments(){
@@ -1874,20 +2092,66 @@
         const confirmBtn = a.source === 'cliente' && a.status !== 'Confirmada'
           ? `<button class="mini-btn" data-confirm-appt="${a.id}">Confirmar</button>`
           : '';
-        return `<tr><td>${a.date}<br><strong>${a.time}</strong></td><td>${a.client}${sourceLabel(a)}</td><td>${a.service}</td><td>${a.professional}</td><td><span class="${statusClass(a.status)}">${a.status}</span></td><td><div class="row-actions">${confirmBtn}<button class="mini-btn" data-edit-appt="${a.id}">Editar</button><button class="mini-btn danger" data-delete-appt="${a.id}">Eliminar</button></div></td></tr>`;
+        const stars = getClientStars(a.client);
+        return `<tr><td>${a.date}<br><strong>${a.time}</strong></td><td>${a.client} <span style="color: #fbbf24; font-size: 11.5px; white-space: nowrap; margin-left: 4px;" title="Valoración">${stars}</span>${sourceLabel(a)}</td><td>${a.service}</td><td>${a.professional}</td><td><span class="${statusClass(a.status)}">${a.status}</span></td><td><div class="row-actions">${confirmBtn}<button class="mini-btn" data-edit-appt="${a.id}">Editar</button><button class="mini-btn danger" data-delete-appt="${a.id}">Eliminar</button></div></td></tr>`;
       }).join('') : `<tr><td colspan="6"><div class="empty-state">Agenda vacía. Usa “Crear cita” para agregar una reserva.</div></td></tr>`;
 
-      const clientRows = buildClientsFromAppointments(appointments, p.clients);
-      clientsTable.innerHTML=clientRows.map(c=>`<tr><td><strong>${c[0]}</strong></td><td>${c[1]}</td><td>${c[2]}</td><td>${fmt(c[3])}</td></tr>`).join('');
+      const clientRows = buildClientsFromAppointments(appointments, getClients());
+      clientsTable.innerHTML = clientRows.map(c => {
+        const stars = getClientStars(c.name);
+        return `<tr><td><strong>${c.name}</strong> <span style="color: #fbbf24; font-size: 11.5px; white-space: nowrap; margin-left: 4px;" title="Valoración">${stars}</span><br><span style="font-size: 11px; color: var(--muted); font-weight: normal;">${c.phone}</span></td><td>${c.lastService}</td><td>${c.nextAction}</td><td><strong>${fmt(c.totalBilling)}</strong></td></tr>`;
+      }).join('');
 
-      servicesGrid.innerHTML=p.services.map(s=>`<article class="card service-card"><h3>${s[0]}</h3><p>Duración estimada: ${s[1]}</p><div class="price">${fmt(s[2])}</div></article>`).join('');
-      professionalsGrid.innerHTML=professionals.length ? professionals.map(x=>`<article class="card pro-card"><div class="avatar">${x.name.charAt(0)}</div><h3>${x.name}</h3><p>${x.role}</p><p class="muted-small">${x.note || 'Sin nota adicional.'}</p><span class="status" style="margin-top:12px">${countAppointmentsForProfessional(x.name)} cita(s) hoy</span><div class="row-actions" style="margin-top:14px"><button class="mini-btn" data-edit-pro="${x.id}">Editar</button><button class="mini-btn danger" data-delete-pro="${x.id}">Eliminar</button></div></article>`).join('') : `<div class="empty-state">Aún no hay profesionales. Agrega el primero para poder asignarlo a la agenda.</div>`;
+      servicesGrid.innerHTML = getServices().map(s => `
+        <article class="card service-card" style="position: relative;">
+          <h3>${s.name}</h3>
+          <p>Duración estimada: ${s.duration}</p>
+          <p class="muted-small" style="margin-bottom: 8px;">Asignado a: <strong>${s.professional || 'Todos'}</strong></p>
+          <div class="price">${fmt(s.price)}</div>
+          <div class="row-actions" style="margin-top:14px; display: flex; gap: 8px;">
+            <button class="mini-btn" data-edit-service="${s.id}">Editar</button>
+            <button class="mini-btn danger" data-delete-service="${s.id}">Eliminar</button>
+          </div>
+        </article>
+      `).join('');
+
+      professionalsTableBody.innerHTML = professionals.length ? professionals.map(x => {
+        const comText = typeof x.commission !== 'undefined' ? `${x.commission}%` : '45%';
+        const daysText = x.days && x.days.length ? x.days.map(d => d.slice(0,3)).join(', ') : 'Ninguno';
+        const shiftsText = x.shifts && x.shifts.length ? x.shifts.join('<br>') : 'Sin turnos';
+        const servicesText = x.services && x.services.length ? x.services.join(', ') : 'Disponible para todo';
+        
+        return `
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="avatar">${x.name.charAt(0)}</div>
+                <div>
+                  <strong>${x.name}</strong><br>
+                  <small style="color: var(--muted)">${x.role}</small>
+                </div>
+              </div>
+            </td>
+            <td><strong>${comText}</strong></td>
+            <td>${daysText}</td>
+            <td><small>${shiftsText}</small></td>
+            <td><small style="display:block; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${servicesText}">${servicesText}</small></td>
+            <td>
+              <div class="row-actions">
+                <button class="mini-btn" data-edit-pro="${x.id}">Editar</button>
+                <button class="mini-btn danger" data-delete-pro="${x.id}">Eliminar</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('') : `<tr><td colspan="6"><div class="empty-state">Aún no hay profesionales. Agrega el primero para poder asignarlo a la agenda.</div></td></tr>`;
       marketingGrid.innerHTML=campaigns.length ? campaigns.map(c=>`<article class="card ${c.type}"><h3>${c.title}</h3><p>${c.description}</p><div class="muted-small"><strong>Canal:</strong> ${c.channel} · <strong>Estado:</strong> ${c.status}</div><div class="row-actions" style="margin-top:14px"><button class="mini-btn" data-edit-campaign="${c.id}">Editar</button><button class="mini-btn danger" data-delete-campaign="${c.id}">Eliminar</button></div></article>`).join('') : `<div class="empty-state">Aún no hay campañas. Crea una promoción, fidelización o recuperación.</div>`;
       renderIntegrationAnalysis(pendingCount, campaigns);
       billingTable.innerHTML=active.map((a,i)=>`<tr><td>${a.client}</td><td>${a.service}</td><td>${i%2?'Transferencia':'Débito'}</td><td><strong>${fmt(servicePrice(a.service))}</strong></td></tr>`).join('') || `<tr><td colspan="4"><div class="empty-state">Sin movimientos todavía.</div></td></tr>`;
       bindAppointmentRowActions();
       bindProfessionalActions();
       bindCampaignActions();
+      bindServiceActions();
     }
 
     
@@ -1989,9 +2253,13 @@
       document.querySelectorAll('[data-delete-campaign]').forEach(btn => btn.addEventListener('click', () => deleteCampaign(btn.dataset.deleteCampaign)));
     }
 
+    function bindServiceActions(){
+      document.querySelectorAll('[data-edit-service]').forEach(btn => btn.addEventListener('click', () => editService(btn.dataset.editService)));
+      document.querySelectorAll('[data-delete-service]').forEach(btn => btn.addEventListener('click', () => deleteService(btn.dataset.deleteService)));
+    }
+
     function fillAppointmentSelects(){
-      const p = currentProfile();
-      apptService.innerHTML = p.services.map(s => `<option value="${s[0]}">${s[0]} · ${fmt(s[2])}</option>`).join('');
+      apptService.innerHTML = getServices().map(s => `<option value="${s.name}">${s.name} · ${fmt(s.price)}</option>`).join('');
       apptProfessional.innerHTML = getProfessionals().map(pro => `<option value="${pro.name}">${pro.name} · ${pro.role}</option>`).join('');
     }
 
@@ -2057,14 +2325,74 @@
       professionalModalTitle.textContent = id ? 'Editar profesional' : currentProfile().newPro;
       professionalSavedMsg.style.display = 'none';
       const pro = id ? getProfessionals().find(x => x.id === id) : null;
+      
       proName.value = pro?.name || '';
       proRole.value = pro?.role || '';
       proNote.value = pro?.note || '';
+      document.getElementById('proCommission').value = typeof pro?.commission !== 'undefined' ? pro.commission : 45;
+      
+      const container = document.getElementById('proShiftsContainer');
+      container.innerHTML = '';
+      if (pro && pro.shifts && pro.shifts.length) {
+        pro.shifts.forEach(shift => {
+          if (typeof shift === 'string') {
+            // Backward compatibility for old string format shifts
+            const parts = shift.split(' - ');
+            addShiftRow('Lunes', parts[0] || '09:00', parts[1] || '18:00');
+          } else {
+            addShiftRow(shift.day || 'Lunes', shift.start || '09:00', shift.end || '18:00');
+          }
+        });
+      } else {
+        addShiftRow('Lunes', '09:00', '18:00');
+      }
+      
+      const serviceChecklist = document.getElementById('proServicesChecklist');
+      const allServices = getServices();
+      serviceChecklist.innerHTML = allServices.map(s => {
+        const isChecked = pro ? (pro.services || []).includes(s.name) : false;
+        return `
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: normal; cursor: pointer;">
+            <input type="checkbox" name="proServices" value="${s.name}" ${isChecked ? 'checked' : ''}>
+            ${s.name}
+          </label>
+        `;
+      }).join('');
+      
       professionalModal.classList.add('open');
       professionalModal.setAttribute('aria-hidden','false');
       document.body.style.overflow = 'hidden';
       setTimeout(()=>proName.focus(), 50);
     }
+
+    function addShiftRow(day='Lunes', start='09:00', end='18:00') {
+      const container = document.getElementById('proShiftsContainer');
+      const row = document.createElement('div');
+      row.className = 'shift-row';
+      row.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 8px;';
+      
+      const weekDays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+      const options = weekDays.map(d => `<option value="${d}" ${d === day ? 'selected' : ''}>${d}</option>`).join('');
+      
+      row.innerHTML = `
+        <select class="field" style="width: 120px; padding: 6px 10px;" required>
+          ${options}
+        </select>
+        <input type="time" class="field" style="width: 100px; padding: 6px 10px;" value="${start}" required>
+        <span style="font-size: 13px;">a</span>
+        <input type="time" class="field" style="width: 100px; padding: 6px 10px;" value="${end}" required>
+        <button type="button" class="mini-btn danger" onclick="this.parentElement.remove()" style="padding: 6px 10px;">❌</button>
+      `;
+      container.appendChild(row);
+    }
+
+    // Bind add shift button
+    setTimeout(() => {
+      const addShiftBtn = document.getElementById('proAddShiftBtn');
+      if (addShiftBtn) {
+        addShiftBtn.addEventListener('click', () => addShiftRow('Lunes', '09:00', '18:00'));
+      }
+    }, 100);
 
     function closeProfessionalModal(){
       professionalModal.classList.remove('open');
@@ -2072,18 +2400,51 @@
       document.body.style.overflow = '';
       editingProfessionalId = null;
       professionalForm.reset();
+      document.getElementById('proShiftsContainer').innerHTML = '';
     }
 
     function saveProfessionalFromModal(){
-      const data = { id: editingProfessionalId || uid(), name: proName.value.trim(), role: proRole.value.trim(), note: proNote.value.trim() };
+      const shifts = [];
+      document.querySelectorAll('#proShiftsContainer .shift-row').forEach(row => {
+        const daySelect = row.querySelector('select');
+        const inputs = row.querySelectorAll('input[type="time"]');
+        if (daySelect && inputs.length === 2 && inputs[0].value && inputs[1].value) {
+          shifts.push({
+            day: daySelect.value,
+            start: inputs[0].value,
+            end: inputs[1].value
+          });
+        }
+      });
+      
+      const services = [];
+      document.querySelectorAll('input[name="proServices"]:checked').forEach(cb => services.push(cb.value));
+      
+      const commissionVal = Number(document.getElementById('proCommission').value || 0);
+
+      // Extract unique days list from shifts
+      const uniqueDays = Array.from(new Set(shifts.map(s => s.day)));
+
+      const data = { 
+        id: editingProfessionalId || uid(), 
+        name: proName.value.trim(), 
+        role: proRole.value.trim(), 
+        note: proNote.value.trim(),
+        commission: commissionVal,
+        days: uniqueDays,
+        shifts: shifts,
+        services: services
+      };
+      
       if (!data.name || !data.role) { (!data.name ? proName : proRole).focus(); return; }
+      
       let list = getProfessionals();
       if (editingProfessionalId) list = list.map(x => x.id === editingProfessionalId ? data : x);
       else list = [...list, data];
+      
       setProfessionals(list);
-      professionalSavedMsg.style.display = 'block';
       render();
-      setTimeout(closeProfessionalModal, 550);
+      closeProfessionalModal();
     }
 
     function deleteProfessional(id){
@@ -2125,9 +2486,8 @@
       if (editingCampaignId) list = list.map(x => x.id === editingCampaignId ? data : x);
       else list = [...list, data];
       setCampaigns(list);
-      campaignSavedMsg.style.display = 'block';
       render();
-      setTimeout(closeCampaignModal, 550);
+      closeCampaignModal();
     }
 
     function deleteCampaign(id){
@@ -2136,6 +2496,221 @@
       if (!confirm(`¿Eliminar la campaña "${campaign.title}"?`)) return;
       setCampaigns(getCampaigns().filter(x => x.id !== id));
       render();
+    }
+
+    const categorySuggestions = {
+      barberia: [
+        { name: "Perfilado de cejas", price: 8000, duration: "15 min" },
+        { name: "Corte con diseño", price: 15000, duration: "45 min" },
+        { name: "Lavado premium", price: 5000, duration: "15 min" },
+        { name: "Afeitado clásico navaja", price: 12000, duration: "30 min" },
+        { name: "Masaje capilar", price: 10000, duration: "30 min" }
+      ],
+      manicure: [
+        { name: "Nail art a mano alzada", price: 8000, duration: "30 min" },
+        { name: "Pedicure express", price: 15000, duration: "45 min" },
+        { name: "Tratamiento de parafina", price: 10000, duration: "30 min" },
+        { name: "Esmaltado semipermanente", price: 14000, duration: "45 min" },
+        { name: "Uñas acrílicas", price: 35000, duration: "120 min" }
+      ],
+      pestanas: [
+        { name: "Lifting cejas / Brow lamination", price: 20000, duration: "60 min" },
+        { name: "Extensiones híbridas", price: 38000, duration: "120 min" },
+        { name: "Tinte de pestañas", price: 8000, duration: "20 min" },
+        { name: "Retoque volumen ruso", price: 25000, duration: "90 min" },
+        { name: "Diseño de mirada (Visagismo)", price: 12000, duration: "30 min" }
+      ],
+      estetica: [
+        { name: "Peeling químico", price: 35000, duration: "60 min" },
+        { name: "Limpieza microdermoabrasión", price: 30000, duration: "45 min" },
+        { name: "Masaje descontracturante", price: 28000, duration: "60 min" },
+        { name: "Tratamiento anti-age", price: 45000, duration: "90 min" },
+        { name: "Radiofrecuencia facial", price: 40000, duration: "60 min" }
+      ],
+      peluqueria: [
+        { name: "Balayage", price: 75000, duration: "150 min" },
+        { name: "Masaje hidratación profunda", price: 25000, duration: "60 min" },
+        { name: "Peinado trenzas", price: 15000, duration: "45 min" },
+        { name: "Corte varón", price: 12000, duration: "30 min" },
+        { name: "Alisado keratina", price: 60000, duration: "120 min" }
+      ]
+    };
+
+    let editingServiceId = null;
+
+    function openServiceModal(id=null) {
+      editingServiceId = id;
+      const modal = document.getElementById('serviceModal');
+      const title = document.getElementById('serviceModalTitle');
+      const savedMsg = document.getElementById('serviceSavedMsg');
+      savedMsg.style.display = 'none';
+
+      title.textContent = id ? 'Editar servicio' : 'Nuevo servicio';
+
+      const sName = document.getElementById('serName');
+      const sPrice = document.getElementById('serPrice');
+      const sDuration = document.getElementById('serDuration');
+      const sProfessional = document.getElementById('serProfessional');
+
+      const professionals = getProfessionals();
+      sProfessional.innerHTML = '<option value="Todos">Todos (Disponible para asignar)</option>' + 
+        professionals.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+
+      const service = id ? getServices().find(x => x.id === id) : null;
+      sName.value = service?.name || '';
+      sPrice.value = service?.price || '';
+      sDuration.value = service?.duration || '45 min';
+      sProfessional.value = service?.professional || 'Todos';
+
+      const suggestionsContainer = document.getElementById('serviceSuggestions');
+      suggestionsContainer.innerHTML = '';
+      const list = categorySuggestions[state.type] || categorySuggestions.barberia;
+      list.forEach(sugg => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'mini-btn';
+        chip.style.margin = '2px';
+        chip.textContent = `${sugg.name} (${fmt(sugg.price)})`;
+        chip.addEventListener('click', () => {
+          sName.value = sugg.name;
+          sPrice.value = sugg.price;
+          sDuration.value = sugg.duration;
+        });
+        suggestionsContainer.appendChild(chip);
+      });
+
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => sName.focus(), 50);
+    }
+
+    function closeServiceModal() {
+      const modal = document.getElementById('serviceModal');
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      editingServiceId = null;
+      document.getElementById('serviceForm').reset();
+    }
+
+    function saveServiceFromModal() {
+      const sName = document.getElementById('serName');
+      const sPrice = document.getElementById('serPrice');
+      const sDuration = document.getElementById('serDuration');
+      const sProfessional = document.getElementById('serProfessional');
+
+      const data = {
+        id: editingServiceId || uid(),
+        name: sName.value.trim(),
+        price: Number(sPrice.value || 0),
+        duration: sDuration.value,
+        professional: sProfessional.value
+      };
+
+      if (!data.name || !data.price) {
+        (!data.name ? sName : sPrice).focus();
+        return;
+      }
+
+      let list = getServices();
+      if (editingServiceId) {
+        list = list.map(x => x.id === editingServiceId ? data : x);
+      } else {
+        list.push(data);
+      }
+
+      setServices(list);
+      render();
+      closeServiceModal();
+    }
+
+    function editService(id) {
+      openServiceModal(id);
+    }
+
+    function deleteService(id) {
+      const service = getServices().find(x => x.id === id);
+      if (!service) return;
+      if (!confirm(`¿Eliminar el servicio "${service.name}" del catálogo?`)) return;
+      setServices(getServices().filter(x => x.id !== id));
+      render();
+    }
+
+    let editingClientId = null;
+
+    function openClientModal(id=null) {
+      editingClientId = id;
+      const modal = document.getElementById('clientModal');
+      const savedMsg = document.getElementById('clientSavedMsg');
+      savedMsg.style.display = 'none';
+
+      const cName = document.getElementById('cliName');
+      const cPhone = document.getElementById('cliPhone');
+      const cLastService = document.getElementById('cliLastService');
+      const cTotalBilling = document.getElementById('cliTotalBilling');
+      const cNextAction = document.getElementById('cliNextAction');
+      const cStars = document.getElementById('cliStars');
+
+      const services = getServices();
+      cLastService.innerHTML = services.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+
+      const client = id ? getClients().find(x => x.id === id) : null;
+      cName.value = client?.name || '';
+      cPhone.value = client?.phone || '';
+      cLastService.value = client?.lastService || (services[0]?.name || '');
+      cTotalBilling.value = client?.totalBilling || 0;
+      cNextAction.value = client?.nextAction || 'Enviar seguimiento post-servicio';
+      cStars.value = client?.stars || 5;
+
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => cName.focus(), 50);
+    }
+
+    function closeClientModal() {
+      const modal = document.getElementById('clientModal');
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      editingClientId = null;
+      document.getElementById('clientForm').reset();
+    }
+
+    function saveClientFromModal() {
+      const cName = document.getElementById('cliName');
+      const cPhone = document.getElementById('cliPhone');
+      const cLastService = document.getElementById('cliLastService');
+      const cTotalBilling = document.getElementById('cliTotalBilling');
+      const cNextAction = document.getElementById('cliNextAction');
+      const cStars = document.getElementById('cliStars');
+
+      const data = {
+        id: editingClientId || 'cli-' + Date.now(),
+        name: cName.value.trim(),
+        phone: cPhone.value.trim(),
+        lastService: cLastService.value,
+        totalBilling: Number(cTotalBilling.value || 0),
+        nextAction: cNextAction.value.trim(),
+        stars: Number(cStars.value || 5)
+      };
+
+      if (!data.name || !data.phone) {
+        (!data.name ? cName : cPhone).focus();
+        return;
+      }
+
+      let list = getClients();
+      if (editingClientId) {
+        list = list.map(x => x.id === editingClientId ? data : x);
+      } else {
+        list.push(data);
+      }
+
+      setClients(list);
+      render();
+      closeClientModal();
     }
 
     async function showApp(){ 
@@ -2359,9 +2934,8 @@
       if (editingAppointmentId) list = list.map(a => a.id === editingAppointmentId ? data : a);
       else list = [...list, data];
       setAppointments(list);
-      appointmentSavedMsg.style.display = 'block';
       render();
-      setTimeout(closeApptModal, 550);
+      closeApptModal();
     }
 
     appointmentForm.addEventListener('submit', e => {
@@ -2378,6 +2952,22 @@
     professionalModal.addEventListener('click', e => { if(e.target === professionalModal) closeProfessionalModal(); });
     professionalForm.addEventListener('submit', e => { e.preventDefault(); saveProfessionalFromModal(); });
     saveProfessionalBtn.addEventListener('click', saveProfessionalFromModal);
+
+    // Event listeners for Client modal
+    document.getElementById('addClientBtn').addEventListener('click', () => openClientModal());
+    document.getElementById('closeClientModal').addEventListener('click', closeClientModal);
+    document.getElementById('cancelClientForm').addEventListener('click', closeClientModal);
+    document.getElementById('clientModal').addEventListener('click', e => { if (e.target.id === 'clientModal') closeClientModal(); });
+    document.getElementById('clientForm').addEventListener('submit', e => { e.preventDefault(); saveClientFromModal(); });
+    document.getElementById('saveClientBtn').addEventListener('click', saveClientFromModal);
+
+    // Event listeners for Service modal
+    document.getElementById('newServiceBtn').addEventListener('click', () => openServiceModal());
+    document.getElementById('closeServiceModal').addEventListener('click', closeServiceModal);
+    document.getElementById('cancelServiceForm').addEventListener('click', closeServiceModal);
+    document.getElementById('serviceModal').addEventListener('click', e => { if (e.target.id === 'serviceModal') closeServiceModal(); });
+    document.getElementById('serviceForm').addEventListener('submit', e => { e.preventDefault(); saveServiceFromModal(); });
+    document.getElementById('saveServiceBtn').addEventListener('click', saveServiceFromModal);
 
     newCampaignBtn.addEventListener('click',()=>openCampaignModal());
     closeCampaignModalBtn.addEventListener('click', closeCampaignModal);
