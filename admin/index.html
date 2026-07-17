@@ -639,6 +639,215 @@
       color: var(--muted);
       text-decoration: line-through;
     }
+    
+    .task-actions {
+      display: flex;
+      gap: 6px;
+      margin-left: auto;
+      align-items: center;
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .task-item:hover .task-actions {
+      opacity: 1;
+    }
+    .task-action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 4px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .task-action-btn:hover {
+      background-color: var(--border);
+    }
+    .task-action-btn.edit:hover {
+      background-color: rgba(99, 102, 241, 0.1);
+    }
+    .task-action-btn.delete:hover {
+      background-color: rgba(239, 68, 68, 0.1);
+    }
+    
+    .add-task-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: 1px dashed var(--border);
+      color: var(--muted);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all 0.2s ease;
+    }
+    .add-task-btn:hover {
+      color: var(--blue);
+      border-color: var(--blue);
+      background-color: rgba(99, 102, 241, 0.05);
+    }
+    
+    :root {
+      --teal: #14b8a6;
+    }
+    
+    .notes-board {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .notes-composer {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .notes-user-selector {
+      display: flex;
+      gap: 12px;
+    }
+    .user-select-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .user-select-btn.active.esteban {
+      border-color: var(--blue);
+      color: var(--blue);
+      background-color: rgba(99, 102, 241, 0.05);
+    }
+    .user-select-btn.active.sergio {
+      border-color: var(--teal);
+      color: var(--teal);
+      background-color: rgba(20, 184, 166, 0.05);
+    }
+    .notes-input-wrapper {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+    .notes-input-wrapper textarea {
+      flex: 1;
+      height: 60px;
+      resize: none;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    .notes-input-wrapper textarea:focus {
+      border-color: var(--blue);
+    }
+    .notes-add-btn {
+      padding: 12px 20px;
+      background-color: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 13.5px;
+      transition: all 0.2s ease;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .notes-add-btn:hover {
+      background-color: #4f46e5;
+    }
+    
+    .notes-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .note-card {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 14px;
+      border-radius: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .note-card:hover {
+      border-color: rgba(99, 102, 241, 0.15);
+    }
+    .note-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .note-author-badge {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+    .note-author-badge.esteban {
+      background-color: rgba(99, 102, 241, 0.1);
+      color: var(--blue);
+    }
+    .note-author-badge.sergio {
+      background-color: rgba(20, 184, 166, 0.1);
+      color: var(--teal);
+    }
+    .note-date {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .note-content {
+      font-size: 13.5px;
+      line-height: 1.5;
+      color: var(--text);
+      white-space: pre-wrap;
+    }
+    .note-delete-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--muted);
+      opacity: 0;
+      transition: all 0.2s ease;
+    }
+    .note-card:hover .note-delete-btn {
+      opacity: 1;
+    }
+    .note-delete-btn:hover {
+      color: #ef4444;
+    }
   </style>
 
 </head>
@@ -884,15 +1093,31 @@
 
     <div class="section-title">
       <div>
-        <h2>Notas internas</h2>
-        <p>Guardado local en tu navegador. No se sincroniza entre computadores.</p>
+        <h2>Notas internas y Colaboración</h2>
+        <p>Escribe notas y comentarios visibles para Esteban y Sergio. Se sincronizan en línea.</p>
       </div>
-      <button class="button danger" id="clearNotes">Borrar notas</button>
+      <button class="button danger" id="clearNotesBtn" style="display:none;">Borrar todas las notas</button>
     </div>
 
     <section class="card">
-      <textarea id="notes" placeholder="Ejemplo: ideas de producto, cambios futuros, observaciones generales. No escribir datos sensibles."></textarea>
-      <div class="save-status" id="saveStatus"></div>
+      <div class="notes-board">
+        <div class="notes-composer">
+          <div class="notes-user-selector">
+            <span style="font-size: 13.5px; font-weight: 500; display: flex; align-items: center; margin-right: 8px;">¿Quién eres?</span>
+            <button class="user-select-btn active esteban" id="userEstebanBtn" type="button">👨‍💻 Esteban</button>
+            <button class="user-select-btn sergio" id="userSergioBtn" type="button">🧑‍💻 Sergio</button>
+          </div>
+          <div class="notes-input-wrapper">
+            <textarea id="noteInput" placeholder="Escribe una nota interna para compartir..."></textarea>
+            <button class="notes-add-btn" id="addNoteBtn" type="button">➕ Agregar nota</button>
+          </div>
+        </div>
+        
+        <div class="notes-feed" id="notesFeed">
+          <!-- Las notas se renderizarán aquí dinámicamente -->
+        </div>
+      </div>
+      <div class="save-status" id="notesSaveStatus"></div>
     </section>
 
     <footer class="footer">
@@ -902,7 +1127,7 @@
 
   <script>
     // --- MOTOR DEL ACORDEÓN DE TAREAS Y SINCRONIZACIÓN ---
-    const KAUZE_TASKS_DATA = [
+    let KAUZE_TASKS_DATA = [
   {
     "title": "🏗️ FASE 1: Ingeniería del Core y Arquitectura Multi-Tenant (Backend en Python)",
     "objectives": [
@@ -953,6 +1178,18 @@
           {
             "id": 10,
             "text": "Desarrollar la lógica condicional que exige el abono con tarjeta previo a la confirmación de la cita si el local así lo configuró."
+          },
+          {
+            "id": 128,
+            "text": "Implementar el middleware de extracción dinámica de subdominios wildcard (*.site.kauze.cl) a partir del Host header para cargar de forma aislada la configuración de cada local."
+          },
+          {
+            "id": 131,
+            "text": "Desarrollar el algoritmo de Prioridad Dinámica para calcular en tiempo real el tiempo de espera estimado de la Fila Virtual sin colisionar con agendamientos web previos."
+          },
+          {
+            "id": 132,
+            "text": "Programar el sistema de Confirmación de Presencia Activa que solicita confirmación vía WhatsApp 10 min antes del turno y elimina de forma automática registros inactivos."
           }
         ]
       },
@@ -1003,6 +1240,14 @@
           {
             "id": 20,
             "text": "Desarrollar el sistema de refresco automatizado de tokens OAuth para asegurar que las cuentas conectadas de los locales no se desvinculen de Meta."
+          },
+          {
+            "id": 126,
+            "text": "Desarrollar el 'Adaptador de Notificaciones' desacoplado en el backend para permitir la conmutación rápida entre proveedores de backup (Zavu, Twilio, Meta Direct) en una línea de código."
+          },
+          {
+            "id": 127,
+            "text": "Implementar la regla de envío híbrido: confirmaciones de reserva despachadas únicamente por Email y alertas críticas de recordatorio de cita enviadas 24h antes por WhatsApp."
           }
         ]
       },
@@ -1108,6 +1353,14 @@
           {
             "id": 40,
             "text": "Integrar la alerta visual y selector de estrellas rápido para \"Evaluar Cliente\" antes de cerrar la pantalla del servicio completado."
+          },
+          {
+            "id": 129,
+            "text": "Diseñar el panel de Preferencias de Alertas para el profesional con selector de frecuencia (Tiempo Real, Resumen Diario consolidado por la mañana, o Resumen Semanal)."
+          },
+          {
+            "id": 130,
+            "text": "Implementar el flujo de Fila Virtual con generación de Código QR en el local, redirección a WhatsApp con plantilla de inicio gratuita y aviso de turno listo ('¡Tu turno está listo!')."
           }
         ]
       },
@@ -1632,30 +1885,69 @@
         syncStatusEl.textContent = text;
     }
    
+    async function saveTasksStructure() {
+        if (isOnline) {
+            const url = window.location.origin;
+            const structUrl = url.endsWith('/') ? `${url}api/tasks-structure` : `${url}/api/tasks-structure`;
+            try {
+                const res = await fetch(structUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(KAUZE_TASKS_DATA)
+                });
+                if (res.ok) {
+                    console.log("Estructura de tareas guardada en el servidor.");
+                }
+            } catch (err) {
+                console.error("Error guardando estructura de tareas:", err);
+            }
+        }
+        localStorage.setItem("kauzeTasksStructure", JSON.stringify(KAUZE_TASKS_DATA));
+    }
+
     async function loadTasks() {
         const apiUrl = getApiUrl();
+        isOnline = false;
+        
         if (apiUrl) {
             try {
                 updateSyncBadge("saving", "🔄 Cargando...");
+                const url = window.location.origin;
+                const structUrl = url.endsWith('/') ? `${url}api/tasks-structure` : `${url}/api/tasks-structure`;
+                const structRes = await fetch(structUrl);
+                if (structRes.ok) {
+                    const structData = await structRes.json();
+                    if (structData && structData.status !== "default") {
+                        KAUZE_TASKS_DATA = structData;
+                    }
+                    isOnline = true;
+                }
+                
                 const res = await fetch(apiUrl);
                 if (res.ok) {
                     const data = await res.json();
                     checkedTasks = data.checked_tasks || [];
-                    isOnline = true;
                     updateSyncBadge("online", "🟢 En línea");
                     renderAccordion();
                     updateProgress();
                     return;
                 }
             } catch (err) {
-                console.error("Error cargando tareas del servidor, cayendo a local:", err);
+                console.error("Error de conexión al servidor, cayendo a local:", err);
             }
         }
         
-        isOnline = false;
         updateSyncBadge("offline", "🔴 Modo local");
-        const local = localStorage.getItem("kauzeCheckedTasks");
-        checkedTasks = local ? JSON.parse(local) : [];
+        const localStruct = localStorage.getItem("kauzeTasksStructure");
+        if (localStruct) {
+            try {
+                KAUZE_TASKS_DATA = JSON.parse(localStruct);
+            } catch (e) {
+                console.error("Error parseando estructura local:", e);
+            }
+        }
+        const localChecked = localStorage.getItem("kauzeCheckedTasks");
+        checkedTasks = localChecked ? JSON.parse(localChecked) : [];
         renderAccordion();
         updateProgress();
     }
@@ -1787,12 +2079,75 @@
                     const span = document.createElement("span");
                     span.innerHTML = `<strong>Paso ${task.id}:</strong> ${task.text}`;
                     
+                    const actionsDiv = document.createElement("div");
+                    actionsDiv.className = "task-actions";
+                    
+                    const editBtn = document.createElement("button");
+                    editBtn.className = "task-action-btn edit";
+                    editBtn.innerHTML = "✏️";
+                    editBtn.title = "Modificar tarea";
+                    editBtn.addEventListener("click", (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        const newText = prompt("Modificar descripción de la tarea:", task.text);
+                        if (newText && newText.trim() !== "") {
+                            task.text = newText.trim();
+                            saveTasksStructure();
+                            renderAccordion();
+                        }
+                    });
+                    
+                    const deleteBtn = document.createElement("button");
+                    deleteBtn.className = "task-action-btn delete";
+                    deleteBtn.innerHTML = "❌";
+                    deleteBtn.title = "Eliminar tarea";
+                    deleteBtn.addEventListener("click", (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        if (confirm(`¿Estás seguro de que quieres eliminar la tarea: "${task.text}"?`)) {
+                            obj.tasks = obj.tasks.filter(t => t.id !== task.id);
+                            checkedTasks = checkedTasks.filter(id => id !== task.id);
+                            saveTasksStructure();
+                            saveTasks();
+                            renderAccordion();
+                        }
+                    });
+                    
+                    actionsDiv.appendChild(editBtn);
+                    actionsDiv.appendChild(deleteBtn);
+                    
                     label.appendChild(checkbox);
                     label.appendChild(span);
+                    label.appendChild(actionsDiv);
                     tasksGrid.appendChild(label);
                 });
                 
+                const addTaskBtn = document.createElement("button");
+                addTaskBtn.className = "add-task-btn";
+                addTaskBtn.innerHTML = "➕ Agregar Tarea";
+                addTaskBtn.addEventListener("click", () => {
+                    const taskText = prompt("Ingresa la descripción de la nueva tarea:");
+                    if (taskText && taskText.trim() !== "") {
+                        let maxId = 0;
+                        KAUZE_TASKS_DATA.forEach(p => {
+                            p.objectives.forEach(o => {
+                                o.tasks.forEach(t => {
+                                    if (t.id > maxId) maxId = t.id;
+                                });
+                            });
+                        });
+                        const newId = maxId + 1;
+                        obj.tasks.push({
+                            id: newId,
+                            text: taskText.trim()
+                        });
+                        saveTasksStructure();
+                        renderAccordion();
+                    }
+                });
+                
                 block.appendChild(tasksGrid);
+                block.appendChild(addTaskBtn);
                 content.appendChild(block);
             });
             
@@ -1807,13 +2162,13 @@
     }
    
     function updateProgress() {
-        const totalTasks = 125;
+        const totalTasks = KAUZE_TASKS_DATA.reduce((sum, p) => sum + p.objectives.reduce((s, o) => s + o.tasks.length, 0), 0);
         const completed = checkedTasks.length;
         const percent = totalTasks > 0 ? Math.round((completed / totalTasks) * 100) : 0;
-        
-        if (globalProgressPercentEl) globalProgressPercentEl.textContent = `${percent}%`;
-        if (globalProgressHintEl) globalProgressHintEl.textContent = `${completed} de ${totalTasks} tareas completadas.`;
-    }
+       
+       if (globalProgressPercentEl) globalProgressPercentEl.textContent = `${percent}%`;
+       if (globalProgressHintEl) globalProgressHintEl.textContent = `${completed} de ${totalTasks} tareas completadas.`;
+   }
    
     document.getElementById("syncNowBtn").addEventListener("click", async () => {
         await loadTasks();
@@ -1848,6 +2203,152 @@
         await saveTasks();
         renderAccordion();
     });
+
+    // --- SISTEMA DE COLABORACIÓN Y NOTAS COMPARTIDAS ---
+    let activeUser = "Esteban";
+    let notesData = [];
+
+    const notesFeed = document.getElementById("notesFeed");
+    const noteInput = document.getElementById("noteInput");
+    const addNoteBtn = document.getElementById("addNoteBtn");
+    const notesSaveStatus = document.getElementById("notesSaveStatus");
+    const userEstebanBtn = document.getElementById("userEstebanBtn");
+    const userSergioBtn = document.getElementById("userSergioBtn");
+
+    function selectUser(user) {
+        activeUser = user;
+        if (user === "Esteban") {
+            userEstebanBtn.classList.add("active");
+            userSergioBtn.classList.remove("active");
+        } else {
+            userEstebanBtn.classList.remove("active");
+            userSergioBtn.classList.add("active");
+        }
+    }
+
+    userEstebanBtn.addEventListener("click", () => selectUser("Esteban"));
+    userSergioBtn.addEventListener("click", () => selectUser("Sergio"));
+
+    async function loadNotes() {
+        if (isOnline) {
+            const url = window.location.origin;
+            const notesUrl = url.endsWith('/') ? `${url}api/notes` : `${url}/api/notes`;
+            try {
+                const res = await fetch(notesUrl);
+                if (res.ok) {
+                    const data = await res.json();
+                    notesData = data.notes || [];
+                    renderNotes();
+                    return;
+                }
+            } catch (err) {
+                console.error("Error cargando notas del servidor:", err);
+            }
+        }
+        
+        const localNotes = localStorage.getItem("kauzeNotes");
+        notesData = localNotes ? JSON.parse(localNotes) : [];
+        renderNotes();
+    }
+
+    async function saveNotes() {
+        if (isOnline) {
+            const url = window.location.origin;
+            const notesUrl = url.endsWith('/') ? `${url}api/notes` : `${url}/api/notes`;
+            try {
+                notesSaveStatus.textContent = "Guardando notas...";
+                const res = await fetch(notesUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ notes: notesData })
+                });
+                if (res.ok) {
+                    notesSaveStatus.textContent = "Notas sincronizadas en línea.";
+                    setTimeout(() => notesSaveStatus.textContent = "", 2000);
+                    return;
+                }
+            } catch (err) {
+                console.error("Error guardando notas en el servidor:", err);
+            }
+        }
+        
+        localStorage.setItem("kauzeNotes", JSON.stringify(notesData));
+        notesSaveStatus.textContent = "Notas guardadas localmente.";
+        setTimeout(() => notesSaveStatus.textContent = "", 2000);
+    }
+
+    function renderNotes() {
+        notesFeed.innerHTML = "";
+        
+        if (notesData.length === 0) {
+            notesFeed.innerHTML = `<p style="color: var(--muted); font-size: 13.5px; text-align: center; margin: 20px 0;">No hay notas registradas. ¡Sé el primero en escribir una!</p>`;
+            return;
+        }
+
+        const sortedNotes = [...notesData].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        sortedNotes.forEach(note => {
+            const card = document.createElement("div");
+            card.className = "note-card";
+            
+            const header = document.createElement("div");
+            header.className = "note-card-header";
+            
+            const badgeClass = note.author.toLowerCase() === "esteban" ? "esteban" : "sergio";
+            const formattedDate = new Date(note.date).toLocaleString('es-CL', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            header.innerHTML = `
+                <span class="note-author-badge ${badgeClass}">${note.author}</span>
+                <span class="note-date">${formattedDate}</span>
+            `;
+            
+            const content = document.createElement("div");
+            content.className = "note-content";
+            content.textContent = note.content;
+            
+            const deleteBtn = document.createElement("button");
+            deleteBtn.className = "note-delete-btn";
+            deleteBtn.innerHTML = "❌";
+            deleteBtn.title = "Eliminar nota";
+            deleteBtn.addEventListener("click", () => {
+                if (confirm("¿Estás seguro de que quieres eliminar esta nota?")) {
+                    notesData = notesData.filter(n => n.id !== note.id);
+                    saveNotes();
+                    renderNotes();
+                }
+            });
+            
+            card.appendChild(header);
+            card.appendChild(content);
+            card.appendChild(deleteBtn);
+            notesFeed.appendChild(card);
+        });
+    }
+
+    addNoteBtn.addEventListener("click", () => {
+        const text = noteInput.value.trim();
+        if (text === "") return;
+        
+        const newNote = {
+            id: Date.now() + Math.random().toString(36).substr(2, 9),
+            author: activeUser,
+            content: text,
+            date: new Date().toISOString()
+        };
+        
+        notesData.push(newNote);
+        noteInput.value = "";
+        saveNotes();
+        renderNotes();
+    });
+
+    loadNotes();
    
     (async function init() {
         if (syncServer) {
@@ -1857,34 +2358,8 @@
             await testAndConnect(localOrigin);
         }
         await loadTasks();
+        await loadNotes();
     })();
-   
-    // --- NOTAS INTERNAS ORIGINALES (Preservadas) ---
-    const notes = document.getElementById("notes");
-    const saveStatus = document.getElementById("saveStatus");
-   
-    notes.value = localStorage.getItem("kauzeAdminNotes") || "";
-   
-    let saveTimer;
-   
-    notes.addEventListener("input", () => {
-        localStorage.setItem("kauzeAdminNotes", notes.value);
-        saveStatus.textContent = "Notas guardadas localmente.";
-        clearTimeout(saveTimer);
-        saveTimer = setTimeout(() => {
-            saveStatus.textContent = "";
-        }, 1800);
-    });
-   
-    document.getElementById("clearNotes").addEventListener("click", () => {
-        const confirmClear = confirm("¿Seguro que quieres borrar las notas locales?");
-        if (!confirmClear) return;
-        
-        notes.value = "";
-        localStorage.removeItem("kauzeAdminNotes");
-        saveStatus.textContent = "Notas borradas.";
-        setTimeout(() => saveStatus.textContent = "", 1800);
-    });
   </script>
 </body>
 </html>
