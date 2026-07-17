@@ -1142,7 +1142,9 @@
       return selected;
     }
 
-    const BACKEND_URL = 'https://admin.kauze.cl';
+    const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? window.location.origin
+      : 'https://admin.kauze.cl';
 
     async function syncOnlineState(push = false) {
       try {
@@ -1903,6 +1905,7 @@
         bannerStyle: state.bannerStyle || 'soft',
         bannerImage: state.bannerImage || ''
       }));
+      syncOnlineState(true);
     }
 
     function normalizeProfessional(row){
@@ -2443,8 +2446,9 @@
       else list = [...list, data];
       
       setProfessionals(list);
+      professionalSavedMsg.style.display = 'block';
       render();
-      closeProfessionalModal();
+      setTimeout(closeProfessionalModal, 500);
     }
 
     function deleteProfessional(id){
@@ -2486,8 +2490,9 @@
       if (editingCampaignId) list = list.map(x => x.id === editingCampaignId ? data : x);
       else list = [...list, data];
       setCampaigns(list);
+      campaignSavedMsg.style.display = 'block';
       render();
-      closeCampaignModal();
+      setTimeout(closeCampaignModal, 500);
     }
 
     function deleteCampaign(id){
@@ -2621,8 +2626,9 @@
       }
 
       setServices(list);
+      document.getElementById('serviceSavedMsg').style.display = 'block';
       render();
-      closeServiceModal();
+      setTimeout(closeServiceModal, 500);
     }
 
     function editService(id) {
@@ -2709,8 +2715,9 @@
       }
 
       setClients(list);
+      document.getElementById('clientSavedMsg').style.display = 'block';
       render();
-      closeClientModal();
+      setTimeout(closeClientModal, 500);
     }
 
     async function showApp(){ 
@@ -2934,8 +2941,9 @@
       if (editingAppointmentId) list = list.map(a => a.id === editingAppointmentId ? data : a);
       else list = [...list, data];
       setAppointments(list);
+      appointmentSavedMsg.style.display = 'block';
       render();
-      closeApptModal();
+      setTimeout(closeApptModal, 500);
     }
 
     appointmentForm.addEventListener('submit', e => {
