@@ -1181,16 +1181,18 @@
     }
 
     const BACKEND_URL = window.location.origin;
+    let onlineSaveQueue = Promise.resolve();
 
-    async function syncOnlineState(push = false) {
+    async function syncOnlineState(push = false, snapshot = null) {
       try {
         if (push) {
-          await fetch(`${BACKEND_URL}/api/app-state`, {
+          const res = await fetch(`${BACKEND_URL}/api/app-state`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'same-origin',
-            body: JSON.stringify(state)
+            body: JSON.stringify(snapshot || state)
           });
+          if (!res.ok) throw new Error(`No se pudo guardar el estado (${res.status}).`);
         } else {
           const res = await fetch(`${BACKEND_URL}/api/app-state`, { credentials: 'same-origin' });
           if (res.ok) {
@@ -1210,8 +1212,10 @@
             }
           }
         }
+        return true;
       } catch (e) {
         console.warn('Error sincronizando con servidor Railway:', e);
+        return false;
       }
     }
 
@@ -1981,7 +1985,14 @@
         bannerStyle: state.bannerStyle || 'soft',
         bannerImage: state.bannerImage || ''
       }));
-      if (currentAccount) syncOnlineState(true);
+      if (currentAccount) {
+        const snapshot = JSON.parse(JSON.stringify(state));
+        onlineSaveQueue = onlineSaveQueue
+          .catch(() => false)
+          .then(() => syncOnlineState(true, snapshot));
+        return onlineSaveQueue;
+      }
+      return Promise.resolve(true);
     }
 
     function normalizeProfessional(row){
@@ -2026,6 +2037,7 @@
         }));
         saveState();
       }
+      state.clients[state.type] = state.clients[state.type].map(normalizeStoredClient);
       return state.clients[state.type];
     }
 
@@ -2040,6 +2052,35 @@
       if (!state.clients) state.clients = {};
       state.clients[state.type] = list;
       saveState();
+    }
+
+    function syncClientFromAppointment(appointment) {
+      if (!state.clients) state.clients = {};
+      const list = [...getClients()];
+      const key = appointment.client.trim().toLowerCase();
+      const index = list.findIndex(client => String(client.name || '').trim().toLowerCase() === key);
+      const nextAction = appointment.status === 'Pendiente'
+        ? 'Confirmar asistencia'
+        : 'Enviar seguimiento post-servicio';
+
+      if (index >= 0) {
+        list[index] = {
+          ...list[index],
+          lastService: appointment.service,
+          nextAction
+        };
+      } else {
+        list.push({
+          id: 'cli-appt-' + Date.now(),
+          name: appointment.client,
+          phone: appointment.phone || 'Sin teléfono',
+          lastService: appointment.service,
+          nextAction,
+          totalBilling: 0,
+          stars: 5
+        });
+      }
+      state.clients[state.type] = list;
     }
 
     function getServices() {
@@ -2110,12 +2151,13 @@
       const p=currentProfile();
       const name = state.name || p.business;
       const appointments = getAppointments().slice().sort((a,b)=>(a.date + a.time).localeCompare(b.date + b.time));
+      const clientRows = buildClientsFromAppointments(appointments, getClients());
       const professionals = getProfessionals();
       const campaigns = getCampaigns();
       const active = appointments.filter(a => a.status !== 'Cancelada' && a.status !== 'No asistió');
       const pendingCount = appointments.filter(a => a.status === 'Pendiente').length;
       const portalCount = appointments.filter(a => a.source === 'cliente').length;
-      const uniqueClients = new Set(active.map(a => a.client.trim().toLowerCase()).filter(Boolean)).size;
+      const uniqueClients = clientRows.length;
       const revenue = todayRevenue();
 
       sideBusiness.textContent=name;
@@ -2175,7 +2217,6 @@
         return `<tr><td>${a.date}<br><strong>${a.time}</strong></td><td>${a.client} <span style="color: #fbbf24; font-size: 11.5px; white-space: nowrap; margin-left: 4px;" title="Valoración">${stars}</span>${sourceLabel(a)}</td><td>${a.service}</td><td>${a.professional}</td><td><span class="${statusClass(a.status)}">${a.status}</span></td><td><div class="row-actions">${confirmBtn}<button class="mini-btn" data-edit-appt="${a.id}">Editar</button><button class="mini-btn danger" data-delete-appt="${a.id}">Eliminar</button></div></td></tr>`;
       }).join('') : `<tr><td colspan="6"><div class="empty-state">Agenda vacía. Usa “Crear cita” para agregar una reserva.</div></td></tr>`;
 
-      const clientRows = buildClientsFromAppointments(appointments, getClients());
       clientsTable.innerHTML = clientRows.map(c => {
         const stars = getClientStars(c.name);
         return `<tr><td><strong>${c.name}</strong> <span style="color: #fbbf24; font-size: 11.5px; white-space: nowrap; margin-left: 4px;" title="Valoración">${stars}</span><br><span style="font-size: 11px; color: var(--muted); font-weight: normal;">${c.phone}</span></td><td>${c.lastService}</td><td>${c.nextAction}</td><td><strong>${fmt(c.totalBilling)}</strong></td></tr>`;
@@ -2273,20 +2314,56 @@
     }
 
 
-    function buildClientsFromAppointments(appointments, defaultClients){
+    function normalizeStoredClient(client, index) {
+      if (!client) client = {};
+      if (Array.isArray(client)) {
+        return {
+          id: `legacy-cli-${index}`,
+          name: client[0] || '',
+          phone: client[4] || 'Sin teléfono',
+          lastService: client[1] || 'Sin servicio',
+          nextAction: client[2] || 'Sin acción pendiente',
+          totalBilling: Number(client[3] || 0),
+          stars: 5
+        };
+      }
+      return {
+        ...client,
+        id: client.id || `cli-${index}`,
+        name: String(client.name || '').trim(),
+        phone: client.phone || 'Sin teléfono',
+        lastService: client.lastService || 'Sin servicio',
+        nextAction: client.nextAction || 'Sin acción pendiente',
+        totalBilling: Number(client.totalBilling || 0),
+        stars: Number(client.stars || 5)
+      };
+    }
+
+    function buildClientsFromAppointments(appointments, storedClients){
       const map = new Map();
-      defaultClients.forEach(c => map.set(c[0].toLowerCase(), [...c]));
+      storedClients.forEach((client, index) => {
+        const normalized = normalizeStoredClient(client, index);
+        if (normalized.name) map.set(normalized.name.toLowerCase(), normalized);
+      });
       appointments.forEach(a => {
         const key = a.client.trim().toLowerCase();
         if (!key) return;
         const value = servicePrice(a.service);
         if (!map.has(key)) {
-          map.set(key, [a.client, a.service, a.status === 'Pendiente' ? 'Confirmar asistencia' : 'Enviar seguimiento post-servicio', value]);
+          map.set(key, {
+            id: `cli-appt-${a.id}`,
+            name: a.client,
+            phone: a.phone || 'Sin teléfono',
+            lastService: a.service,
+            nextAction: a.status === 'Pendiente' ? 'Confirmar asistencia' : 'Enviar seguimiento post-servicio',
+            totalBilling: value,
+            stars: 5
+          });
         } else {
           const row = map.get(key);
-          row[1] = a.service;
-          row[2] = a.status === 'Pendiente' ? 'Confirmar asistencia' : 'Enviar seguimiento post-servicio';
-          row[3] = Number(row[3] || 0) + value;
+          row.lastService = a.service;
+          row.nextAction = a.status === 'Pendiente' ? 'Confirmar asistencia' : 'Enviar seguimiento post-servicio';
+          row.totalBilling = Number(row.totalBilling || 0) + value;
         }
       });
       return Array.from(map.values());
@@ -3128,6 +3205,7 @@
       let list = getAppointments();
       if (editingAppointmentId) list = list.map(a => a.id === editingAppointmentId ? data : a);
       else list = [...list, data];
+      syncClientFromAppointment(data);
       setAppointments(list);
       appointmentSavedMsg.style.display = 'block';
       render();
