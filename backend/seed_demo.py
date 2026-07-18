@@ -96,6 +96,10 @@ def build_panel_state(today=None):
         "name": DEMO_NAME,
         "type": "barberia",
         "demoMode": True,
+        "publicBookingEnabled": True,
+        "publicRating": "5.0",
+        "publicReviews": 24,
+        "clientRatingMode": "none",
         "externalMessagingEnabled": False,
         "ownerWhatsapp": "",
         "ownerCalendarEmail": "",
@@ -127,7 +131,7 @@ def build_panel_state(today=None):
                     "lastService": "Corte clásico",
                     "nextAction": "Simular recordatorio interno",
                     "totalBilling": 45000,
-                    "stars": 5,
+                    "internalRating": None,
                 },
                 {
                     "id": "demo-cli-2",
@@ -136,7 +140,7 @@ def build_panel_state(today=None):
                     "lastService": "Fade",
                     "nextAction": "Confirmar asistencia en panel",
                     "totalBilling": 36000,
-                    "stars": 4,
+                    "internalRating": None,
                 },
                 {
                     "id": "demo-cli-3",
@@ -145,7 +149,7 @@ def build_panel_state(today=None):
                     "lastService": "Corte + barba",
                     "nextAction": "Simular fidelización",
                     "totalBilling": 72000,
-                    "stars": 5,
+                    "internalRating": None,
                 },
             ]
         },

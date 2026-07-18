@@ -4,7 +4,7 @@ import os
 import socketserver
 import sys
 from http.cookies import SimpleCookie
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, unquote, urlparse
 
 from backend.auth import (
     AccountUnavailable,
@@ -19,6 +19,12 @@ from backend.auth import (
     save_business_state,
 )
 from backend.db import DatabaseNotConfigured, is_configured
+from backend.public_booking import (
+    PublicBookingError,
+    create_public_appointment,
+    list_public_businesses,
+    public_availability,
+)
 
 
 PORT = int(os.environ.get("PORT", 8000))
@@ -147,7 +153,8 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        path = urlparse(self.path).path
+        parsed_url = urlparse(self.path)
+        path = parsed_url.path
 
         if path == "/api/health":
             self._json_response(
@@ -158,6 +165,34 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                     "authMode": "postgresql",
                 },
             )
+            return
+
+        if path == "/api/public/businesses":
+            try:
+                self._json_response(200, {"businesses": list_public_businesses()})
+            except DatabaseNotConfigured:
+                self._json_response(503, {"error": "database_not_configured"})
+            return
+
+        if path.startswith("/api/public/businesses/") and path.endswith("/availability"):
+            parts = [unquote(part) for part in path.strip("/").split("/")]
+            if len(parts) != 5:
+                self._json_response(404, {"error": "not_found"})
+                return
+            query = parse_qs(parsed_url.query)
+            try:
+                result = public_availability(
+                    parts[3],
+                    (query.get("date") or [""])[0],
+                    (query.get("professionalId") or [None])[0],
+                )
+                self._json_response(200, result)
+            except PublicBookingError as exc:
+                self._json_response(
+                    exc.status, {"error": exc.code, "message": str(exc)}
+                )
+            except DatabaseNotConfigured:
+                self._json_response(503, {"error": "database_not_configured"})
             return
 
         if path == "/api/auth/me":
@@ -208,6 +243,26 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
 
         if not self._origin_allowed():
             self._json_response(403, {"error": "origin_not_allowed"})
+            return
+
+        if path == "/api/public/appointments":
+            try:
+                data = self._read_json()
+                client_key = (
+                    self.headers.get("CF-Connecting-IP")
+                    or self.headers.get("X-Forwarded-For", "").split(",", 1)[0].strip()
+                    or self.client_address[0]
+                )
+                result = create_public_appointment(data, client_key)
+                self._json_response(201 if result["created"] else 200, result)
+            except PublicBookingError as exc:
+                self._json_response(
+                    exc.status, {"error": exc.code, "message": str(exc)}
+                )
+            except DatabaseNotConfigured:
+                self._json_response(503, {"error": "database_not_configured"})
+            except ValueError as exc:
+                self._json_response(400, {"error": "invalid_request", "message": str(exc)})
             return
 
         if path == "/api/auth/login":
