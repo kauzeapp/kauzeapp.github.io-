@@ -222,6 +222,30 @@
       box-shadow: var(--shadow-soft);
     }
 
+    .public-business-identity {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .public-business-identity > div:last-child {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .business-card .public-business-identity h2,
+    .business-card .public-business-identity p {
+      margin-bottom: 0;
+    }
+
+    .public-profile-logo {
+      width: 76px !important;
+      height: 76px !important;
+      border-radius: 22px !important;
+      font-size: 19px !important;
+    }
+
     .business-card h2 {
       font-family: 'Sora', sans-serif;
       font-size: 25px;
@@ -1008,6 +1032,22 @@
       box-shadow: var(--shadow-soft);
     }
 
+    .business-logo.has-image {
+      padding: 3px;
+      overflow: hidden;
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--navy);
+    }
+
+    .business-logo img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+      border-radius: inherit;
+    }
+
     .business-title {
       min-width: 0;
       flex: 1;
@@ -1635,8 +1675,13 @@
 
       <aside class="business-panel flow-hidden" id="businessPanel">
         <article class="business-card">
-          <h2 id="businessName">Barbería Corte Fino</h2>
-          <p id="businessDescription">Agenda cortes, barba y servicios premium directamente desde este portal.</p>
+          <div class="public-business-identity">
+            <div class="business-logo public-profile-logo" id="businessPublicLogo" aria-label="Logo del negocio">BC</div>
+            <div>
+              <h2 id="businessName">Barbería Corte Fino</h2>
+              <p id="businessDescription">Agenda cortes, barba y servicios premium directamente desde este portal.</p>
+            </div>
+          </div>
 
           <select class="business-switch" id="businessType">
             <option value="barberia">💈 Barbería</option>
@@ -2372,6 +2417,7 @@
       const business = currentBusiness();
       document.getElementById('businessName').textContent = p.business;
       document.getElementById('businessDescription').textContent = p.description;
+      paintPublicBusinessLogo(document.getElementById('businessPublicLogo'), business);
       if (customerFlow === 'booking') {
         document.getElementById('heroTitle').textContent = p.hero;
         document.getElementById('heroSubtitle').textContent = p.subtitle;
@@ -2457,6 +2503,47 @@
       return name.split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0]).join('').toUpperCase();
     }
 
+    function safePublicLogoSource(value) {
+      const source = String(value || '').trim();
+      if (!source) return '';
+      if (/^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(source) && source.length <= 750000) return source;
+      try {
+        const parsed = new URL(source, window.location.origin);
+        if (parsed.protocol !== 'https:' && parsed.origin !== window.location.origin) return '';
+        return source.replace(/"/g, '&quot;');
+      } catch (error) {
+        return '';
+      }
+    }
+
+    function businessLogoMarkup(item, extraClass = '') {
+      const colors = item.logoColors || ['#2563EB', '#6366F1'];
+      const source = safePublicLogoSource(item.logoUrl);
+      const image = source ? `<img src="${source}" alt="Logo del negocio">` : businessInitials(item.name);
+      return `<div class="business-logo ${source ? 'has-image' : ''} ${extraClass}" style="--logo-a:${colors[0]};--logo-b:${colors[1]}">${image}</div>`;
+    }
+
+    function paintPublicBusinessLogo(element, item) {
+      if (!element) return;
+      const source = safePublicLogoSource(item.logoUrl);
+      element.classList.toggle('has-image', !!source);
+      element.replaceChildren();
+      if (!source) {
+        element.textContent = businessInitials(item.name);
+        return;
+      }
+      const image = document.createElement('img');
+      image.src = source;
+      image.alt = `Logo de ${item.name}`;
+      image.decoding = 'async';
+      image.onerror = () => {
+        element.classList.remove('has-image');
+        element.replaceChildren();
+        element.textContent = businessInitials(item.name);
+      };
+      element.appendChild(image);
+    }
+
     function businessStartingPrice(item) {
       const services = item.services?.length ? item.services : (profiles[item.type]?.services || []);
       const prices = services.map(service => Number(service[2]) || 0).filter(Boolean);
@@ -2537,7 +2624,6 @@
 
       const base = profiles[item.type] || profiles.barberia;
       const services = (item.services?.length ? item.services : base.services || []).slice(0, 3);
-      const colors = item.logoColors || ['#2563EB', '#6366F1'];
       const publicContact = item.instagramUrl
         ? `<a class="btn" href="${item.instagramUrl}" target="_blank" rel="noopener noreferrer">Ver Instagram</a><span class="business-contact-note">${item.instagramHandle || 'Perfil del negocio'}</span>`
         : item.phone
@@ -2547,7 +2633,7 @@
       holder.innerHTML = `
         <div>
           <div class="detail-brand">
-            <div class="business-logo detail-logo" style="--logo-a:${colors[0]};--logo-b:${colors[1]}">${businessInitials(item.name)}</div>
+            ${businessLogoMarkup(item, 'detail-logo')}
             <div>
               <h3>${item.name}</h3>
               <p>${item.location} · Negocio verificado por Kauze</p>
@@ -2612,12 +2698,11 @@
       grid.innerHTML = list.map(item => {
         const base = profiles[item.type] || profiles.barberia;
         const services = (item.services?.length ? item.services : base.services || []).slice(0, 2).map(service => service[0]).join(' · ');
-        const colors = item.logoColors || ['#2563EB', '#6366F1'];
         const detailOpen = selectedPreviewBusinessId === item.id;
         return `
           <article class="business-item ${detailOpen ? 'selected' : ''}">
             <div class="business-top">
-              <div class="business-logo" style="--logo-a:${colors[0]};--logo-b:${colors[1]}">${businessInitials(item.name)}</div>
+              ${businessLogoMarkup(item)}
               <div class="business-title">
                 <h3>${item.name}</h3>
                 <p>${exploreTypeOptions.find(option => option.key === item.type)?.label || item.type} · ${item.location}</p>

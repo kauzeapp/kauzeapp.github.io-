@@ -71,6 +71,23 @@ def _instagram_url(value):
     return escape(candidate[:500], quote=True)
 
 
+def _public_logo_url(value):
+    candidate = str(value or "").strip()
+    if not candidate:
+        return ""
+    if candidate.startswith("/") and not candidate.startswith("//"):
+        return escape(candidate[:500], quote=True)
+    if re.fullmatch(
+        r"data:image/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+",
+        candidate,
+    ) and len(candidate) <= 750_000:
+        return candidate
+    parsed = urlparse(candidate)
+    if parsed.scheme != "https" or not parsed.hostname:
+        return ""
+    return escape(candidate[:1000], quote=True)
+
+
 def _public_subdomain(value, fallback):
     candidate = str(value or "").strip().lower()
     return candidate if re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", candidate) else str(fallback)
@@ -157,6 +174,7 @@ def _public_business(row):
         "location": _public_text(row.get("commune") or row.get("city") or "Santiago", 100),
         "city": _public_text(row.get("city") or "Santiago", 100),
         "route": f'{_public_subdomain(state.get("publicSubdomain"), row["slug"])}.kauze.cl',
+        "logoUrl": _public_logo_url(state.get("logoUrl") or row.get("logo_url")),
         "instagramUrl": _instagram_url(state.get("instagramUrl")),
         "instagramHandle": _public_text(state.get("instagramHandle") or "", 80),
         "phone": _public_text(state.get("publicPhone") or row.get("phone") or "", 30),
@@ -199,6 +217,7 @@ def list_public_businesses():
               l.comuna AS commune,
               l.ciudad AS city,
               l.telefono_whatsapp AS phone,
+              l.logo_url,
               c.slug AS category_slug,
               e.estado AS panel_state
             FROM locales l

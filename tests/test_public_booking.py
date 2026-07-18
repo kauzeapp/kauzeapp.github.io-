@@ -14,6 +14,7 @@ class PublicBookingTests(unittest.TestCase):
             "pageTitle": "Reserva en Cauce Norte",
             "instagramUrl": "https://www.instagram.com/masterplan.soluciones",
             "instagramHandle": "@masterplan.soluciones",
+            "logoUrl": "/cliente/assets/masterplan-logo.jpg",
             "publicSubdomain": "masterplan",
             "services": {
                 "barberia": [
@@ -56,6 +57,7 @@ class PublicBookingTests(unittest.TestCase):
         self.assertTrue(business["demoMode"])
         self.assertEqual(business["route"], "masterplan.kauze.cl")
         self.assertEqual(business["instagramHandle"], "@masterplan.soluciones")
+        self.assertEqual(business["logoUrl"], "/cliente/assets/masterplan-logo.jpg")
         self.assertEqual(
             business["instagramUrl"],
             "https://www.instagram.com/masterplan.soluciones",
@@ -63,6 +65,7 @@ class PublicBookingTests(unittest.TestCase):
 
     def test_public_projection_rejects_unsafe_social_url(self):
         self.state["instagramUrl"] = "javascript:alert(1)"
+        self.state["logoUrl"] = "javascript:alert(1)"
         self.state["publicSubdomain"] = '"><script>'
         business = _public_business(
             {
@@ -78,6 +81,7 @@ class PublicBookingTests(unittest.TestCase):
             }
         )
         self.assertEqual(business["instagramUrl"], "")
+        self.assertEqual(business["logoUrl"], "")
         self.assertEqual(business["route"], "masterplan.kauze.cl")
 
     def test_occupied_slot_is_not_offered(self):

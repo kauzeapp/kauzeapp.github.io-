@@ -16,9 +16,17 @@ for (const required of [
   "requestedBusinessSlug",
   "directBusinessMode",
   "instagramUrl",
+  "logoUrl",
+  "businessLogoMarkup",
+  "businessPublicLogo",
   "Reservas conectadas a PostgreSQL",
 ]) {
   if (!source.includes(required)) throw new Error(`Falta integración: ${required}`);
+}
+
+const masterplanLogo = path.join(__dirname, "..", "cliente", "assets", "masterplan-logo.jpg");
+if (!fs.existsSync(masterplanLogo) || fs.statSync(masterplanLogo).size < 1000) {
+  throw new Error("Falta el logo local de Masterplan.");
 }
 
 if (source.includes("También quedará visible en el panel del negocio cuando abras /app/ en este mismo navegador")) {
