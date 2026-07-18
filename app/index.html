@@ -297,6 +297,67 @@
       margin-bottom: 12px;
     }
 
+    .logo-settings {
+      display: grid;
+      grid-template-columns: 86px minmax(0, 1fr);
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 14px;
+      padding: 13px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(255,255,255,.72);
+    }
+
+    .logo-settings-preview {
+      width: 86px;
+      height: 86px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: #fff;
+      color: var(--blue);
+      font-family: 'Sora', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .logo-settings-preview img,
+    #preview-logo-badge img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+    }
+
+    .logo-settings-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .logo-file-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .logo-feedback {
+      min-height: 18px;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
     .theme-mini-list {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -598,7 +659,25 @@
 
             <div class="personalization-box">
               <h3>Personalización de página pública</h3>
-              <p>Esto controla cómo se verá el portal del cliente: banner, texto principal, botón y estilo visual. El catálogo se filtra automáticamente para evitar que una barbería use paletas estéticas o que una estética use temas masculinos.</p>
+              <p>Esto controla cómo se verá el portal del cliente: logo, banner, texto principal, botón y estilo visual. El catálogo se filtra automáticamente para evitar que una barbería use paletas estéticas o que una estética use temas masculinos.</p>
+
+              <div class="field-group">
+                <label>Logo del negocio</label>
+                <div class="logo-settings">
+                  <div class="logo-settings-preview" id="settingsLogoPreview" aria-label="Vista previa del logo">K</div>
+                  <div>
+                    <strong style="display:block;color:var(--navy);font-size:13px;margin-bottom:4px">Identidad visible para clientes</strong>
+                    <span style="display:block;color:var(--muted);font-size:11px;line-height:1.5">JPG, PNG o WEBP. Kauze lo reduce automáticamente para que cargue rápido.</span>
+                    <input class="logo-file-input" id="settingsLogoFile" type="file" accept="image/png,image/jpeg,image/webp">
+                    <div class="logo-settings-actions">
+                      <label class="btn" for="settingsLogoFile" style="width:auto;cursor:pointer">Subir logo</label>
+                      <button class="btn" id="clearBusinessLogo" type="button" style="width:auto">Quitar</button>
+                    </div>
+                    <div class="logo-feedback" id="settingsLogoFeedback">Se usará en el perfil público y en el buscador de negocios.</div>
+                  </div>
+                </div>
+                <input class="field" id="settingsLogoUrl" type="text" placeholder="O pega una URL HTTPS del logo">
+              </div>
 
               <div class="field-group">
                 <label>Título del banner</label>
@@ -1096,7 +1175,8 @@
 
 
   <script>
-    const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', ownerWhatsapp:'', ownerCalendarEmail:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, clientRatingMode:'none', publicRating:null, publicReviews:0, activeTheme:'Kauze Base', pageTitle:'Agenda tu próxima hora sin escribir por WhatsApp', pageSubtitle:'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.', pageCta:'Reservar ahora', bannerStyle:'soft', bannerImage:'', appointments:{}, professionals:{}, campaigns:{} };
+    const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', logoUrl:'', ownerWhatsapp:'', ownerCalendarEmail:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, clientRatingMode:'none', publicRating:null, publicReviews:0, activeTheme:'Kauze Base', pageTitle:'Agenda tu próxima hora sin escribir por WhatsApp', pageSubtitle:'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.', pageCta:'Reservar ahora', bannerStyle:'soft', bannerImage:'', appointments:{}, professionals:{}, campaigns:{} };
+    let pendingLogoData = null;
     const CLIENT_PORTAL_APPOINTMENTS_KEY = 'kauzeSharedAppointmentsV1';
     
     // --- CATALOGO DE ESTILOS Y TEMAS (Kauze Design System) ---
@@ -1290,6 +1370,108 @@
       return blackScore > whiteScore ? black : white;
     }
 
+    function businessLogoInitials() {
+      return String(settingsBusiness?.value || state.name || 'K')
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(part => part[0])
+        .join('')
+        .toUpperCase() || 'K';
+    }
+
+    function safeBusinessLogoSource(value) {
+      const source = String(value || '').trim();
+      if (!source) return '';
+      if (/^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(source) && source.length <= 750000) return source;
+      try {
+        const parsed = new URL(source, window.location.origin);
+        if (parsed.protocol !== 'https:' && parsed.origin !== window.location.origin) return '';
+        return source;
+      } catch (error) {
+        return '';
+      }
+    }
+
+    function currentBusinessLogoSource() {
+      const candidate = pendingLogoData !== null
+        ? pendingLogoData
+        : (settingsLogoUrl?.value.trim() || state.logoUrl || '');
+      return safeBusinessLogoSource(candidate);
+    }
+
+    function paintBusinessLogo(element, source, fallback, compact = false) {
+      if (!element) return;
+      element.replaceChildren();
+      element.textContent = fallback;
+      if (!source) return;
+      const img = document.createElement('img');
+      img.alt = 'Logo del negocio';
+      img.decoding = 'async';
+      img.onload = () => {
+        element.replaceChildren(img);
+        element.style.background = '#FFFFFF';
+        element.style.padding = compact ? '2px' : '4px';
+      };
+      img.onerror = () => {
+        element.replaceChildren();
+        element.textContent = fallback;
+      };
+      img.src = source;
+    }
+
+    function updateBusinessLogoPreviews(theme = ensureThemeForType(state.type, state.activeTheme)) {
+      const source = currentBusinessLogoSource();
+      const fallback = businessLogoInitials();
+      const previewLogo = document.getElementById('preview-logo-badge');
+      [settingsLogoPreview, previewLogo].forEach(element => {
+        if (!element) return;
+        element.style.padding = '0';
+        element.style.background = source ? '#FFFFFF' : theme.primary;
+        element.style.color = readableTextOn(theme.primary);
+      });
+      paintBusinessLogo(settingsLogoPreview, source, fallback);
+      paintBusinessLogo(previewLogo, source, fallback, true);
+    }
+
+    function resizeBusinessLogo(file) {
+      return new Promise((resolve, reject) => {
+        if (!file || !['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+          reject(new Error('Selecciona una imagen JPG, PNG o WEBP.'));
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          reject(new Error('La imagen supera 5 MB. Elige un archivo más liviano.'));
+          return;
+        }
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('No fue posible leer la imagen.'));
+        reader.onload = () => {
+          const image = new Image();
+          image.onerror = () => reject(new Error('El archivo no contiene una imagen válida.'));
+          image.onload = () => {
+            const maxSide = 512;
+            const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+            canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+            const context = canvas.getContext('2d');
+            context.imageSmoothingEnabled = true;
+            context.imageSmoothingQuality = 'high';
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/webp', 0.86);
+            if (dataUrl.length > 750000) {
+              reject(new Error('La imagen sigue siendo demasiado pesada después de optimizarla.'));
+              return;
+            }
+            resolve(dataUrl);
+          };
+          image.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
     function isDarkSurface(hex) {
       return relativeLuminance(hex) < 0.22;
     }
@@ -1372,6 +1554,7 @@
         btn.classList.toggle('active', btn.dataset.themeChip === theme.name);
       });
 
+      updateBusinessLogoPreviews(theme);
       updatePagePreview();
     }
 
@@ -1724,6 +1907,7 @@
       if (!normalized.campaigns) normalized.campaigns = {};
       if (typeof normalized.ownerWhatsapp === 'undefined') normalized.ownerWhatsapp = '';
       if (typeof normalized.ownerCalendarEmail === 'undefined') normalized.ownerCalendarEmail = '';
+      if (typeof normalized.logoUrl !== 'string') normalized.logoUrl = '';
       if (typeof normalized.depositEnabled === 'undefined') normalized.depositEnabled = true;
       if (!normalized.depositMode) normalized.depositMode = 'percent';
       if (typeof normalized.depositPercent === 'undefined') normalized.depositPercent = 15;
@@ -1783,6 +1967,11 @@
     const businessTypeSwitch = document.getElementById('businessTypeSwitch');
     const settingsType = document.getElementById('settingsType');
     const settingsBusiness = document.getElementById('settingsBusiness');
+    const settingsLogoUrl = document.getElementById('settingsLogoUrl');
+    const settingsLogoFile = document.getElementById('settingsLogoFile');
+    const settingsLogoPreview = document.getElementById('settingsLogoPreview');
+    const settingsLogoFeedback = document.getElementById('settingsLogoFeedback');
+    const clearBusinessLogo = document.getElementById('clearBusinessLogo');
     const settingsOwnerWhatsapp = document.getElementById('settingsOwnerWhatsapp');
     const settingsCalendarEmail = document.getElementById('settingsCalendarEmail');
     const settingsDepositEnabled = document.getElementById('settingsDepositEnabled');
@@ -2029,6 +2218,7 @@
       localStorage.setItem('kauzeBusinessContactV1', JSON.stringify({
         businessName: state.name || currentProfile().business,
         businessType: state.type,
+        logoUrl: state.logoUrl || '',
         ownerWhatsapp: state.ownerWhatsapp || '',
         ownerCalendarEmail: state.ownerCalendarEmail || '',
         depositEnabled: !!state.depositEnabled,
@@ -2227,6 +2417,8 @@
       businessTypeSwitch.value=state.type;
       settingsType.value=state.type;
       settingsBusiness.value=name;
+      pendingLogoData = String(state.logoUrl || '').startsWith('data:image/') ? state.logoUrl : null;
+      if (settingsLogoUrl) settingsLogoUrl.value = pendingLogoData ? '' : (state.logoUrl || '');
       if (settingsOwnerWhatsapp) settingsOwnerWhatsapp.value = state.ownerWhatsapp || '';
       if (settingsCalendarEmail) settingsCalendarEmail.value = state.ownerCalendarEmail || '';
       if (settingsDepositEnabled) settingsDepositEnabled.checked = !!state.depositEnabled;
@@ -3115,10 +3307,58 @@
       input.addEventListener(eventName, () => updatePagePreview());
     });
 
+    if (settingsBusiness) {
+      settingsBusiness.addEventListener('input', () => updateBusinessLogoPreviews());
+    }
+
+    if (settingsLogoUrl) {
+      settingsLogoUrl.addEventListener('input', () => {
+        pendingLogoData = null;
+        if (settingsLogoFeedback) settingsLogoFeedback.textContent = 'Vista previa desde la URL indicada.';
+        updateBusinessLogoPreviews();
+      });
+    }
+
+    if (settingsLogoFile) {
+      settingsLogoFile.addEventListener('change', async () => {
+        const file = settingsLogoFile.files?.[0];
+        if (!file) return;
+        if (settingsLogoFeedback) settingsLogoFeedback.textContent = 'Optimizando imagen…';
+        try {
+          pendingLogoData = await resizeBusinessLogo(file);
+          if (settingsLogoUrl) settingsLogoUrl.value = '';
+          if (settingsLogoFeedback) settingsLogoFeedback.textContent = 'Logo listo. Presiona “Guardar cambios” para publicarlo.';
+          updateBusinessLogoPreviews();
+        } catch (error) {
+          pendingLogoData = null;
+          if (settingsLogoFeedback) settingsLogoFeedback.textContent = error.message;
+        } finally {
+          settingsLogoFile.value = '';
+        }
+      });
+    }
+
+    if (clearBusinessLogo) {
+      clearBusinessLogo.addEventListener('click', () => {
+        pendingLogoData = '';
+        if (settingsLogoUrl) settingsLogoUrl.value = '';
+        if (settingsLogoFeedback) settingsLogoFeedback.textContent = 'Logo quitado de la vista previa. Guarda los cambios para confirmar.';
+        updateBusinessLogoPreviews();
+      });
+    }
+
     saveSettings.addEventListener('click',()=>{ 
       const selectedType = settingsType.value;
+      const typedLogoUrl = settingsLogoUrl ? settingsLogoUrl.value.trim() : '';
+      const selectedLogo = currentBusinessLogoSource();
+      if (typedLogoUrl && !selectedLogo) {
+        if (settingsLogoFeedback) settingsLogoFeedback.textContent = 'Usa una URL HTTPS válida o carga una imagen desde tu equipo.';
+        settingsLogoUrl.focus();
+        return;
+      }
       state.name = settingsBusiness.value.trim() || profiles[selectedType].business; 
       state.type = selectedType; 
+      state.logoUrl = selectedLogo;
       state.ownerWhatsapp = settingsOwnerWhatsapp ? settingsOwnerWhatsapp.value.trim() : ''; 
       state.ownerCalendarEmail = settingsCalendarEmail ? settingsCalendarEmail.value.trim() : ''; 
       state.depositEnabled = settingsDepositEnabled ? settingsDepositEnabled.checked : false; 
@@ -3132,6 +3372,8 @@
       state.pageCta = settingsPageCta ? settingsPageCta.value.trim() : state.pageCta;
       state.bannerStyle = settingsBannerStyle ? settingsBannerStyle.value : (state.bannerStyle || 'soft');
       state.bannerImage = settingsBannerImage ? settingsBannerImage.value.trim() : (state.bannerImage || '');
+      pendingLogoData = String(state.logoUrl || '').startsWith('data:image/') ? state.logoUrl : null;
+      if (settingsLogoFeedback) settingsLogoFeedback.textContent = state.logoUrl ? 'Logo guardado y visible para clientes.' : 'Sin logo: Kauze mostrará las iniciales del negocio.';
 
       const selectedTheme = settingsThemeSelector ? settingsThemeSelector.value : state.activeTheme;
       const theme = ensureThemeForType(state.type, selectedTheme);

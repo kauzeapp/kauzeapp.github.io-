@@ -27,6 +27,7 @@ MASTERPLAN_STATE.update(
         "pageSubtitle": "Elige servicio, profesional y horario. Para ver trabajos y ejemplos, visita su Instagram.",
         "instagramUrl": "https://www.instagram.com/masterplan.soluciones?igsh=MXVsNnF3NXI5M2hkMA==",
         "instagramHandle": "@masterplan.soluciones",
+        "logoUrl": "/cliente/assets/masterplan-logo.jpg",
         "publicSubdomain": "masterplan",
         "professionals": {
             "barberia": [
@@ -56,12 +57,16 @@ MASTERPLAN_STATE.update(
     }
 )
 BUSINESS_STATES = {DEMO_SLUG: STATE, "masterplan": MASTERPLAN_STATE}
+PREVIEW_BUSINESS_SLUG = os.environ.get("PREVIEW_BUSINESS", DEMO_SLUG)
+if PREVIEW_BUSINESS_SLUG not in BUSINESS_STATES:
+    PREVIEW_BUSINESS_SLUG = DEMO_SLUG
+PREVIEW_STATE = BUSINESS_STATES[PREVIEW_BUSINESS_SLUG]
 ACCOUNT = {
     "user": {"id": "preview-owner", "name": "Sergio Molina", "email": "preview@kauze.cl"},
     "business": {
-        "id": "preview-business",
-        "name": DEMO_NAME,
-        "slug": DEMO_SLUG,
+        "id": f"preview-{PREVIEW_BUSINESS_SLUG}",
+        "name": PREVIEW_STATE["name"],
+        "slug": PREVIEW_BUSINESS_SLUG,
         "type": "barberia",
         "status": "activo",
     },
@@ -91,6 +96,7 @@ def business_payload(slug=DEMO_SLUG):
         "location": "Providencia",
         "city": "Santiago",
         "route": "masterplan.kauze.cl" if is_masterplan else f"{DEMO_SLUG}.kauze.cl",
+        "logoUrl": state.get("logoUrl", ""),
         "instagramUrl": state.get("instagramUrl", ""),
         "instagramHandle": state.get("instagramHandle", ""),
         "phone": "",
@@ -131,7 +137,7 @@ class PreviewHandler(SimpleHTTPRequestHandler):
         if path == "/api/auth/me":
             return self.json_response(200, {"account": ACCOUNT})
         if path == "/api/app-state":
-            return self.json_response(200, STATE)
+            return self.json_response(200, BUSINESS_STATES[PREVIEW_BUSINESS_SLUG])
         if path == "/api/public/businesses":
             return self.json_response(200, {"businesses": [business_payload(), business_payload("masterplan")]})
         if path.startswith("/api/public/businesses/") and path.endswith("/availability"):
@@ -161,10 +167,9 @@ class PreviewHandler(SimpleHTTPRequestHandler):
         return super().do_GET()
 
     def do_POST(self):
-        global STATE
         path = urlparse(self.path).path
         if path == "/api/app-state":
-            STATE = self.read_json()
+            BUSINESS_STATES[PREVIEW_BUSINESS_SLUG] = self.read_json()
             return self.json_response(200, {"status": "success", "version": 1})
         if path == "/api/auth/logout":
             return self.json_response(200, {"status": "success"})
