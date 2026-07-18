@@ -2717,7 +2717,12 @@
       professionalsTableBody.innerHTML = professionals.length ? professionals.map(x => {
         const comText = professionalCommissionLabel(x);
         const daysText = x.days && x.days.length ? x.days.map(d => d.slice(0,3)).join(', ') : 'Ninguno';
-        const shiftsText = x.shifts && x.shifts.length ? x.shifts.join('<br>') : 'Sin turnos';
+        const shiftsText = x.shifts && x.shifts.length
+          ? x.shifts.map(shift => typeof shift === 'string'
+            ? shift
+            : `${shift.day || 'Día'} · ${shift.start || '--:--'} - ${shift.end || '--:--'}`
+          ).join('<br>')
+          : 'Sin turnos';
         const servicesText = x.services && x.services.length ? x.services.join(', ') : 'Disponible para todo';
         const profileImage = safeProfileImageSource(x.profileImage);
         
