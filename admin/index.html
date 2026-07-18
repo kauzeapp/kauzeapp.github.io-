@@ -932,6 +932,15 @@
       </div>
     </header>
 
+    <!-- Banner de notificaciones de aprobaciones pendientes -->
+    <div id="adminNotificationBanner" class="warning" style="display: none; margin-bottom: 24px; padding: 18px 24px; border-radius: 16px; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.24); align-items: center; gap: 14px; text-align: left;">
+      <span style="font-size: 24px;">🔔</span>
+      <div>
+        <strong style="color: #b45309; font-size: 15px; display: block; margin-bottom: 2px;">Solicitudes Pendientes de Aprobación</strong>
+        <span style="color: #78350f; font-size: 13.5px;" id="adminNotificationText">Tienes 0 barberos esperando activación manual de su plan y subdominio.</span>
+      </div>
+    </div>
+
     <section class="hero">
       <h1>Panel interno Kauze</h1>
       <p class="lead">
@@ -2552,6 +2561,20 @@
             const res = await fetch("/api/admin/clientes");
             if (res.ok) {
                 clientsData = await res.json();
+                
+                // Actualizar banner de notificaciones
+                const pendingCount = clientsData.filter(c => c.requiereAprobacion).length;
+                const banner = document.getElementById("adminNotificationBanner");
+                const bannerText = document.getElementById("adminNotificationText");
+                if (banner && bannerText) {
+                    if (pendingCount > 0) {
+                        banner.style.display = "flex";
+                        bannerText.textContent = `Tienes ${pendingCount} solicitud(es) de suscripción esperando validación de pago y activación.`;
+                    } else {
+                        banner.style.display = "none";
+                    }
+                }
+                
                 renderClientsTable();
             }
         } catch (err) {
@@ -2591,9 +2614,22 @@
             
             // Subdomain link
             const url = client.subdominio ? `https://${client.subdominio}` : "#";
+            
+            // Mapeo de categorías
+            const categoryNames = {
+                barberia: "💈 Barbería",
+                manicure: "💅 Manicure",
+                pestanas: "👁️ Pestañas",
+                estetica: "💆 Estética",
+                peluqueria: "💇 Peluquería",
+                tatuajes: "🎨 Tatuajes",
+                talleres: "🚗 Talleres"
+            };
+            const categoryLabel = categoryNames[client.categoriaSlug] || client.categoriaSlug || "💈 Barbería";
+
             const subNameMarkup = client.subdominio 
-                ? `<a href="${url}" target="_blank" style="color: var(--blue); font-weight: 700; text-decoration: none;">${client.businessName}</a><div style="font-size: 11px; color: var(--text-muted);">${client.subdominio}</div>`
-                : `<span style="font-weight: 700; color: var(--navy);">${client.businessName}</span><div style="font-size: 11px; color: #ef4444; font-weight: 700;">Pendiente activación</div>`;
+                ? `<a href="${url}" target="_blank" style="color: var(--blue); font-weight: 700; text-decoration: none;">${client.businessName}</a> <span style="font-size:10.5px; font-weight:bold; color:var(--text-muted); margin-left:6px; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${categoryLabel}</span><div style="font-size: 11px; color: var(--text-muted);">${client.subdominio}</div>`
+                : `<span style="font-weight: 700; color: var(--navy);">${client.businessName}</span> <span style="font-size:10.5px; font-weight:bold; color:var(--text-muted); margin-left:6px; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${categoryLabel}</span><div style="font-size: 11px; color: #ef4444; font-weight: 700;">Pendiente activación</div>`;
             
             // Status badge
             let badgeStyle = "background: #e2e8f0; color: #475569;";
@@ -2678,7 +2714,8 @@
             phone: document.getElementById("mPhone").value.trim(),
             businessName: document.getElementById("mBusiness").value.trim(),
             planTipo: document.getElementById("mPlan").value,
-            estadoSuscripcion: document.getElementById("mState").value
+            estadoSuscripcion: document.getElementById("mState").value,
+            categoriaSlug: document.getElementById("mCategory").value
         };
         
         try {
@@ -2727,8 +2764,20 @@
           <input type="tel" id="mPhone" class="form-input" placeholder="Ej. +56998765432" required>
         </div>
         <div class="form-group">
-          <label for="mBusiness">Nombre de la Barbería</label>
+          <label for="mBusiness">Nombre de la Barbería / Negocio</label>
           <input type="text" id="mBusiness" class="form-input" placeholder="Ej. Barbería Golden" required>
+        </div>
+        <div class="form-group">
+          <label for="mCategory">Tipo de Servicio / Rubro</label>
+          <select id="mCategory" class="form-input" style="padding-top:4px;">
+            <option value="barberia">💈 Barbería</option>
+            <option value="manicure">💅 Manicure / Uñas</option>
+            <option value="pestanas">👁️ Pestañas / Lashistas</option>
+            <option value="estetica">💆 Estética / Cosmetología</option>
+            <option value="peluqueria">💇 Peluquería / Estilista</option>
+            <option value="tatuajes">🎨 Tatuajes / Estudio</option>
+            <option value="talleres">🚗 Talleres / Mecánica</option>
+          </select>
         </div>
         <div class="form-group">
           <label for="mPlan">Plan de Suscripción</label>
