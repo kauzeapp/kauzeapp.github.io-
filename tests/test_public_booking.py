@@ -12,6 +12,9 @@ class PublicBookingTests(unittest.TestCase):
             "demoMode": True,
             "businessStatus": "DISPONIBLE",
             "pageTitle": "Reserva en Cauce Norte",
+            "instagramUrl": "https://www.instagram.com/masterplan.soluciones",
+            "instagramHandle": "@masterplan.soluciones",
+            "publicSubdomain": "masterplan",
             "services": {
                 "barberia": [
                     {"id": "service-1", "name": "Fade", "duration": "60 min", "price": 18000}
@@ -43,6 +46,7 @@ class PublicBookingTests(unittest.TestCase):
                 "address": "Avenida Demo 123",
                 "commune": "Providencia",
                 "city": "Santiago",
+                "phone": None,
                 "category_slug": "barberia",
                 "panel_state": self.state,
             }
@@ -50,6 +54,31 @@ class PublicBookingTests(unittest.TestCase):
         self.assertEqual(business["services"][0]["name"], "Fade")
         self.assertEqual(business["professionals"][0]["name"], "Camila Soto")
         self.assertTrue(business["demoMode"])
+        self.assertEqual(business["route"], "masterplan.kauze.cl")
+        self.assertEqual(business["instagramHandle"], "@masterplan.soluciones")
+        self.assertEqual(
+            business["instagramUrl"],
+            "https://www.instagram.com/masterplan.soluciones",
+        )
+
+    def test_public_projection_rejects_unsafe_social_url(self):
+        self.state["instagramUrl"] = "javascript:alert(1)"
+        self.state["publicSubdomain"] = '"><script>'
+        business = _public_business(
+            {
+                "slug": "masterplan",
+                "name": "Masterplan Barbería — DEMO",
+                "description": "Demo funcional",
+                "address": "Avenida Demo 456",
+                "commune": "Providencia",
+                "city": "Santiago",
+                "phone": None,
+                "category_slug": "barberia",
+                "panel_state": self.state,
+            }
+        )
+        self.assertEqual(business["instagramUrl"], "")
+        self.assertEqual(business["route"], "masterplan.kauze.cl")
 
     def test_occupied_slot_is_not_offered(self):
         available = _available_slots(

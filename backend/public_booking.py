@@ -4,6 +4,7 @@ import threading
 import time
 from datetime import date, datetime, timedelta, timezone
 from html import escape
+from urllib.parse import urlparse
 
 from backend.db import connection
 
@@ -55,6 +56,24 @@ def _duration_minutes(value):
 
 def _public_text(value, maximum=240):
     return escape(" ".join(str(value or "").strip().split())[:maximum])
+
+
+def _instagram_url(value):
+    candidate = str(value or "").strip()
+    if not candidate:
+        return ""
+    parsed = urlparse(candidate)
+    if parsed.scheme != "https" or parsed.hostname not in (
+        "instagram.com",
+        "www.instagram.com",
+    ):
+        return ""
+    return escape(candidate[:500], quote=True)
+
+
+def _public_subdomain(value, fallback):
+    candidate = str(value or "").strip().lower()
+    return candidate if re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", candidate) else str(fallback)
 
 
 def _typed_rows(state, key, business_type):
@@ -137,7 +156,10 @@ def _public_business(row):
         "address": _public_text(row.get("address") or "Dirección por confirmar", 160),
         "location": _public_text(row.get("commune") or row.get("city") or "Santiago", 100),
         "city": _public_text(row.get("city") or "Santiago", 100),
-        "route": f'{row["slug"]}.kauze.cl',
+        "route": f'{_public_subdomain(state.get("publicSubdomain"), row["slug"])}.kauze.cl',
+        "instagramUrl": _instagram_url(state.get("instagramUrl")),
+        "instagramHandle": _public_text(state.get("instagramHandle") or "", 80),
+        "phone": _public_text(state.get("publicPhone") or row.get("phone") or "", 30),
         "rating": str(state.get("publicRating") or "5.0"),
         "reviews": int(state.get("publicReviews") or 1),
         "statusLabel": "Disponible" if state.get("businessStatus") == "DISPONIBLE" else "Agenda pausada",
@@ -176,6 +198,7 @@ def list_public_businesses():
               l.direccion AS address,
               l.comuna AS commune,
               l.ciudad AS city,
+              l.telefono_whatsapp AS phone,
               c.slug AS category_slug,
               e.estado AS panel_state
             FROM locales l

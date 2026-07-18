@@ -4,6 +4,7 @@ import json
 import os
 import secrets
 import sys
+from copy import deepcopy
 from datetime import date, timedelta
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, unquote, urlparse
@@ -18,6 +19,43 @@ from backend.seed_demo import DEMO_NAME, DEMO_SLUG, build_panel_state
 
 PORT = int(os.environ.get("PORT", "8891"))
 STATE = build_panel_state()
+MASTERPLAN_STATE = deepcopy(STATE)
+MASTERPLAN_STATE.update(
+    {
+        "name": "Masterplan Barbería — DEMO",
+        "pageTitle": "Reserva tu hora en Masterplan Barbería",
+        "pageSubtitle": "Elige servicio, profesional y horario. Para ver trabajos y ejemplos, visita su Instagram.",
+        "instagramUrl": "https://www.instagram.com/masterplan.soluciones?igsh=MXVsNnF3NXI5M2hkMA==",
+        "instagramHandle": "@masterplan.soluciones",
+        "publicSubdomain": "masterplan",
+        "professionals": {
+            "barberia": [
+                {
+                    "id": "masterplan-pro-1",
+                    "name": "Benjamín Soto",
+                    "role": "Barbero senior",
+                    "note": "Perfil ficticio para pruebas internas.",
+                },
+                {
+                    "id": "masterplan-pro-2",
+                    "name": "Martina Rojas",
+                    "role": "Especialista en fade",
+                    "note": "Perfil ficticio para pruebas internas.",
+                },
+            ]
+        },
+        "services": {
+            "barberia": [
+                {"id": "masterplan-ser-1", "name": "Corte clásico", "duration": "45 min", "price": 12000},
+                {"id": "masterplan-ser-2", "name": "Fade", "duration": "60 min", "price": 16000},
+                {"id": "masterplan-ser-3", "name": "Perfilado de barba", "duration": "30 min", "price": 10000},
+            ]
+        },
+        "appointments": {"barberia": []},
+        "clients": {"barberia": []},
+    }
+)
+BUSINESS_STATES = {DEMO_SLUG: STATE, "masterplan": MASTERPLAN_STATE}
 ACCOUNT = {
     "user": {"id": "preview-owner", "name": "Sergio Molina", "email": "preview@kauze.cl"},
     "business": {
@@ -31,38 +69,43 @@ ACCOUNT = {
 }
 
 
-def business_payload():
+def business_payload(slug=DEMO_SLUG):
+    state = BUSINESS_STATES[slug]
     services = [
         _service_payload(item, index)
-        for index, item in enumerate(STATE["services"]["barberia"], 1)
+        for index, item in enumerate(state["services"]["barberia"], 1)
     ]
     professionals = [
         _professional_payload(item, index)
-        for index, item in enumerate(STATE["professionals"]["barberia"], 1)
+        for index, item in enumerate(state["professionals"]["barberia"], 1)
     ]
     tomorrow = (date.today() + timedelta(days=1)).isoformat()
+    is_masterplan = slug == "masterplan"
     return {
-        "id": DEMO_SLUG,
-        "slug": DEMO_SLUG,
+        "id": slug,
+        "slug": slug,
         "type": "barberia",
-        "name": DEMO_NAME,
-        "description": "Demo funcional conectada entre cliente y panel.",
-        "address": "Avenida Demo 123",
+        "name": state["name"],
+        "description": "Perfil ficticio conectado a Instagram para probar reservas directas en Kauze." if is_masterplan else "Demo funcional conectada entre cliente y panel.",
+        "address": "Avenida Demo 456" if is_masterplan else "Avenida Demo 123",
         "location": "Providencia",
         "city": "Santiago",
-        "route": f"{DEMO_SLUG}.kauze.cl",
+        "route": "masterplan.kauze.cl" if is_masterplan else f"{DEMO_SLUG}.kauze.cl",
+        "instagramUrl": state.get("instagramUrl", ""),
+        "instagramHandle": state.get("instagramHandle", ""),
+        "phone": "",
         "rating": "5.0",
-        "reviews": 24,
+        "reviews": 1 if is_masterplan else 24,
         "statusLabel": "Disponible",
         "statusTone": "good",
-        "hero": STATE["pageTitle"],
-        "subtitle": STATE["pageSubtitle"],
-        "cta": STATE["pageCta"],
+        "hero": state["pageTitle"],
+        "subtitle": state["pageSubtitle"],
+        "cta": state["pageCta"],
         "demoMode": True,
         "deposit": {"enabled": False, "mode": "none", "percent": 0, "fixedAmount": 0, "minimum": 0},
         "services": services,
         "professionals": professionals,
-        "nextSlots": _available_slots(STATE, "barberia", tomorrow)[:4],
+        "nextSlots": _available_slots(state, "barberia", tomorrow)[:4],
     }
 
 
@@ -90,22 +133,26 @@ class PreviewHandler(SimpleHTTPRequestHandler):
         if path == "/api/app-state":
             return self.json_response(200, STATE)
         if path == "/api/public/businesses":
-            return self.json_response(200, {"businesses": [business_payload()]})
+            return self.json_response(200, {"businesses": [business_payload(), business_payload("masterplan")]})
         if path.startswith("/api/public/businesses/") and path.endswith("/availability"):
             parts = [unquote(part) for part in path.strip("/").split("/")]
+            slug = parts[3]
+            state = BUSINESS_STATES.get(slug)
+            if not state:
+                return self.json_response(404, {"error": "business_not_found"})
             query = parse_qs(parsed.query)
             target_date = (query.get("date") or [date.today().isoformat()])[0]
             professional_id = (query.get("professionalId") or [None])[0]
             professional = next(
                 (
                     item
-                    for index, raw in enumerate(STATE["professionals"]["barberia"], 1)
+                    for index, raw in enumerate(state["professionals"]["barberia"], 1)
                     if (item := _professional_payload(raw, index))["id"] == professional_id
                 ),
                 None,
             )
             slots = _available_slots(
-                STATE,
+                state,
                 "barberia",
                 target_date,
                 professional["name"] if professional else None,
@@ -125,13 +172,17 @@ class PreviewHandler(SimpleHTTPRequestHandler):
             return self.json_response(404, {"error": "not_found"})
 
         data = self.read_json()
+        slug = data.get("businessSlug", DEMO_SLUG)
+        state = BUSINESS_STATES.get(slug)
+        if not state:
+            return self.json_response(404, {"error": "business_not_found"})
         services = [
             _service_payload(item, index)
-            for index, item in enumerate(STATE["services"]["barberia"], 1)
+            for index, item in enumerate(state["services"]["barberia"], 1)
         ]
         professionals = [
             _professional_payload(item, index)
-            for index, item in enumerate(STATE["professionals"]["barberia"], 1)
+            for index, item in enumerate(state["professionals"]["barberia"], 1)
         ]
         service = next(item for item in services if item["id"] == data["serviceId"])
         professional = next(item for item in professionals if item["id"] == data["professionalId"])
@@ -163,8 +214,8 @@ class PreviewHandler(SimpleHTTPRequestHandler):
             "createdAt": date.today().isoformat(),
             "code": f"{secrets.randbelow(1_000_000):06d}",
         }
-        STATE["appointments"]["barberia"].append(appointment)
-        STATE["clients"]["barberia"].append(
+        state["appointments"]["barberia"].append(appointment)
+        state["clients"]["barberia"].append(
             {
                 "id": f"preview-client-{secrets.token_urlsafe(6)}",
                 "name": appointment["client"],
@@ -176,7 +227,7 @@ class PreviewHandler(SimpleHTTPRequestHandler):
                 "stars": 5,
             }
         )
-        return self.json_response(201, {"appointment": appointment, "business": DEMO_NAME, "created": True})
+        return self.json_response(201, {"appointment": appointment, "business": state["name"], "created": True})
 
 
 if __name__ == "__main__":

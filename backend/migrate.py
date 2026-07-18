@@ -145,6 +145,17 @@ def bootstrap_owner(conn):
     print(f"Cuenta inicial lista para el negocio: {local_slug}")
 
 
+def provision_demo_businesses(conn):
+    function_name = conn.execute(
+        "SELECT to_regprocedure('provisionar_masterplan_demo()')"
+    ).fetchone()[0]
+    if not function_name:
+        return
+    provisioned = conn.execute("SELECT provisionar_masterplan_demo()").fetchone()[0]
+    if provisioned:
+        print("Negocio de prueba Masterplan listo.")
+
+
 def main():
     url = database_url()
     if not url:
@@ -155,6 +166,7 @@ def main():
         apply_migrations(conn)
         with conn.transaction():
             bootstrap_owner(conn)
+            provision_demo_businesses(conn)
 
 
 if __name__ == "__main__":
