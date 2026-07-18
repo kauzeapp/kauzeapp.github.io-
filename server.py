@@ -233,11 +233,67 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             self._json_response(200, self._read_file_json("notes_db.json", {"notes": []}))
             return
 
+        if path == "/api/admin/dashboard/stats":
+            account = self._require_session()
+            if not account:
+                return
+            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+                self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
+                return
+            from backend.subscriptions import get_dashboard_stats
+            self._json_response(200, get_dashboard_stats())
+            return
+
+        if path == "/api/admin/clientes":
+            account = self._require_session()
+            if not account:
+                return
+            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+                self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
+                return
+            query = parse_qs(parsed_url.query)
+            status_filter = (query.get("status") or [None])[0]
+            search_query = (query.get("q") or [None])[0]
+            from backend.subscriptions import get_admin_clients
+            self._json_response(200, get_admin_clients(status_filter, search_query))
+            return
+
         host = self.headers.get("Host", "").split(":", 1)[0].lower()
         if host.startswith("admin.") and path in ("/", "/index.html"):
             self.path = "/admin/index.html"
 
         super().do_GET()
+
+    def do_PUT(self):
+        path = urlparse(self.path).path
+
+        if not self._origin_allowed():
+            self._json_response(403, {"error": "origin_not_allowed"})
+            return
+
+        if path.startswith("/api/admin/clientes/") and path.endswith("/confirmar"):
+            account = self._require_session()
+            if not account:
+                return
+            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+                self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
+                return
+            try:
+                parts = path.strip("/").split("/")
+                if len(parts) != 5:
+                    self._json_response(404, {"error": "not_found"})
+                    return
+                client_id = parts[3]
+                from backend.subscriptions import confirm_client_activation
+                result = confirm_client_activation(client_id)
+                self._json_response(200, result)
+            except ValueError as e:
+                self._json_response(400, {"error": "invalid_request", "message": str(e)})
+            except Exception as e:
+                self._json_response(500, {"error": "internal_error", "message": str(e)})
+            return
+
+        self._json_response(405, {"error": "method_not_allowed"})
 
     def do_POST(self):
         path = urlparse(self.path).path
@@ -264,6 +320,58 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                 self._json_response(503, {"error": "database_not_configured"})
             except ValueError as exc:
                 self._json_response(400, {"error": "invalid_request", "message": str(exc)})
+            return
+
+        if path == "/api/subscriptions/register":
+            try:
+                data = self._read_json()
+                from backend.subscriptions import register_subscription
+                result = register_subscription(data)
+                self._json_response(201, result)
+            except ValueError as e:
+                self._json_response(400, {"error": "invalid_request", "message": str(e)})
+            except Exception as e:
+                self._json_response(500, {"error": "internal_error", "message": str(e)})
+            return
+
+        if path == "/api/admin/clientes/crear":
+            account = self._require_session()
+            if not account:
+                return
+            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+                self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
+                return
+            try:
+                data = self._read_json()
+                from backend.subscriptions import create_admin_client
+                result = create_admin_client(data)
+                self._json_response(201, result)
+            except ValueError as e:
+                self._json_response(400, {"error": "invalid_request", "message": str(e)})
+            except Exception as e:
+                self._json_response(500, {"error": "internal_error", "message": str(e)})
+            return
+
+        if path.startswith("/api/admin/clientes/") and path.endswith("/reset-password"):
+            account = self._require_session()
+            if not account:
+                return
+            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+                self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
+                return
+            try:
+                parts = path.strip("/").split("/")
+                if len(parts) != 5:
+                    self._json_response(404, {"error": "not_found"})
+                    return
+                client_id = parts[3]
+                from backend.subscriptions import reset_client_password
+                result = reset_client_password(client_id)
+                self._json_response(200, result)
+            except ValueError as e:
+                self._json_response(400, {"error": "invalid_request", "message": str(e)})
+            except Exception as e:
+                self._json_response(500, {"error": "internal_error", "message": str(e)})
             return
 
         if path == "/api/auth/login":
