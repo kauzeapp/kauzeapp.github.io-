@@ -1639,6 +1639,11 @@
       font-weight: 800;
     }
 
+    .maps-btn:hover {
+      border-color: var(--blue) !important;
+      background: var(--soft-blue) !important;
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 
@@ -1742,6 +1747,21 @@
             <button class="btn primary" type="button" id="searchBusinessLocation">Buscar negocios</button>
             <button class="btn location-button" type="button" id="useMyLocation">◎ Mi ubicación</button>
           </div>
+          
+          <!-- Filtros de búsqueda en Google Maps -->
+          <div class="maps-filter-container" style="margin-top: 18px; border-top: 1px solid var(--border); padding-top: 18px;">
+            <span style="font-size: 13px; font-weight: 700; color: var(--navy); display: block; margin-bottom: 10px; text-align: left;">🌐 Buscar en Google Maps por categoría:</span>
+            <div class="maps-filter-row" style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button type="button" class="btn maps-btn" onclick="searchInGoogleMaps('Barbería')" style="min-height: 38px; padding: 6px 14px; font-size: 12.5px; border-radius: 999px; background: white; font-weight: 600; box-shadow: var(--shadow-soft);">💈 Barberías</button>
+              <button type="button" class="btn maps-btn" onclick="searchInGoogleMaps('Salón de Belleza')" style="min-height: 38px; padding: 6px 14px; font-size: 12.5px; border-radius: 999px; background: white; font-weight: 600; box-shadow: var(--shadow-soft);">💅 Salones</button>
+              <button type="button" class="btn maps-btn" onclick="searchInGoogleMaps('Lashistas')" style="min-height: 38px; padding: 6px 14px; font-size: 12.5px; border-radius: 999px; background: white; font-weight: 600; box-shadow: var(--shadow-soft);">👁️ Lashistas</button>
+              <button type="button" class="btn maps-btn" onclick="searchInGoogleMaps('Estética')" style="min-height: 38px; padding: 6px 14px; font-size: 12.5px; border-radius: 999px; background: white; font-weight: 600; box-shadow: var(--shadow-soft);">💆 Estéticas</button>
+              <button type="button" class="btn maps-btn" onclick="searchInGoogleMaps('Peluquería')" style="min-height: 38px; padding: 6px 14px; font-size: 12.5px; border-radius: 999px; background: white; font-weight: 600; box-shadow: var(--shadow-soft);">💇 Peluquerías</button>
+              <button type="button" class="btn maps-btn" onclick="searchInGoogleMaps('Tatuajes')" style="min-height: 38px; padding: 6px 14px; font-size: 12.5px; border-radius: 999px; background: white; font-weight: 600; box-shadow: var(--shadow-soft);">🎨 Tatuajes</button>
+              <button type="button" class="btn maps-btn" onclick="searchInGoogleMaps('Taller Mecánico')" style="min-height: 38px; padding: 6px 14px; font-size: 12.5px; border-radius: 999px; background: white; font-weight: 600; box-shadow: var(--shadow-soft);">🚗 Talleres</button>
+            </div>
+          </div>
+          
           <p class="location-status" id="locationStatus" aria-live="polite">Puedes escribir tu comuna o permitir el acceso a tu ubicación.</p>
         </div>
       </div>
@@ -2039,6 +2059,48 @@
         hero: 'Reserva tu peluquería Kauze sin perder tiempo por DM.',
         subtitle: 'Mira disponibilidad, elige estilista y confirma tu hora fácilmente.',
         tags: ['💇 Color & peinado', '⭐ 4.8 rating', '📍 La Reina']
+      },
+      {
+        id: 'biz-ink-art-studio',
+        type: 'tatuajes',
+        name: 'Ink & Art Studio',
+        description: 'Estudio de tatuajes personalizados y piercings con altos estándares de higiene.',
+        location: 'Providencia',
+        distance: '1.2 km',
+        address: 'Av. Providencia 2250, Local 12',
+        lat: -33.4245,
+        lng: -70.6088,
+        route: 'inkandart.kauze.cl',
+        nextSlots: ['11:00', '14:30', '16:00'],
+        logoColors: ['#000000', '#D97706'],
+        rating: '4.9',
+        reviews: 142,
+        statusLabel: 'Disponible hoy',
+        statusTone: 'good',
+        hero: 'Reserva tu sesión de tatuaje o piercing.',
+        subtitle: 'Elige tu artista y agenda tu bloque de tiempo en segundos.',
+        tags: ['🎨 Fineline & Blackwork', '💎 Piercings', '📍 Providencia']
+      },
+      {
+        id: 'biz-taller-master',
+        type: 'talleres',
+        name: 'Taller Mecánico Master',
+        description: 'Servicio mecánico automotriz, diagnóstico, mantención por kilometraje y frenos.',
+        location: 'Ñuñoa',
+        distance: '1.9 km',
+        address: 'Av. José Pedro Alessandri 450',
+        lat: -33.4595,
+        lng: -70.5985,
+        route: 'tallermaster.kauze.cl',
+        nextSlots: ['09:30', '11:00', '15:00', '16:30'],
+        logoColors: ['#374151', '#EF4444'],
+        rating: '4.8',
+        reviews: 215,
+        statusLabel: 'Cupos limitados',
+        statusTone: 'warn',
+        hero: 'Agenda la mantención de tu auto online.',
+        subtitle: 'Mecánica de confianza con reserva de turnos en tiempo real.',
+        tags: ['🚗 Mecánica general', '⚙️ Diagnóstico scanner', '📍 Ñuñoa']
       }
     ];
 
@@ -2048,7 +2110,9 @@
       { key: 'manicure', label: 'Manicure' },
       { key: 'pestanas', label: 'Pestañas' },
       { key: 'estetica', label: 'Estética' },
-      { key: 'peluqueria', label: 'Peluquería' }
+      { key: 'peluqueria', label: 'Peluquería' },
+      { key: 'tatuajes', label: 'Tatuajes' },
+      { key: 'talleres', label: 'Talleres' }
     ];
 
     const SELECTED_BUSINESS_KEY = 'kauzeSelectedBusinessId';
@@ -2152,6 +2216,46 @@
           ['Francisca León', 'Estilista senior', 'Corte y peinado.'],
           ['Romina Tapia', 'Colorista', 'Coloración y mechas.'],
           ['Claudia Vera', 'Estilista', 'Brushing y tratamientos.']
+        ]
+      },
+      tatuajes: {
+        business: 'Ink & Art Studio',
+        description: 'Tatuajes personalizados, piercings y arte corporal con los mejores artistas.',
+        hero: 'Agenda tu sesión de tatuaje o piercing.',
+        subtitle: 'Elige tu artista, servicio y bloque de tiempo.',
+        prosLabel: 'tatuador',
+        services: [
+          ['Tatuaje pequeño (2-5cm)', '60 min', 40000],
+          ['Tatuaje mediano (6-12cm)', '120 min', 80000],
+          ['Sesión tatuaje grande (medio día)', '240 min', 180000],
+          ['Piercing lóbulo', '30 min', 15000],
+          ['Piercing nostril', '30 min', 20000],
+          ['Evaluación diseño', '20 min', 0]
+        ],
+        pros: [
+          ['Sebastián Soto', 'Tatuador senior', 'Especialista en realismo y blackwork.'],
+          ['Nicole Díaz', 'Tatuadora', 'Especialista en fineline y puntillismo.'],
+          ['Matías Castro', 'Piercer profesional', 'Perforador oficial con materiales de titanio.']
+        ]
+      },
+      talleres: {
+        business: 'Taller Mecánico Master',
+        description: 'Mantención, mecánica general, frenos y diagnóstico electrónico multimarca.',
+        hero: 'Reserva la mantención de tu auto online.',
+        subtitle: 'Selecciona el servicio mecánico y horario de recepción.',
+        prosLabel: 'mecánico',
+        services: [
+          ['Diagnóstico scanner', '45 min', 25000],
+          ['Cambio de aceite + filtros', '60 min', 45000],
+          ['Cambio pastillas de freno', '90 min', 35000],
+          ['Alineación y balanceo', '60 min', 20000],
+          ['Mantención por kilometraje', '180 min', 90000],
+          ['Revisión pre-compra', '75 min', 30000]
+        ],
+        pros: [
+          ['Juan Riquelme', 'Mecánico jefe', 'Especialista en motores y diagnóstico electrónico.'],
+          ['Rodrigo Muñoz', 'Mecánico', 'Mecánica de frenos y suspensiones.'],
+          ['Diego Rojas', 'Técnico alineación', 'Alineación, balanceo y neumáticos.']
         ]
       }
     };
@@ -2556,6 +2660,19 @@
       const services = item.services?.length ? item.services : (profiles[item.type]?.services || []);
       const prices = services.map(service => Number(service[2]) || 0).filter(Boolean);
       return prices.length ? Math.min(...prices) : 0;
+    }
+
+    function searchInGoogleMaps(businessType) {
+      const input = document.getElementById('businessSearch');
+      const location = input ? input.value.trim() : '';
+      let query = businessType;
+      if (location && location !== 'Ubicación actual detectada') {
+        query += ' ' + location;
+      } else {
+        query += ' cerca de mi';
+      }
+      const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+      window.open(url, '_blank');
     }
 
     function applyLocationSearch() {
