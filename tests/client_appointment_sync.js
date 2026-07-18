@@ -45,6 +45,11 @@ const renderedClients = clientFunctions.buildClientsFromAppointments(appointment
 assert.strictEqual(renderedClients.length, 2);
 assert.strictEqual(renderedClients[1].name, "Cliente nuevo");
 assert.strictEqual(renderedClients[1].phone, "Sin teléfono");
+assert.strictEqual(renderedClients[1].totalBilling, 0);
+const waitingClient = clientFunctions.buildClientsFromAppointments([
+  {...appointments[0], status: "Esperando confirmación"},
+], stored)[1];
+assert.strictEqual(waitingClient.nextAction, "Confirmar asistencia");
 const legacyClient = clientFunctions.normalizeStoredClient(
   ["Cliente antiguo", "Barba", "Seguimiento", 9000],
   0,

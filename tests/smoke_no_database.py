@@ -58,6 +58,12 @@ def main():
             method="POST",
             payload={"email": "prueba@kauze.cl", "password": "no-es-real"},
         )[0] == 503
+        assert request("/api/public/businesses")[0] == 503
+        assert request(
+            "/api/public/appointments",
+            method="POST",
+            payload={"businessSlug": "demo"},
+        )[0] in (400, 503)
         assert request("/api/tasks")[0] == 200
         print("Servidor válido: rutas públicas y fallo seguro sin DATABASE_URL.")
     finally:

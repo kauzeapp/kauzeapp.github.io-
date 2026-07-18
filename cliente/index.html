@@ -689,10 +689,11 @@
       border-radius: 24px;
       padding: 20px;
       box-shadow: var(--shadow-soft);
-      display: grid;
+      display: flex;
+      flex-direction: column;
       gap: 12px;
       min-height: 220px;
-      align-content: start;
+      height: 100%;
       transition: .18s ease;
     }
 
@@ -719,6 +720,8 @@
       font-size: 21px;
       letter-spacing: -.6px;
       line-height: 1.15;
+      min-height: 50px;
+      margin: 0;
     }
 
     .welcome-option p {
@@ -726,6 +729,7 @@
       line-height: 1.62;
       font-size: 14px;
       margin: 0;
+      min-height: 46px;
     }
 
     .welcome-option .btn {
@@ -1375,6 +1379,11 @@
         padding: 18px;
       }
 
+      .welcome-option h3,
+      .welcome-option p {
+        min-height: auto;
+      }
+
       .steps {
         grid-template-columns: 1fr 1fr;
       }
@@ -1777,7 +1786,7 @@
 
       <div class="success" id="bookingSuccess">
         <h3>Reserva creada correctamente</h3>
-        <p id="successText">Tu cita quedó guardada localmente para esta presentación.</p>
+        <p id="successText">Tu cita quedará guardada en el negocio seleccionado.</p>
       </div>
     </section>
 
@@ -1796,8 +1805,8 @@
       </article>
 
       <article class="mini-panel">
-        <h2>Evaluación postventa</h2>
-        <p>Simulación del flujo de estrellas y comentario que luego alimentará reseñas, fidelización y puntos Kauze.</p>
+        <h2>Califica a la barbería</h2>
+        <p>Evalúa tu experiencia con el negocio. Esta calificación pública ayuda a otros clientes a elegir dónde reservar.</p>
 
         <div class="rating" id="ratingStars">
           <button class="star" type="button" data-rating="1">★</button>
@@ -1814,14 +1823,14 @@
 
         <button class="btn full" type="button" id="saveReview">Enviar evaluación</button>
         <div class="success" id="reviewSuccess">
-          <h3>Evaluación guardada</h3>
-          <p>Demo: el cliente sumaría puntos Kauze y el negocio recibiría feedback.</p>
+          <h3>Evaluación enviada a la barbería</h3>
+          <p>La nota corresponde al negocio, no a la ficha personal del cliente.</p>
         </div>
       </article>
     </section>
 
     <footer class="footer">
-      © 2026 Kauze.cl · Portal cliente final demo · Sin backend
+      © 2026 Kauze.cl · Portal cliente final demo · Reservas conectadas a PostgreSQL
     </footer>
   </main>
 
@@ -2072,6 +2081,8 @@
 
     const slots = ['10:00','10:30','11:00','11:30','12:00','14:00','14:30','15:00','15:30','16:00','17:00','18:00'];
     const CLIENT_PORTAL_APPOINTMENTS_KEY = 'kauzeSharedAppointmentsV1';
+    const PUBLIC_API_URL = window.location.origin;
+    let publicBusinessesLoaded = false;
 
     function getBusinessContact() {
       try {
@@ -2083,6 +2094,16 @@
     }
 
     function getDepositConfig() {
+      const onlineDeposit = currentBusiness()?.deposit;
+      if (onlineDeposit) {
+        return {
+          enabled: !!onlineDeposit.enabled,
+          mode: onlineDeposit.mode || 'none',
+          percent: Number(onlineDeposit.percent || 0),
+          fixedAmount: Number(onlineDeposit.fixedAmount || 0),
+          minimum: Number(onlineDeposit.minimum || 0)
+        };
+      }
       const contact = getBusinessContact();
       return {
         enabled: contact.depositEnabled !== false,
@@ -2192,6 +2213,46 @@
       return d.toISOString().split('T')[0];
     }
 
+    function coordsForLocation(location) {
+      const normalized = normalizeExplorerText(location);
+      const preset = locationPresets.find(item => item.terms.some(term => normalized.includes(normalizeExplorerText(term))));
+      return preset ? { lat: preset.lat, lng: preset.lng } : { lat: -33.4326, lng: -70.6161 };
+    }
+
+    function mapPublicBusiness(item) {
+      const coords = coordsForLocation(`${item.location || ''} ${item.city || ''}`);
+      return {
+        ...item,
+        id: item.id || item.slug,
+        online: true,
+        distance: item.distance || '—',
+        lat: Number(item.lat || coords.lat),
+        lng: Number(item.lng || coords.lng),
+        logoColors: item.logoColors || ['#172554', '#2563EB'],
+        tags: item.tags || ['💈 Asociado Kauze', '⚡ Reserva conectada', item.demoMode ? '🧪 Negocio DEMO' : '✅ Negocio verificado'],
+        serviceItems: Array.isArray(item.services) ? item.services : [],
+        professionalItems: Array.isArray(item.professionals) ? item.professionals : [],
+        services: (item.services || []).map(service => [service.name, service.duration, Number(service.price || 0)]),
+        pros: (item.professionals || []).map(pro => [pro.name, pro.role || 'Profesional', pro.note || 'Disponible para reservas.']),
+        availableSlots: Array.isArray(item.nextSlots) ? item.nextSlots : slots
+      };
+    }
+
+    async function loadPublicBusinesses() {
+      try {
+        const response = await fetch(`${PUBLIC_API_URL}/api/public/businesses`, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`No se pudieron cargar los negocios (${response.status}).`);
+        const data = await response.json();
+        const onlineBusinesses = (data.businesses || []).map(mapPublicBusiness);
+        if (onlineBusinesses.length) {
+          featuredBusinesses.splice(0, featuredBusinesses.length, ...onlineBusinesses);
+          publicBusinessesLoaded = true;
+        }
+      } catch (error) {
+        console.warn('La lista en línea no está disponible; se mantiene el catálogo visual.', error);
+      }
+    }
+
     function currentBusiness() {
       let business = featuredBusinesses.find(item => item.id === selectedBusinessId);
       if (!business) {
@@ -2207,6 +2268,8 @@
 
       return {
         ...base,
+        services: business.services?.length ? business.services : base.services,
+        pros: business.pros?.length ? business.pros : base.pros,
         business: business.name,
         description: business.description || base.description,
         hero: business.hero || base.hero,
@@ -2421,7 +2484,7 @@
       }
 
       const base = profiles[item.type] || profiles.barberia;
-      const services = (base.services || []).slice(0, 3);
+      const services = (item.services?.length ? item.services : base.services || []).slice(0, 3);
       const colors = item.logoColors || ['#2563EB', '#6366F1'];
 
       holder.innerHTML = `
@@ -2490,7 +2553,7 @@
 
       grid.innerHTML = list.map(item => {
         const base = profiles[item.type] || profiles.barberia;
-        const services = (base.services || []).slice(0, 2).map(service => service[0]).join(' · ');
+        const services = (item.services?.length ? item.services : base.services || []).slice(0, 2).map(service => service[0]).join(' · ');
         const colors = item.logoColors || ['#2563EB', '#6366F1'];
         const detailOpen = selectedPreviewBusinessId === item.id;
         return `
@@ -2588,15 +2651,16 @@
         btn.addEventListener('click', () => {
           selectedProfessional = Number(btn.dataset.pro);
           renderProfessionals();
-          goStep(3);
+          refreshAvailability().finally(() => goStep(3));
         });
       });
     }
 
     function renderSlots() {
-      document.getElementById('slotsGrid').innerHTML = slots.map(slot => `
+      const availableSlots = currentBusiness().availableSlots || slots;
+      document.getElementById('slotsGrid').innerHTML = availableSlots.length ? availableSlots.map(slot => `
         <button class="slot ${selectedSlot === slot ? 'selected' : ''}" type="button" data-slot="${slot}">${slot}</button>
-      `).join('');
+      `).join('') : `<div class="empty-businesses">No quedan horas disponibles para esta fecha. Prueba otro día o profesional.</div>`;
 
       document.querySelectorAll('[data-slot]').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -2605,6 +2669,32 @@
           goStep(4);
         });
       });
+    }
+
+    async function refreshAvailability() {
+      const business = currentBusiness();
+      const date = document.getElementById('bookingDate').value || todayISO();
+      const professional = selectedProfessional !== null
+        ? business.professionalItems?.[selectedProfessional]
+        : null;
+      if (!business.online || !professional) {
+        business.availableSlots = business.nextSlots || slots;
+        renderSlots();
+        return;
+      }
+      try {
+        const query = new URLSearchParams({ date, professionalId: professional.id });
+        const response = await fetch(`${PUBLIC_API_URL}/api/public/businesses/${encodeURIComponent(business.slug)}/availability?${query}`, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`No se pudo consultar la agenda (${response.status}).`);
+        const data = await response.json();
+        business.availableSlots = Array.isArray(data.slots) ? data.slots : [];
+        if (!business.availableSlots.includes(selectedSlot)) selectedSlot = null;
+      } catch (error) {
+        console.warn('No fue posible actualizar las horas disponibles.', error);
+        business.availableSlots = business.nextSlots || slots;
+      }
+      renderSlots();
+      updateSummary();
     }
 
     function goStep(step) {
@@ -2678,6 +2768,35 @@
       localStorage.setItem(CLIENT_PORTAL_APPOINTMENTS_KEY, JSON.stringify(nextList));
     }
 
+    async function createOnlineAppointment(data, business, serviceItem, professionalItem) {
+      if (!business.online) {
+        throw new Error('Este negocio pertenece al catálogo visual y todavía no acepta reservas conectadas.');
+      }
+      const response = await fetch(`${PUBLIC_API_URL}/api/public/appointments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requestId: data.requestId,
+          businessSlug: business.slug,
+          serviceId: serviceItem.id,
+          professionalId: professionalItem.id,
+          date: data.date,
+          time: data.time,
+          clientName: data.client,
+          phone: data.phone,
+          email: data.email,
+          website: ''
+        })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const error = new Error(result.message || 'No pudimos guardar la reserva. Intenta nuevamente.');
+        error.code = result.error || 'booking_failed';
+        throw error;
+      }
+      return result;
+    }
+
     document.getElementById('businessType').addEventListener('change', (e) => {
       const nextType = e.target.value;
       const firstMatch = featuredBusinesses.find(item => item.type === nextType);
@@ -2698,6 +2817,7 @@
       if (event.key === 'Enter') applyLocationSearch();
     });
 
+    document.getElementById('bookingDate').min = todayISO();
     document.getElementById('bookingDate').value = todayISO();
 
     document.querySelectorAll('[data-pay-method]').forEach(btn => {
@@ -2710,10 +2830,10 @@
 
     document.getElementById('todayBtn').addEventListener('click', () => {
       document.getElementById('bookingDate').value = todayISO();
-      updateSummary();
+      refreshAvailability();
     });
 
-    document.getElementById('bookingDate').addEventListener('input', updateSummary);
+    document.getElementById('bookingDate').addEventListener('input', refreshAvailability);
 
     document.getElementById('startBookingFlow').addEventListener('click', () => showClientFlow('booking'));
 
@@ -2730,21 +2850,24 @@
 
     document.getElementById('resetBooking').addEventListener('click', resetBooking);
 
-    document.getElementById('bookingForm').addEventListener('submit', (e) => {
+    document.getElementById('bookingForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const p = profile();
+      const selectedBusiness = currentBusiness();
       const service = selectedService !== null ? p.services[selectedService] : null;
       const pro = selectedProfessional !== null ? p.pros[selectedProfessional] : null;
+      const serviceItem = selectedService !== null ? selectedBusiness.serviceItems?.[selectedService] : null;
+      const professionalItem = selectedProfessional !== null ? selectedBusiness.professionalItems?.[selectedProfessional] : null;
       const date = document.getElementById('bookingDate').value || todayISO();
 
-      if (!service || !pro || !selectedSlot) return alert('Faltan datos de la reserva.');
+      if (!service || !pro || !selectedSlot || !serviceItem || !professionalItem) return alert('Faltan datos de la reserva.');
 
       const requiredDeposit = isDepositRequired();
       const calculatedDeposit = depositAmount(service[2]);
 
       const data = {
-        id: `reserva-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        requestId: `reserva-${Date.now()}-${Math.random().toString(16).slice(2)}`,
         type: currentType,
         source: 'cliente',
         status: 'Esperando confirmación',
@@ -2779,17 +2902,41 @@
 
       data.notifications = buildNotificationFlow(data);
 
+      const submitButton = document.getElementById('submitBookingBtn');
+      const originalSubmitText = submitButton.textContent;
+      submitButton.disabled = true;
+      submitButton.textContent = 'Guardando reserva…';
+
+      let onlineResult;
+      try {
+        onlineResult = await createOnlineAppointment(data, selectedBusiness, serviceItem, professionalItem);
+      } catch (error) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalSubmitText;
+        if (error.code === 'slot_unavailable') await refreshAvailability();
+        alert(error.message);
+        return;
+      }
+
+      Object.assign(data, onlineResult.appointment, {
+        business: onlineResult.business || p.business,
+        businessId: selectedBusiness.id,
+        businessLocation: selectedBusiness.location,
+        businessDistance: selectedBusiness.distance
+      });
+      saveAppointment(data);
+      submitButton.disabled = false;
+      submitButton.textContent = originalSubmitText;
       document.getElementById('paymentStatus').className = 'pay-status ok';
       document.getElementById('paymentStatus').textContent = requiredDeposit
         ? `🟢 Pago demo aprobado por ${selectedPaymentMethod}`
-        : '🟢 Reserva sin abono solicitada correctamente';
-      saveAppointment(data);
+        : '🟢 Reserva guardada correctamente en Kauze';
 
       const paymentMessage = requiredDeposit
         ? `Pagaste un abono demo de ${money(data.depositAmount)} para ${data.service}.`
         : `Solicitaste ${data.service} sin abono porque este negocio no lo exige.`;
 
-      document.getElementById('successText').textContent = `Listo, ${data.name}. Tu reserva fue enviada a ${data.business}.  ${paymentMessage} La reserva quedó esperando confirmación de asistencia. Código demo: ${data.code}. También quedará visible en el panel del negocio cuando abras /app/ en este mismo navegador. Kauze deja programado el WhatsApp al cliente, el aviso al dueño, el evento Calendar demo y la actualización en app.`;
+      document.getElementById('successText').textContent = `Listo, ${data.name}. Tu reserva fue guardada en ${data.business}. ${paymentMessage} Código de seguimiento: ${data.code}. Ya está disponible en el panel privado del negocio, incluso desde otro navegador o una pestaña incógnita.`;
       document.getElementById('bookingSuccess').classList.add('active');
       document.getElementById('bookingSuccess').scrollIntoView({ behavior:'smooth', block:'center' });
     });
@@ -2868,14 +3015,20 @@
       document.getElementById('reviewSuccess').classList.add('active');
     });
 
-    const initialBusiness = featuredBusinesses.find(item => item.id === selectedBusinessId) || featuredBusinesses[0];
-    selectedBusinessId = initialBusiness.id;
-    currentType = initialBusiness.type;
-    explorerType = currentType;
-    renderProfile();
-    renderBusinessExplorer();
-    goStep(1);
-    showClientFlow('inicio', false);
+    async function initializeClientPortal() {
+      await loadPublicBusinesses();
+      const initialBusiness = featuredBusinesses.find(item => item.id === selectedBusinessId) || featuredBusinesses[0];
+      selectedBusinessId = initialBusiness.id;
+      currentType = initialBusiness.type;
+      explorerType = currentType;
+      localStorage.setItem(SELECTED_BUSINESS_KEY, selectedBusinessId);
+      renderProfile();
+      renderBusinessExplorer();
+      goStep(1);
+      showClientFlow('inicio', false);
+    }
+
+    initializeClientPortal();
   </script>
 </body>
 </html>

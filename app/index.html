@@ -52,6 +52,7 @@
     .login-badge{display:inline-flex;align-items:center;width:max-content;margin-bottom:16px;padding:7px 11px;border-radius:999px;background:var(--soft-blue);color:var(--blue);font-size:12px;font-weight:800}
     .login-card h2{font-family:'Sora',sans-serif;font-size:31px;letter-spacing:-1px;color:var(--navy);margin-bottom:8px}
     .login-intro{color:var(--muted);font-size:14px;line-height:1.65;margin-bottom:22px}
+    [hidden]{display:none!important}
     .field-group{display:grid;gap:7px;margin-bottom:14px}
     .field-group label{font-size:13px;font-weight:800;color:var(--navy)}
     .field{width:100%;min-height:50px;border:1px solid var(--border);border-radius:16px;padding:12px 14px;background:#fff;color:var(--text);outline:none;transition:.18s}
@@ -509,7 +510,7 @@
           <article class="card metric"><div class="label">Citas hoy</div><div class="value" id="mCitas">0</div><div class="trend">+12% vs ayer</div></article>
           <article class="card metric"><div class="label">Ingresos hoy</div><div class="value" id="mIngresos">$0</div><div class="trend">+8% esta semana</div></article>
           <article class="card metric"><div class="label">Nuevos clientes</div><div class="value" id="mClientes">0</div><div class="trend">+3 últimos 7 días</div></article>
-          <article class="card metric"><div class="label">Valoración promedio</div><div class="value">4.8</div><div class="trend">★★★★★</div></article>
+          <article class="card metric"><div class="label">Valoración del negocio</div><div class="value" id="mBusinessRating">—</div><div class="trend" id="mBusinessReviews">Sin reseñas públicas</div></article>
         </div>
         <div class="section-head">
           <div>
@@ -564,7 +565,7 @@
             <tbody id="professionalsTableBody"></tbody>
           </table>
         </article>
-        <div class="notice" style="margin-top:14px">Los profesionales se guardan localmente en este navegador. Si asignas citas a un profesional y luego lo eliminas, las citas antiguas se mantienen como registro.</div>
+        <div class="notice" style="margin-top:14px">Los profesionales se guardan en el negocio conectado a PostgreSQL. Si asignas citas a un profesional y luego lo eliminas, las citas antiguas se mantienen como registro.</div>
       </section>
       <section class="view" id="view-marketing"><div class="section-head"><div><h2>Marketing</h2><p>Promociones, fidelización y recuperación.</p></div><button type="button" class="btn primary" id="newCampaignBtn" style="width:auto">Crear campaña</button></div><div class="grid-3" id="marketingGrid"></div><div class="section-head"><div><h2>Análisis de integraciones</h2><p>Vista comercial para explicar cómo Kauze conectará WhatsApp e Instagram.</p></div></div><div class="grid-3" id="integrationGrid"></div><article class="card" style="margin-top:14px"><h3 style="font-family:Sora,sans-serif;font-size:18px;color:var(--navy);margin-bottom:8px">Checklist antes de conectar Meta</h3><div class="checklist"><div class="check-item"><span class="check-dot">1</span><span>Número de WhatsApp corporativo libre, sin WhatsApp normal activo en celular.</span></div><div class="check-item"><span class="check-dot">2</span><span>Cuenta de Meta Business verificada y permisos para WhatsApp Business Cloud API.</span></div><div class="check-item"><span class="check-dot">3</span><span>Plantillas de confirmación, recordatorio, reactivación y postventa aprobadas por Meta.</span></div><div class="check-item"><span class="check-dot">4</span><span>Instagram conectado para automatizar respuestas, seguimiento y recuperación de clientes.</span></div></div></article></section>
       <section class="view" id="view-facturacion"><div class="section-head"><div><h2>Facturación</h2><p>Ingresos, métodos de pago y movimientos.</p></div><button type="button" class="btn primary" style="width:auto">Registrar pago</button></div><div class="grid-4"><article class="card metric"><div class="label">Ventas del día</div><div class="value" id="billingToday">$0</div><div class="trend">Registradas</div></article><article class="card metric"><div class="label">Ticket promedio</div><div class="value" id="billingAvg">$0</div><div class="trend">Por atención</div></article><article class="card metric"><div class="label">Pagos pendientes</div><div class="value">2</div><div class="trend warn">Revisar hoy</div></article><article class="card metric"><div class="label">Método principal</div><div class="value">Débito</div><div class="trend">Mayor uso</div></article></div><div class="section-head"><div><h2>Últimos pagos</h2><p>Movimiento temporal para demo.</p></div></div><article class="card table-wrap"><table><thead><tr><th>Cliente</th><th>Servicio</th><th>Método</th><th>Monto</th></tr></thead><tbody id="billingTable"></tbody></table></article></section>
@@ -572,7 +573,7 @@
         <div class="section-head">
           <div>
             <h2>Ajustes</h2>
-            <p>Configuración local de la demo.</p>
+            <p>Configuración conectada del negocio demo.</p>
           </div>
         </div>
         <div class="grid-2">
@@ -634,6 +635,20 @@
               <div class="theme-mini-list" id="themeMiniList"></div>
             </div>
 
+            <div class="personalization-box">
+              <h3>Calificación interna de clientes</h3>
+              <p>Es una herramienta privada y opcional para el equipo. La valoración pública siempre corresponde al negocio y nunca al cliente.</p>
+              <div class="field-group">
+                <label for="settingsClientRatingMode">Sistema de calificación</label>
+                <select class="field" id="settingsClientRatingMode">
+                  <option value="none">Desactivado (recomendado)</option>
+                  <option value="stars">Estrellas internas (1 a 5)</option>
+                  <option value="score">Nota interna (1,0 a 7,0)</option>
+                </select>
+              </div>
+              <div class="theme-helper">Esta información solo aparece dentro del panel del negocio. No se publica ni altera las reseñas de la barbería.</div>
+            </div>
+
             <h2 style="font-family:Sora,sans-serif;font-size:18px;margin:18px 0 12px">Canales de notificación del dueño</h2>
             <div class="field-group">
               <label>WhatsApp del dueño / encargado</label>
@@ -678,7 +693,7 @@
             </div>
 
             <button type="button" class="btn primary" id="saveSettings">Guardar cambios locales</button>
-            <div class="save-msg" id="saveMsg">Cambios guardados en este navegador.</div>
+            <div class="save-msg" id="saveMsg">Cambios guardados en Kauze.</div>
           </article>
 
           <article class="card" style="display: flex; flex-direction: column; align-items: center;">
@@ -735,7 +750,7 @@
       <div class="modal-head">
         <div>
           <h2 id="appointmentModalTitle">Crear cita</h2>
-          <p>Registra una reserva para la agenda del negocio. Por ahora se guarda localmente en este navegador.</p>
+          <p>Registra una reserva y guárdala en el panel conectado del negocio.</p>
         </div>
         <button class="close-modal" type="button" id="closeAppointmentModal">×</button>
       </div>
@@ -871,15 +886,10 @@
             <label for="cliTotalBilling">Valor total pagado ($)</label>
             <input class="field" id="cliTotalBilling" type="number" min="0" placeholder="Ej: 12000" value="0">
           </div>
-          <div class="field-group">
-            <label for="cliStars">Valoración / Estrellas</label>
-            <select class="field" id="cliStars">
-              <option value="5">⭐⭐⭐⭐⭐ (Excelente)</option>
-              <option value="4">⭐⭐⭐⭐ (Bueno)</option>
-              <option value="3">⭐⭐⭐ (Regular)</option>
-              <option value="2">⭐⭐ (Mala conducta)</option>
-              <option value="1">⭐ (Conflictivo)</option>
-            </select>
+          <div class="field-group" id="clientRatingField" hidden>
+            <label for="cliInternalRating" id="clientRatingLabel">Calificación interna</label>
+            <select class="field" id="cliInternalRating"></select>
+            <small style="color:var(--muted);font-weight:600;line-height:1.4;">Solo visible para el negocio. No modifica la reputación pública de la barbería.</small>
           </div>
           <div class="field-group full">
             <label for="cliNextAction">Próxima acción / Estado</label>
@@ -1086,7 +1096,7 @@
 
 
   <script>
-    const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', ownerWhatsapp:'', ownerCalendarEmail:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, activeTheme:'Kauze Base', pageTitle:'Agenda tu próxima hora sin escribir por WhatsApp', pageSubtitle:'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.', pageCta:'Reservar ahora', bannerStyle:'soft', bannerImage:'', appointments:{}, professionals:{}, campaigns:{} };
+    const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', ownerWhatsapp:'', ownerCalendarEmail:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, clientRatingMode:'none', publicRating:null, publicReviews:0, activeTheme:'Kauze Base', pageTitle:'Agenda tu próxima hora sin escribir por WhatsApp', pageSubtitle:'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.', pageCta:'Reservar ahora', bannerStyle:'soft', bannerImage:'', appointments:{}, professionals:{}, campaigns:{} };
     const CLIENT_PORTAL_APPOINTMENTS_KEY = 'kauzeSharedAppointmentsV1';
     
     // --- CATALOGO DE ESTILOS Y TEMAS (Kauze Design System) ---
@@ -1182,6 +1192,7 @@
 
     const BACKEND_URL = window.location.origin;
     let onlineSaveQueue = Promise.resolve();
+    let onlineSavePending = 0;
 
     async function syncOnlineState(push = false, snapshot = null) {
       try {
@@ -1714,6 +1725,8 @@
       if (typeof normalized.depositPercent === 'undefined') normalized.depositPercent = 15;
       if (typeof normalized.depositFixedAmount === 'undefined') normalized.depositFixedAmount = 1000;
       if (typeof normalized.depositMinimum === 'undefined') normalized.depositMinimum = 1000;
+      if (!['none', 'stars', 'score'].includes(normalized.clientRatingMode)) normalized.clientRatingMode = 'none';
+      normalized.publicReviews = Number(normalized.publicReviews || 0);
       if (!normalized.activeTheme || normalized.activeTheme === 'Club Náutico' || normalized.activeTheme === 'Brisa Serena') normalized.activeTheme = 'Kauze Base';
       if (!normalized.pageTitle) normalized.pageTitle = 'Agenda tu próxima hora sin escribir por WhatsApp';
       if (!normalized.pageSubtitle) normalized.pageSubtitle = 'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.';
@@ -1773,6 +1786,7 @@
     const settingsDepositPercent = document.getElementById('settingsDepositPercent');
     const settingsDepositFixed = document.getElementById('settingsDepositFixed');
     const settingsDepositMinimum = document.getElementById('settingsDepositMinimum');
+    const settingsClientRatingMode = document.getElementById('settingsClientRatingMode');
     const settingsThemeSelector = document.getElementById('settingsThemeSelector');
     const themePolicyNote = document.getElementById('themePolicyNote');
     const themePalettePreview = document.getElementById('themePalettePreview');
@@ -1789,6 +1803,8 @@
     const mCitas = document.getElementById('mCitas');
     const mIngresos = document.getElementById('mIngresos');
     const mClientes = document.getElementById('mClientes');
+    const mBusinessRating = document.getElementById('mBusinessRating');
+    const mBusinessReviews = document.getElementById('mBusinessReviews');
     const billingToday = document.getElementById('billingToday');
     const billingAvg = document.getElementById('billingAvg');
     const phoneCats = document.getElementById('phoneCats');
@@ -1874,6 +1890,28 @@
           renderThemeMiniList();
         });
       }
+    }
+
+    function renderThemeMiniList(){
+      if (!themeMiniList) return;
+      const type = settingsType ? settingsType.value : state.type;
+      const allowed = allowedThemesForType(type);
+      const activeName = settingsThemeSelector?.value || state.activeTheme;
+      themeMiniList.innerHTML = allowed.map((theme, index) => `
+        <button type="button" class="theme-chip ${theme.name === activeName ? 'active' : ''}" data-theme-index="${index}">
+          <span class="theme-chip-main"><span class="theme-dot" style="background:${theme.primary}"></span><span>${theme.name}</span></span>
+          <span class="theme-chip-meta">${theme.vertical === 'base' ? 'Base' : verticalLabel(theme.vertical)}</span>
+        </button>
+      `).join('');
+      themeMiniList.querySelectorAll('[data-theme-index]').forEach(button => {
+        button.addEventListener('click', () => {
+          const theme = allowed[Number(button.dataset.themeIndex)];
+          if (!theme) return;
+          if (settingsThemeSelector) settingsThemeSelector.value = theme.name;
+          updateMockupPreview(theme);
+          renderThemeMiniList();
+        });
+      });
     }
 
     function currentProfile(){ return profiles[state.type] || profiles.barberia; }
@@ -1987,9 +2025,11 @@
       }));
       if (currentAccount) {
         const snapshot = JSON.parse(JSON.stringify(state));
+        onlineSavePending += 1;
         onlineSaveQueue = onlineSaveQueue
           .catch(() => false)
-          .then(() => syncOnlineState(true, snapshot));
+          .then(() => syncOnlineState(true, snapshot))
+          .finally(() => { onlineSavePending = Math.max(0, onlineSavePending - 1); });
         return onlineSaveQueue;
       }
       return Promise.resolve(true);
@@ -2033,7 +2073,7 @@
           lastService: c[1],
           nextAction: c[2],
           totalBilling: c[3],
-          stars: 5
+          internalRating: null
         }));
         saveState();
       }
@@ -2041,11 +2081,14 @@
       return state.clients[state.type];
     }
 
-    function getClientStars(clientName) {
-      if (!clientName) return '⭐⭐⭐⭐⭐';
-      const c = getClients().find(x => x.name.toLowerCase() === clientName.trim().toLowerCase());
-      const starsNum = c ? Number(c.stars || 5) : 5;
-      return '⭐'.repeat(starsNum);
+    function getClientInternalRating(client) {
+      if (!client || state.clientRatingMode === 'none') return '';
+      const value = Number(client.internalRating || 0);
+      if (!value) return '<span style="color:var(--muted);font-size:11px;font-weight:700;">Sin calificar</span>';
+      if (state.clientRatingMode === 'score') {
+        return `<span style="color:var(--blue);font-size:11px;font-weight:800;white-space:nowrap;" title="Calificación privada del negocio">Nota interna ${value.toFixed(1)}</span>`;
+      }
+      return `<span style="color:#f59e0b;font-size:11.5px;white-space:nowrap;" title="Calificación privada del negocio">${'⭐'.repeat(Math.max(1, Math.min(5, Math.round(value))))}</span>`;
     }
 
     function setClients(list) {
@@ -2059,7 +2102,7 @@
       const list = [...getClients()];
       const key = appointment.client.trim().toLowerCase();
       const index = list.findIndex(client => String(client.name || '').trim().toLowerCase() === key);
-      const nextAction = appointment.status === 'Pendiente'
+      const nextAction = appointment.status === 'Pendiente' || appointment.status === 'Esperando confirmación'
         ? 'Confirmar asistencia'
         : 'Enviar seguimiento post-servicio';
 
@@ -2077,7 +2120,7 @@
           lastService: appointment.service,
           nextAction,
           totalBilling: 0,
-          stars: 5
+          internalRating: null
         });
       }
       state.clients[state.type] = list;
@@ -2147,7 +2190,6 @@
     }
 
     function render(){
-      importClientPortalAppointments();
       const p=currentProfile();
       const name = state.name || p.business;
       const appointments = getAppointments().slice().sort((a,b)=>(a.date + a.time).localeCompare(b.date + b.time));
@@ -2155,7 +2197,7 @@
       const professionals = getProfessionals();
       const campaigns = getCampaigns();
       const active = appointments.filter(a => a.status !== 'Cancelada' && a.status !== 'No asistió');
-      const pendingCount = appointments.filter(a => a.status === 'Pendiente').length;
+      const pendingCount = appointments.filter(a => a.status === 'Pendiente' || a.status === 'Esperando confirmación').length;
       const portalCount = appointments.filter(a => a.source === 'cliente').length;
       const uniqueClients = clientRows.length;
       const revenue = todayRevenue();
@@ -2172,6 +2214,7 @@
       if (settingsDepositPercent) settingsDepositPercent.value = Number(state.depositPercent || 0);
       if (settingsDepositFixed) settingsDepositFixed.value = Number(state.depositFixedAmount || 0);
       if (settingsDepositMinimum) settingsDepositMinimum.value = Number(state.depositMinimum || 0);
+      if (settingsClientRatingMode) settingsClientRatingMode.value = state.clientRatingMode || 'none';
       if (settingsPageTitle) settingsPageTitle.value = state.pageTitle || '';
       if (settingsPageSubtitle) settingsPageSubtitle.value = state.pageSubtitle || '';
       if (settingsPageCta) settingsPageCta.value = state.pageCta || '';
@@ -2194,6 +2237,8 @@
       mCitas.textContent=active.length;
       mIngresos.textContent=fmt(revenue);
       mClientes.textContent=uniqueClients;
+      if (mBusinessRating) mBusinessRating.textContent = state.publicRating ? `${Number(state.publicRating).toFixed(1)} ★` : '—';
+      if (mBusinessReviews) mBusinessReviews.textContent = state.publicReviews ? `${state.publicReviews} reseñas públicas` : 'Sin reseñas públicas';
       billingToday.textContent=fmt(revenue);
       billingAvg.textContent=fmt(active.length ? Math.round(revenue/active.length) : 0);
       phoneCats.innerHTML=p.cats.map(c=>`<div class="cat-card">${p.emoji}<br>${c}</div>`).join('');
@@ -2213,13 +2258,12 @@
         const confirmBtn = a.source === 'cliente' && a.status !== 'Confirmada'
           ? `<button class="mini-btn" data-confirm-appt="${a.id}">Confirmar</button>`
           : '';
-        const stars = getClientStars(a.client);
-        return `<tr><td>${a.date}<br><strong>${a.time}</strong></td><td>${a.client} <span style="color: #fbbf24; font-size: 11.5px; white-space: nowrap; margin-left: 4px;" title="Valoración">${stars}</span>${sourceLabel(a)}</td><td>${a.service}</td><td>${a.professional}</td><td><span class="${statusClass(a.status)}">${a.status}</span></td><td><div class="row-actions">${confirmBtn}<button class="mini-btn" data-edit-appt="${a.id}">Editar</button><button class="mini-btn danger" data-delete-appt="${a.id}">Eliminar</button></div></td></tr>`;
+        return `<tr><td>${a.date}<br><strong>${a.time}</strong></td><td>${a.client}${sourceLabel(a)}</td><td>${a.service}</td><td>${a.professional}</td><td><span class="${statusClass(a.status)}">${a.status}</span></td><td><div class="row-actions">${confirmBtn}<button class="mini-btn" data-edit-appt="${a.id}">Editar</button><button class="mini-btn danger" data-delete-appt="${a.id}">Eliminar</button></div></td></tr>`;
       }).join('') : `<tr><td colspan="6"><div class="empty-state">Agenda vacía. Usa “Crear cita” para agregar una reserva.</div></td></tr>`;
 
       clientsTable.innerHTML = clientRows.map(c => {
-        const stars = getClientStars(c.name);
-        return `<tr><td><strong>${c.name}</strong> <span style="color: #fbbf24; font-size: 11.5px; white-space: nowrap; margin-left: 4px;" title="Valoración">${stars}</span><br><span style="font-size: 11px; color: var(--muted); font-weight: normal;">${c.phone}</span></td><td>${c.lastService}</td><td>${c.nextAction}</td><td><strong>${fmt(c.totalBilling)}</strong></td></tr>`;
+        const internalRating = getClientInternalRating(c);
+        return `<tr><td><strong>${c.name}</strong>${internalRating ? ` · ${internalRating}` : ''}<br><span style="font-size: 11px; color: var(--muted); font-weight: normal;">${c.phone}</span></td><td>${c.lastService}</td><td>${c.nextAction}</td><td><strong>${fmt(c.totalBilling)}</strong></td></tr>`;
       }).join('');
 
       servicesGrid.innerHTML = getServices().map(s => `
@@ -2324,7 +2368,7 @@
           lastService: client[1] || 'Sin servicio',
           nextAction: client[2] || 'Sin acción pendiente',
           totalBilling: Number(client[3] || 0),
-          stars: 5
+          internalRating: null
         };
       }
       return {
@@ -2335,7 +2379,7 @@
         lastService: client.lastService || 'Sin servicio',
         nextAction: client.nextAction || 'Sin acción pendiente',
         totalBilling: Number(client.totalBilling || 0),
-        stars: Number(client.stars || 5)
+        internalRating: Number(client.internalRating || 0) || null
       };
     }
 
@@ -2348,22 +2392,21 @@
       appointments.forEach(a => {
         const key = a.client.trim().toLowerCase();
         if (!key) return;
-        const value = servicePrice(a.service);
+        const needsConfirmation = a.status === 'Pendiente' || a.status === 'Esperando confirmación';
         if (!map.has(key)) {
           map.set(key, {
             id: `cli-appt-${a.id}`,
             name: a.client,
             phone: a.phone || 'Sin teléfono',
             lastService: a.service,
-            nextAction: a.status === 'Pendiente' ? 'Confirmar asistencia' : 'Enviar seguimiento post-servicio',
-            totalBilling: value,
-            stars: 5
+            nextAction: needsConfirmation ? 'Confirmar asistencia' : 'Enviar seguimiento post-servicio',
+            totalBilling: 0,
+            internalRating: null
           });
         } else {
           const row = map.get(key);
           row.lastService = a.service;
-          row.nextAction = a.status === 'Pendiente' ? 'Confirmar asistencia' : 'Enviar seguimiento post-servicio';
-          row.totalBilling = Number(row.totalBilling || 0) + value;
+          row.nextAction = needsConfirmation ? 'Confirmar asistencia' : 'Enviar seguimiento post-servicio';
         }
       });
       return Array.from(map.values());
@@ -2798,6 +2841,30 @@
 
     let editingClientId = null;
 
+    function configureClientRatingField(client = null) {
+      const field = document.getElementById('clientRatingField');
+      const label = document.getElementById('clientRatingLabel');
+      const input = document.getElementById('cliInternalRating');
+      const mode = state.clientRatingMode || 'none';
+      field.hidden = mode === 'none';
+      if (mode === 'none') {
+        input.innerHTML = '';
+        return;
+      }
+
+      const currentValue = Number(client?.internalRating || 0);
+      if (mode === 'score') {
+        label.textContent = 'Nota interna del cliente';
+        const values = [];
+        for (let value = 1; value <= 7; value += 0.5) values.push(value);
+        input.innerHTML = '<option value="">Sin calificar</option>' + values.map(value => `<option value="${value}">${value.toFixed(1)}</option>`).join('');
+      } else {
+        label.textContent = 'Estrellas internas del cliente';
+        input.innerHTML = '<option value="">Sin calificar</option>' + [1,2,3,4,5].map(value => `<option value="${value}">${'⭐'.repeat(value)}</option>`).join('');
+      }
+      input.value = currentValue ? String(currentValue) : '';
+    }
+
     function openClientModal(id=null) {
       editingClientId = id;
       const modal = document.getElementById('clientModal');
@@ -2809,7 +2876,6 @@
       const cLastService = document.getElementById('cliLastService');
       const cTotalBilling = document.getElementById('cliTotalBilling');
       const cNextAction = document.getElementById('cliNextAction');
-      const cStars = document.getElementById('cliStars');
 
       const services = getServices();
       cLastService.innerHTML = services.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
@@ -2820,7 +2886,7 @@
       cLastService.value = client?.lastService || (services[0]?.name || '');
       cTotalBilling.value = client?.totalBilling || 0;
       cNextAction.value = client?.nextAction || 'Enviar seguimiento post-servicio';
-      cStars.value = client?.stars || 5;
+      configureClientRatingField(client);
 
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
@@ -2843,16 +2909,18 @@
       const cLastService = document.getElementById('cliLastService');
       const cTotalBilling = document.getElementById('cliTotalBilling');
       const cNextAction = document.getElementById('cliNextAction');
-      const cStars = document.getElementById('cliStars');
+      const cInternalRating = document.getElementById('cliInternalRating');
+      const existingClient = editingClientId ? getClients().find(x => x.id === editingClientId) : null;
 
       const data = {
+        ...(existingClient || {}),
         id: editingClientId || 'cli-' + Date.now(),
         name: cName.value.trim(),
         phone: cPhone.value.trim(),
         lastService: cLastService.value,
         totalBilling: Number(cTotalBilling.value || 0),
         nextAction: cNextAction.value.trim(),
-        stars: Number(cStars.value || 5)
+        internalRating: state.clientRatingMode === 'none' ? (existingClient?.internalRating || null) : (Number(cInternalRating.value || 0) || null)
       };
 
       if (!data.name || !data.phone) {
@@ -3035,6 +3103,7 @@
       state.depositPercent = settingsDepositPercent ? Number(settingsDepositPercent.value || 0) : 0; 
       state.depositFixedAmount = settingsDepositFixed ? Number(settingsDepositFixed.value || 0) : 0; 
       state.depositMinimum = settingsDepositMinimum ? Number(settingsDepositMinimum.value || 0) : 0; 
+      state.clientRatingMode = settingsClientRatingMode ? settingsClientRatingMode.value : 'none';
       state.pageTitle = settingsPageTitle ? settingsPageTitle.value.trim() : state.pageTitle;
       state.pageSubtitle = settingsPageSubtitle ? settingsPageSubtitle.value.trim() : state.pageSubtitle;
       state.pageCta = settingsPageCta ? settingsPageCta.value.trim() : state.pageCta;
@@ -3250,7 +3319,7 @@
     campaignForm.addEventListener('submit', e => { e.preventDefault(); saveCampaignFromModal(); });
     saveCampaignBtn.addEventListener('click', saveCampaignFromModal);
 
-    const viewsMeta={inicio:['Inicio','Resumen general del negocio.'],agenda:['Agenda','Reservas, horarios y confirmaciones.'],clientes:['Clientes','Historial, preferencias y seguimiento.'],servicios:['Servicios','Catálogo, duración y precios.'],profesionales:['Profesionales','Equipo, horarios y desempeño.'],marketing:['Marketing','Promociones, campañas y fidelización.'],facturacion:['Facturación','Ingresos, pagos y movimientos.'],ajustes:['Ajustes','Configuración local de la demo.']};
+    const viewsMeta={inicio:['Inicio','Resumen general del negocio.'],agenda:['Agenda','Reservas, horarios y confirmaciones.'],clientes:['Clientes','Historial, preferencias y seguimiento.'],servicios:['Servicios','Catálogo, duración y precios.'],profesionales:['Profesionales','Equipo, horarios y desempeño.'],marketing:['Marketing','Promociones, campañas y fidelización.'],facturacion:['Facturación','Ingresos, pagos y movimientos.'],ajustes:['Ajustes','Configuración conectada del negocio demo.']};
     document.querySelectorAll('#nav button').forEach(btn=>btn.addEventListener('click', async ()=>{
       const v=btn.dataset.view;
       const targetView = document.getElementById('view-'+v);
@@ -3268,19 +3337,22 @@
       render();
     }));
 
-    window.addEventListener('storage', (event) => {
-      if (event.key === CLIENT_PORTAL_APPOINTMENTS_KEY) {
-        const imported = importClientPortalAppointments();
-        if (imported > 0) render();
-      }
-    });
-
     window.addEventListener('focus', async () => {
       if(!currentAccount) return;
-      const imported = importClientPortalAppointments();
-      if (imported > 0) render();
       await syncOnlineState(false);
       render();
+    });
+
+    async function refreshPanelFromServer() {
+      if (!currentAccount || document.hidden || onlineSavePending > 0) return;
+      const before = JSON.stringify(state);
+      const synced = await syncOnlineState(false);
+      if (synced && JSON.stringify(state) !== before) render();
+    }
+
+    setInterval(refreshPanelFromServer, 4000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) refreshPanelFromServer();
     });
 
     async function restoreExistingSession(){
