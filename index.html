@@ -10,19 +10,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Sora:wght@700;800&display=swap" rel="stylesheet">
     
     <style>
-        /* Variables basadas estrictamente en la paleta de tu imagen */
+        /* Variables basadas en el estilo de Kauze/cliente */
         :root {
-            --bg-color: #ffffff; /* Fondo blanco limpio de Kauze */
+            --bg-color: #F7F9FC;
             --container-bg: #ffffff;
-            --surface-card: #f8fafc; /* Gris ultra claro para las tarjetas de la app */
-            --accent-primary: #1A1F36; /* Azul marino oscuro principal */
-            --accent-blue: #2563EB; /* Azul tech de los botones/acentos */
-            --accent-purple: #6366F1; /* Morado de la marca */
-            --accent-teal: #10B981; /* Verde agua/teal de los iconos */
-            --text-main: #1A1F36; /* Títulos oscuros y limpios */
-            --text-muted: #64748B; /* Texto de cuerpo suave */
-            --border-color: #E2E8F0; /* Bordes sutiles */
-            --gold-color: #D97706; /* Ámbar pulido para exclusividad */
+            --surface-card: rgba(255, 255, 255, 0.92);
+            --accent-primary: #0B1736;
+            --accent-blue: #2563EB;
+            --accent-purple: #6366F1;
+            --accent-teal: #10B981;
+            --text-main: #111827;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
+            --gold-color: #D97706;
+            --navy: #0B1736;
+            --shadow: 0 18px 55px rgba(15, 23, 42, 0.08);
+            --shadow-soft: 0 10px 28px rgba(15, 23, 42, 0.06);
         }
 
         * {
@@ -33,35 +36,46 @@
 
         body {
             font-family: 'Inter', -apple-system, sans-serif;
-            background-color: #fdfdfd;
+            background:
+                radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 28%),
+                radial-gradient(circle at top right, rgba(99, 102, 241, 0.12), transparent 30%),
+                var(--bg-color);
             color: var(--text-main);
             line-height: 1.6;
-            padding: 60px 20px;
+            padding: 40px 20px;
             -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
         }
 
         .container {
-            max-width: 740px;
+            max-width: 1060px;
             margin: 0 auto;
             background-color: var(--container-bg);
             border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 52px;
-            box-shadow: 0 12px 34px rgba(0, 0, 0, 0.03);
+            border-radius: 28px;
+            padding: 48px;
+            box-shadow: var(--shadow);
+            position: relative;
         }
 
-        /* Encabezado Tipográfico - KAUZE */
         .header {
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 56px;
+            width: 100%;
         }
 
-        .logo {
-            font-family: 'Sora', sans-serif;
-            font-size: 38px;
-            font-weight: 800;
-            letter-spacing: -1px; /* El estilo moderno de Sora suele ir más junto */
-            color: var(--accent-primary);
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-img {
+            height: 46px;
+            width: auto;
+            object-fit: contain;
         }
 
         /* Secciones */
@@ -77,36 +91,36 @@
             padding-bottom: 0;
         }
 
-        /* Títulos basados en Sora Bold */
         h1 {
             font-family: 'Sora', sans-serif;
-            font-size: 34px;
+            font-size: clamp(28px, 4vw, 42px);
             font-weight: 800;
-            line-height: 1.25;
+            line-height: 1.15;
             margin-bottom: 20px;
             text-align: center;
-            color: var(--text-main);
-            letter-spacing: -0.5px;
+            color: var(--navy);
+            letter-spacing: -1px;
         }
 
         .subtitle {
-            font-size: 17px;
+            font-size: 16.5px;
             color: var(--text-muted);
             text-align: center;
-            max-width: 620px;
+            max-width: 760px;
             margin: 0 auto 32px auto;
+            line-height: 1.7;
         }
 
         h2 {
             font-family: 'Sora', sans-serif;
-            font-size: 22px;
-            font-weight: 700;
+            font-size: 24px;
+            font-weight: 800;
             margin-bottom: 24px;
-            color: var(--text-main);
-            letter-spacing: -0.3px;
+            color: var(--navy);
+            letter-spacing: -0.5px;
         }
 
-        /* Categorías / Rubros (Estilo Tags de la imagen) */
+        /* Categorías / Rubros */
         .market-tags {
             display: flex;
             justify-content: center;
@@ -116,78 +130,136 @@
         }
 
         .tag {
-            background-color: #f1f5f9;
+            background-color: #ffffff;
             border: 1px solid var(--border-color);
-            padding: 8px 16px;
+            padding: 8px 18px;
             border-radius: 30px;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-main);
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--navy);
             display: inline-flex;
             align-items: center;
             gap: 6px;
             transition: all 0.2s ease;
+            box-shadow: var(--shadow-soft);
         }
         
         .tag:hover {
             border-color: var(--accent-blue);
             background-color: #eff6ff;
+            transform: translateY(-1px);
         }
 
-        /* Grid de Tarjetas (Limpio y corporativo) */
+        /* Grid de Tarjetas */
         .grid-cards {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 20px;
         }
 
-        @media (max-width: 600px) {
+        .grid-cards.three-cols {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        @media (max-width: 850px) {
+            .grid-cards.three-cols {
+                grid-template-columns: 1fr;
+            }
             .grid-cards {
                 grid-template-columns: 1fr;
             }
             .container {
                 padding: 28px;
             }
-            h1 { font-size: 28px; }
         }
 
         .card {
-            background-color: var(--surface-card);
+            background: var(--surface-card);
             border: 1px solid var(--border-color);
-            padding: 24px;
-            border-radius: 16px;
-            font-size: 15px;
+            padding: 32px;
+            border-radius: 26px;
+            font-size: 14.5px;
             color: var(--text-muted);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.01);
-            transition: all 0.2s ease;
+            box-shadow: var(--shadow-soft);
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            backdrop-filter: blur(14px);
         }
 
         .card:hover {
             border-color: #cbd5e1;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.03);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
         }
 
         .card-title {
             font-family: 'Sora', sans-serif;
-            font-weight: 700;
-            font-size: 16px;
-            margin-bottom: 8px;
-            color: var(--text-main);
+            font-weight: 800;
+            font-size: 19px;
+            margin-bottom: 12px;
+            color: var(--navy);
+            letter-spacing: -0.5px;
         }
 
-        /* Modificadores de color para los bordes superiores de las tarjetas (estilo UI de tu app) */
-        .card-blue { border-top: 3px solid var(--accent-blue); }
-        .card-purple { border-top: 3px solid var(--accent-purple); }
-        .card-teal { border-top: 3px solid var(--accent-teal); }
-        .card-dark { border-top: 3px solid var(--accent-primary); }
+        .card-desc {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 28px;
+            color: var(--text-muted);
+            flex-grow: 1;
+        }
+
+        /* Modificadores de color para los bordes superiores de las tarjetas */
+        .card-blue { border-top: 4px solid var(--accent-blue); }
+        .card-purple { border-top: 4px solid var(--accent-purple); }
+        .card-teal { border-top: 4px solid var(--accent-teal); }
+        .card-dark { border-top: 4px solid var(--accent-primary); }
+        .card-gold { border-top: 4px solid var(--gold-color); }
+
+        /* Botones estilo píldora de cliente */
+        .btn {
+            border: 1px solid var(--border-color);
+            background: #fff;
+            color: var(--navy);
+            min-height: 44px;
+            padding: 10px 20px;
+            border-radius: 999px;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.18s ease;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+        }
+
+        .btn.primary {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-color: transparent;
+            color: #fff;
+        }
+
+        .btn.primary:hover {
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.2);
+        }
 
         /* Bloque del Programa Fundadores */
         .counter-container {
             background: rgba(217, 119, 6, 0.03);
             border: 1px solid rgba(217, 119, 6, 0.2);
             padding: 28px;
-            border-radius: 16px;
+            border-radius: 20px;
             text-align: center;
             margin-top: 24px;
         }
@@ -214,7 +286,7 @@
         .progress-bar-fill {
             background: linear-gradient(90deg, #f59e0b, #d97706);
             height: 100%;
-            width: 0%; /* Animado dinámicamente con JS */
+            width: 0%;
             border-radius: 6px;
             transition: width 1.5s cubic-bezier(0.1, 0.8, 0.2, 1);
         }
@@ -231,9 +303,10 @@
             width: 100%;
             padding-top: 130%; 
             overflow: hidden;
-            border-radius: 16px;
+            border-radius: 20px;
             border: 1px solid var(--border-color);
             background-color: #ffffff;
+            box-shadow: var(--shadow-soft);
         }
 
         .iframe-container iframe {
@@ -252,25 +325,28 @@
             font-size: 13px;
             color: var(--text-muted);
         }
-        .kz-login-trigger {
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--accent-blue);
-    border: 1px solid var(--accent-blue);
-    padding: 8px 16px;
-    border-radius: 8px;
-    background: transparent;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    display: inline-block;
-}
 
-.kz-login-trigger:hover {
-    background: #eff6ff;
-    transform: translateY(-1px);
-}
+        .kz-login-trigger {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--navy);
+            border: 1px solid var(--border-color);
+            padding: 9px 20px;
+            border-radius: 999px;
+            background: #ffffff;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .kz-login-trigger:hover {
+            background: #f8fafc;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
 
 .kz-access-modal {
     position: fixed;
@@ -438,16 +514,12 @@
 
     <div class="container">
         
-        <!-- LOGO TIPOGRÁFICO DE MARCA CON BOTÓN DE INGRESO -->
-    <div class="header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 56px;">
-    <!-- Espaciador invisible a la izquierda para mantener el logo perfectamente centrado en pantallas grandes -->
-    <div style="width: 90px;" class="hide-mobile"></div> 
-    
-    <div class="logo" style="margin: 0 auto;">Kauze</div>
-    
-    <a href="https://admin.kauze.cl" class="kz-login-trigger" id="kzOpenAccess">
-    Ingresar
-</a>
+        <!-- ENCABEZADO CON LOGO DE MARCA Y BOTÓN DE INGRESO -->
+        <div class="header">
+            <div class="logo-container">
+                <img class="logo-img" src="app/kauze-logo-panel.png" alt="Kauze Logo" />
+            </div>
+            <a href="/admin/" class="kz-login-trigger">Ingresar</a>
         </div>
 
         <!-- 1. HERO (INTRIGA CON RUBROS REINCORPORADOS) -->
@@ -460,18 +532,40 @@
                 <span class="tag">💅 Salones de Belleza</span>
                 <span class="tag">👁️ Lashistas</span>
                 <span class="tag">💆 Estéticas</span>
+                <span class="tag">🎨 Tatuajes</span>
+                <span class="tag">🚗 Talleres</span>
                 <span class="tag">✨ Independientes</span>
             </div>
         </div>
 
-        <!-- 2. EL PROBLEMA (DESAFÍOS) -->
+        <!-- 2. PORTAL DE SELECCIÓN DE TRES VÍAS -->
         <div class="section">
-            <h2>¿Te identificas con esto?</h2>
-            <div class="grid-cards">
-                <div class="card">¿Cansado de perder dinero cuando un cliente te cancela a última hora o no asiste?</div>
-                <div class="card">¿Sientes que pasas más tiempo respondiendo mensajes de WhatsApp que entregando tus servicios?</div>
-                <div class="card">¿Se te pasan clientes potenciales porque olvidas responder o lo haces demasiado tarde?</div>
-                <div class="card">¿Tu negocio se estanca porque la administración diaria no te deja tiempo para planificar el mañana?</div>
+            <h2>Elige cómo deseas continuar:</h2>
+            <div class="grid-cards three-cols">
+                <!-- Opción 1: Fundador -->
+                <div class="card card-gold">
+                    <div>
+                        <div class="card-title">🚀 Programa Fundadores</div>
+                        <p class="card-desc">Para barberías, salones, lashistas, tatuadores o talleres mecánicos. Descubre cómo automatizar tus reservas, reducir inasistencias por WhatsApp y llevar el control total de tu negocio con soporte preferencial de por vida.</p>
+                    </div>
+                    <a href="#postular" class="btn primary">Conoce el Programa</a>
+                </div>
+                <!-- Opción 2: Ya eres cliente (Lleva a /app/) -->
+                <div class="card card-blue">
+                    <div>
+                        <div class="card-title">🏪 Ya soy parte de Kauze</div>
+                        <p class="card-desc">Si ya registraste tu negocio en la plataforma, accede directamente a tu panel administrativo para gestionar tu agenda del día, comisiones del equipo, caja diaria y campañas de fidelización.</p>
+                    </div>
+                    <a href="/app/" class="btn primary">Ingresar a mi Panel</a>
+                </div>
+                <!-- Opción 3: Busca Negocios (Lleva a /cliente/) -->
+                <div class="card card-purple">
+                    <div>
+                        <div class="card-title">🔍 Busca Negocios</div>
+                        <p class="card-desc">¿Quieres reservar una cita en tu negocio o taller favorito? Accede a nuestro portal de agendamiento para clientes finales, busca comercios locales asociados y reserva tu turno en segundos las 24/7.</p>
+                    </div>
+                    <a href="/cliente/" class="btn primary">Buscar y Reservar</a>
+                </div>
             </div>
         </div>
 
@@ -513,7 +607,7 @@
         </div>
 
         <!-- 5. FORMULARIO CONECTADO A GOOGLE FORMS -->
-        <div class="section">
+        <div class="section" id="postular">
             <h2>Postula aquí</h2>
             <p style="margin-bottom: 24px; color: var(--text-muted);">Completa tus datos a continuación. Revisaremos tu postulación y, si tu negocio califica, te contactaremos directamente.</p>
             
@@ -556,76 +650,25 @@
                 }
             }, 150);
         });
+
+        // Configuración dinámica de enlaces (Local vs Producción)
+        document.addEventListener("DOMContentLoaded", () => {
+            const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+            
+            const loginBtn = document.querySelector(".kz-login-trigger");
+            const appLink = document.querySelector(".card-blue .btn");
+            const clientLink = document.querySelector(".card-purple .btn");
+            
+            if (loginBtn) {
+                loginBtn.href = isLocal ? "/admin/" : "https://admin.kauze.cl";
+            }
+            if (appLink) {
+                appLink.href = isLocal ? "/app/" : "https://kauze.cl/app";
+            }
+            if (clientLink) {
+                clientLink.href = isLocal ? "/cliente/" : "https://kauze.cl/cliente";
+            }
+        });
     </script>
-<div class="kz-access-modal" id="kzAccessModal" aria-hidden="true">
-    <div class="kz-access-backdrop" id="kzCloseAccess"></div>
-
-    <div class="kz-access-card" role="dialog" aria-modal="true">
-        <button class="kz-access-x" type="button" id="kzCloseAccessButton">×</button>
-
-        <div class="kz-access-logo">Kauze</div>
-
-        <span class="kz-access-badge">Selecciona tu modo de ingreso</span>
-
-        <h2>¿Cómo quieres entrar?</h2>
-
-        <p>
-            Elige si quieres ingresar como equipo interno de Kauze o como negocio cliente.
-        </p>
-
-        <div class="kz-access-options">
-            <a class="kz-access-option" href="https://admin.kauze.cl">
-                <div class="kz-access-icon">🔐</div>
-                <div>
-                    <strong>Modo Admin</strong>
-                    <span>Panel interno del equipo Kauze.</span>
-                </div>
-            </a>
-
-            <a class="kz-access-option" href="/app/">
-                <div class="kz-access-icon">🏪</div>
-                <div>
-                    <strong>Modo Cliente</strong>
-                    <span>Panel para negocios, reservas y gestión.</span>
-                </div>
-            </a>
-        </div>
-
-        <button class="kz-access-link" type="button" id="kzCancelAccess">
-            Regresar al inicio
-        </button>
-    </div>
-</div>
-
-<script>
-    const kzOpenAccess = document.getElementById("kzOpenAccess");
-    const kzAccessModal = document.getElementById("kzAccessModal");
-    const kzCloseAccess = document.getElementById("kzCloseAccess");
-    const kzCloseAccessButton = document.getElementById("kzCloseAccessButton");
-    const kzCancelAccess = document.getElementById("kzCancelAccess");
-
-    function openKauzeAccessModal() {
-        kzAccessModal.classList.add("is-open");
-        kzAccessModal.setAttribute("aria-hidden", "false");
-        document.body.style.overflow = "hidden";
-    }
-
-    function closeKauzeAccessModal() {
-        kzAccessModal.classList.remove("is-open");
-        kzAccessModal.setAttribute("aria-hidden", "true");
-        document.body.style.overflow = "";
-    }
-
-    // kzOpenAccess.addEventListener("click", openKauzeAccessModal);
-    kzCloseAccess.addEventListener("click", closeKauzeAccessModal);
-    kzCloseAccessButton.addEventListener("click", closeKauzeAccessModal);
-    kzCancelAccess.addEventListener("click", closeKauzeAccessModal);
-
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") {
-            closeKauzeAccessModal();
-        }
-    });
-</script>
 </body>
 </html>
