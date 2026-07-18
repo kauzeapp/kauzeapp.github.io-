@@ -18,4 +18,18 @@ for (const forbidden of ["LOGIN_PASSWORD", "LOGIN_EMAIL", "kauzeAppV3RememberedA
   if (source.includes(forbidden)) throw new Error(`Referencia insegura encontrada: ${forbidden}`);
 }
 
+for (const required of [
+  "/api/account/profile-image",
+  "settingsUserPhotoFile",
+  "saveUserPhoto",
+  "proPhotoFile",
+  "resizeProfilePhoto",
+  "proCommissionPreset",
+  "proCommissionCustomType",
+  "commissionFixedAmount",
+  "professionalCommissionLabel",
+]) {
+  if (!source.includes(required)) throw new Error(`Falta personalización de perfil: ${required}`);
+}
+
 console.log(`Frontend válido: ${ids.length} IDs únicos y JavaScript correcto.`);

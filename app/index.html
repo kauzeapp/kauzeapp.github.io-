@@ -102,7 +102,8 @@
     .top-right{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
     .type-switch{min-height:44px;border-radius:999px;border:1px solid var(--border);background:#fff;padding:0 14px;font-weight:800;color:var(--navy);box-shadow:0 8px 24px rgba(15,23,42,.045);outline:none}
     .user-chip{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid var(--border);border-radius:999px;padding:8px 12px;box-shadow:0 8px 24px rgba(15,23,42,.045)}
-    .avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--soft-blue);color:var(--blue);font-weight:900}
+    .avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:var(--soft-blue);color:var(--blue);font-weight:900}
+    .avatar img{width:100%;height:100%;display:block;object-fit:cover}
     .user-chip strong{display:block;font-size:13px;color:var(--navy)}
     .user-chip small{font-size:12px;color:var(--muted)}
     .view{display:none;animation:fade .18s ease}
@@ -178,7 +179,28 @@
     .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;flex-wrap:wrap}
     .empty-state{padding:24px;border:1px dashed #CBD5E1;border-radius:20px;background:rgba(255,255,255,.65);color:var(--muted);font-size:14px;line-height:1.7;text-align:center}
     .appointment-created{color:var(--teal);font-weight:900;font-size:13px;margin-top:10px;display:none}
+    .profile-settings{display:grid;grid-template-columns:88px minmax(0,1fr);gap:16px;align-items:center;padding:16px;border:1px solid var(--border);border-radius:20px;background:linear-gradient(135deg,rgba(37,99,235,.06),rgba(99,102,241,.04));margin-bottom:22px}
+    .profile-photo-preview{width:88px;height:88px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-family:'Sora',sans-serif;font-size:26px;font-weight:900;border:4px solid #fff;box-shadow:var(--shadow-soft)}
+    .profile-photo-preview img{width:100%;height:100%;display:block;object-fit:cover}
+    .profile-settings-copy strong{display:block;color:var(--navy);font-size:14px;margin-bottom:4px}
+    .profile-settings-copy p{color:var(--muted);font-size:12px;line-height:1.55;margin-bottom:9px}
+    .profile-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .profile-feedback{min-height:18px;margin-top:7px;color:var(--muted);font-size:11px;font-weight:800}
+    .settings-divider{height:1px;background:var(--border);margin:4px 0 22px}
+    .professional-photo-control{display:grid;grid-template-columns:72px minmax(0,1fr);gap:14px;align-items:center;padding:12px;border:1px solid var(--border);border-radius:18px;background:var(--soft)}
+    .professional-photo-preview{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:var(--soft-blue);color:var(--blue);font-size:22px;font-weight:900;border:3px solid #fff;box-shadow:var(--shadow-soft)}
+    .professional-photo-preview img{width:100%;height:100%;display:block;object-fit:cover}
+    .commission-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+    .commission-option{position:relative;cursor:pointer}
+    .commission-option input{position:absolute;opacity:0;pointer-events:none}
+    .commission-option span{min-height:48px;display:grid;place-items:center;padding:8px 6px;border:1px solid var(--border);border-radius:14px;background:#fff;color:var(--navy);font-size:13px;font-weight:900;text-align:center;transition:.18s}
+    .commission-option input:checked + span{border-color:var(--blue);background:var(--soft-blue);color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+    .commission-option input:focus-visible + span{outline:3px solid rgba(37,99,235,.24);outline-offset:2px}
+    .commission-custom{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;padding:12px;border:1px solid var(--border);border-radius:16px;background:var(--soft)}
+    .commission-custom .field-group{margin-bottom:0}
+    .commission-help{display:block;margin-top:8px;color:var(--muted);font-size:11px;line-height:1.45}
     @media(max-width:650px){.form-grid{grid-template-columns:1fr}.modal-card{padding:22px;border-radius:24px}.modal-actions .btn{width:100%}.row-actions{width:100%}.mini-btn{flex:1}}
+    @media(max-width:650px){.commission-options{grid-template-columns:1fr 1fr}.commission-custom{grid-template-columns:1fr}}
 
 
     .integration-card{position:relative;overflow:hidden}
@@ -562,7 +584,7 @@
             🟢 DISPONIBLE
           </div>
           <select class="type-switch" id="businessTypeSwitch"></select>
-          <div class="user-chip"><div class="avatar">S</div><div><strong>Sergio Molina</strong><small>Demo · Administrador</small></div></div>
+          <div class="user-chip"><div class="avatar" id="headerUserAvatar">S</div><div><strong id="headerUserName">Sergio Molina</strong><small id="headerUserRole">Demo · Administrador</small></div></div>
         </div>
       </header>
 
@@ -639,6 +661,23 @@
         </div>
         <div class="grid-2">
           <article class="card">
+            <h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:6px">Mi perfil personal</h2>
+            <p style="color:var(--muted);font-size:13px;line-height:1.55;margin-bottom:14px">Esta foto pertenece a tu usuario y es independiente del logo del negocio.</p>
+            <div class="profile-settings">
+              <div class="profile-photo-preview" id="settingsUserPhotoPreview" aria-label="Vista previa de mi foto">S</div>
+              <div class="profile-settings-copy">
+                <strong id="settingsUserIdentity">Usuario Kauze</strong>
+                <p>Sube una foto JPG, PNG o WEBP. Solo modifica tu cuenta, incluso si trabajas en más de un negocio.</p>
+                <input class="logo-file-input" id="settingsUserPhotoFile" type="file" accept="image/png,image/jpeg,image/webp">
+                <div class="profile-actions">
+                  <label class="btn" for="settingsUserPhotoFile" style="width:auto;cursor:pointer">Subir mi foto</label>
+                  <button class="btn" id="clearUserPhoto" type="button" style="width:auto">Quitar</button>
+                  <button class="btn primary" id="saveUserPhoto" type="button" style="width:auto">Guardar mi foto</button>
+                </div>
+                <div class="profile-feedback" id="settingsUserPhotoFeedback">La imagen se mostrará en la esquina superior del panel.</div>
+              </div>
+            </div>
+            <div class="settings-divider"></div>
             <h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Datos del negocio</h2>
             <div class="field-group">
               <label>Nombre del negocio</label>
@@ -902,13 +941,51 @@
             <label for="proRole">Cargo / especialidad</label>
             <input class="field" id="proRole" type="text" placeholder="Ej: Barbero senior" required>
           </div>
-          <div class="field-group">
-            <label for="proCommission">Porcentaje de Comisión (%)</label>
-            <input class="field" id="proCommission" type="number" min="0" max="100" placeholder="Ej: 45" value="0">
+          <div class="field-group full">
+            <label>Comisión del profesional</label>
+            <div class="commission-options" id="proCommissionOptions" role="radiogroup" aria-label="Tipo de comisión">
+              <label class="commission-option"><input type="radio" name="proCommissionPreset" value="10"><span>10%</span></label>
+              <label class="commission-option"><input type="radio" name="proCommissionPreset" value="20"><span>20%</span></label>
+              <label class="commission-option"><input type="radio" name="proCommissionPreset" value="40" checked><span>40%</span></label>
+              <label class="commission-option"><input type="radio" name="proCommissionPreset" value="custom"><span>Personalizado</span></label>
+            </div>
+            <div class="commission-custom" id="proCommissionCustom" hidden>
+              <div class="field-group">
+                <label for="proCommissionCustomType">Modalidad</label>
+                <select class="field" id="proCommissionCustomType">
+                  <option value="fixed">Monto fijo en pesos</option>
+                  <option value="percent">Otro porcentaje</option>
+                </select>
+              </div>
+              <div class="field-group" id="proCommissionFixedGroup">
+                <label for="proCommissionFixed">Monto fijo (CLP)</label>
+                <input class="field" id="proCommissionFixed" type="number" min="1" step="100" inputmode="numeric" placeholder="Ej: 8.000">
+              </div>
+              <div class="field-group" id="proCommissionPercentGroup" hidden>
+                <label for="proCommissionPercent">Porcentaje personalizado</label>
+                <input class="field" id="proCommissionPercent" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="Ej: 35">
+              </div>
+            </div>
+            <span class="commission-help">El porcentaje se calcula sobre el valor del servicio. El monto fijo se paga igual, independiente del precio.</span>
           </div>
           <div class="field-group">
             <label for="proNote">Nota visible</label>
             <input class="field" id="proNote" type="text" placeholder="Ej: Especialista en degradados">
+          </div>
+
+          <div class="field-group full">
+            <label>Foto del profesional</label>
+            <div class="professional-photo-control">
+              <div class="professional-photo-preview" id="proPhotoPreview" aria-label="Vista previa del profesional">P</div>
+              <div>
+                <span style="display:block;color:var(--muted);font-size:12px;line-height:1.5;margin-bottom:8px">Opcional. Aparecerá al elegir profesional durante la reserva.</span>
+                <input class="logo-file-input" id="proPhotoFile" type="file" accept="image/png,image/jpeg,image/webp">
+                <div class="profile-actions">
+                  <label class="btn" for="proPhotoFile" style="width:auto;cursor:pointer">Subir foto</label>
+                  <button class="btn" id="clearProPhoto" type="button" style="width:auto">Quitar</button>
+                </div>
+              </div>
+            </div>
           </div>
 
           
@@ -1177,6 +1254,8 @@
   <script>
     const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', logoUrl:'', ownerWhatsapp:'', ownerCalendarEmail:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, clientRatingMode:'none', publicRating:null, publicReviews:0, activeTheme:'Kauze Base', pageTitle:'Agenda tu próxima hora sin escribir por WhatsApp', pageSubtitle:'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.', pageCta:'Reservar ahora', bannerStyle:'soft', bannerImage:'', appointments:{}, professionals:{}, campaigns:{} };
     let pendingLogoData = null;
+    let pendingUserProfileImage = null;
+    let pendingProfessionalPhoto = null;
     const CLIENT_PORTAL_APPOINTMENTS_KEY = 'kauzeSharedAppointmentsV1';
     
     // --- CATALOGO DE ESTILOS Y TEMAS (Kauze Design System) ---
@@ -1470,6 +1549,98 @@
         };
         reader.readAsDataURL(file);
       });
+    }
+
+    function resizeProfilePhoto(file) {
+      return new Promise((resolve, reject) => {
+        if (!file || !['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+          reject(new Error('Selecciona una imagen JPG, PNG o WEBP.'));
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          reject(new Error('La imagen supera 5 MB. Elige un archivo más liviano.'));
+          return;
+        }
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('No fue posible leer la imagen.'));
+        reader.onload = () => {
+          const image = new Image();
+          image.onerror = () => reject(new Error('El archivo no contiene una imagen válida.'));
+          image.onload = () => {
+            const side = Math.min(image.naturalWidth, image.naturalHeight);
+            const sourceX = Math.max(0, (image.naturalWidth - side) / 2);
+            const sourceY = Math.max(0, (image.naturalHeight - side) / 2);
+            const canvas = document.createElement('canvas');
+            canvas.width = 384;
+            canvas.height = 384;
+            const context = canvas.getContext('2d');
+            context.imageSmoothingEnabled = true;
+            context.imageSmoothingQuality = 'high';
+            context.drawImage(image, sourceX, sourceY, side, side, 0, 0, 384, 384);
+            const dataUrl = canvas.toDataURL('image/webp', 0.84);
+            if (dataUrl.length > 750000) {
+              reject(new Error('La imagen sigue siendo demasiado pesada después de optimizarla.'));
+              return;
+            }
+            resolve(dataUrl);
+          };
+          image.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function profileInitials(name = '') {
+      return String(name || 'K')
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(part => part[0])
+        .join('')
+        .toUpperCase() || 'K';
+    }
+
+    function safeProfileImageSource(value) {
+      const source = String(value || '').trim();
+      if (/^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(source) && source.length <= 750000) return source;
+      if (/^https:\/\/[^\s]+$/.test(source) && source.length <= 1000 && !/["'<>]/.test(source)) return source;
+      return '';
+    }
+
+    function paintProfilePhoto(element, source, name) {
+      if (!element) return;
+      element.replaceChildren();
+      const safeSource = safeProfileImageSource(source);
+      if (!safeSource) {
+        element.textContent = profileInitials(name);
+        return;
+      }
+      const image = document.createElement('img');
+      image.alt = `Foto de ${name || 'usuario'}`;
+      image.decoding = 'async';
+      image.onerror = () => {
+        element.replaceChildren();
+        element.textContent = profileInitials(name);
+      };
+      image.src = safeSource;
+      element.appendChild(image);
+    }
+
+    function updateUserProfileUI() {
+      const name = currentAccount?.user?.name || 'Usuario Kauze';
+      const role = currentAccount?.role?.name || 'Usuario';
+      const source = pendingUserProfileImage !== null
+        ? pendingUserProfileImage
+        : (currentAccount?.user?.profileImage || '');
+      paintProfilePhoto(headerUserAvatar, source, name);
+      paintProfilePhoto(settingsUserPhotoPreview, source, name);
+      if (headerUserName) headerUserName.textContent = name;
+      if (headerUserRole) headerUserRole.textContent = role;
+      if (settingsUserIdentity) settingsUserIdentity.textContent = `${name} · ${role}`;
+    }
+
+    function updateProfessionalPhotoPreview(name = proName?.value || 'Profesional') {
+      paintProfilePhoto(proPhotoPreview, pendingProfessionalPhoto || '', name);
     }
 
     function isDarkSurface(hex) {
@@ -1930,6 +2101,7 @@
 
     function hydrateBusinessState(account) {
       currentAccount = account;
+      pendingUserProfileImage = null;
       const key = businessStateStorageKey();
       let cached = null;
       try { cached = key ? JSON.parse(localStorage.getItem(key) || 'null') : null; } catch (e) { cached = null; }
@@ -1965,6 +2137,15 @@
     const mobileMenu = document.getElementById('mobileMenu');
     const sidebar = document.getElementById('sidebar');
     const businessTypeSwitch = document.getElementById('businessTypeSwitch');
+    const headerUserAvatar = document.getElementById('headerUserAvatar');
+    const headerUserName = document.getElementById('headerUserName');
+    const headerUserRole = document.getElementById('headerUserRole');
+    const settingsUserPhotoPreview = document.getElementById('settingsUserPhotoPreview');
+    const settingsUserIdentity = document.getElementById('settingsUserIdentity');
+    const settingsUserPhotoFile = document.getElementById('settingsUserPhotoFile');
+    const settingsUserPhotoFeedback = document.getElementById('settingsUserPhotoFeedback');
+    const clearUserPhoto = document.getElementById('clearUserPhoto');
+    const saveUserPhoto = document.getElementById('saveUserPhoto');
     const settingsType = document.getElementById('settingsType');
     const settingsBusiness = document.getElementById('settingsBusiness');
     const settingsLogoUrl = document.getElementById('settingsLogoUrl');
@@ -2038,6 +2219,16 @@
     const proName = document.getElementById('proName');
     const proRole = document.getElementById('proRole');
     const proNote = document.getElementById('proNote');
+    const proPhotoPreview = document.getElementById('proPhotoPreview');
+    const proPhotoFile = document.getElementById('proPhotoFile');
+    const clearProPhoto = document.getElementById('clearProPhoto');
+    const proCommissionOptions = Array.from(document.querySelectorAll('input[name="proCommissionPreset"]'));
+    const proCommissionCustom = document.getElementById('proCommissionCustom');
+    const proCommissionCustomType = document.getElementById('proCommissionCustomType');
+    const proCommissionFixedGroup = document.getElementById('proCommissionFixedGroup');
+    const proCommissionPercentGroup = document.getElementById('proCommissionPercentGroup');
+    const proCommissionFixed = document.getElementById('proCommissionFixed');
+    const proCommissionPercent = document.getElementById('proCommissionPercent');
     const newCampaignBtn = document.getElementById('newCampaignBtn');
     const campaignModal = document.getElementById('campaignModal');
     const campaignModalTitle = document.getElementById('campaignModalTitle');
@@ -2251,11 +2442,40 @@
         name: row[0], 
         role: row[1], 
         note: row[2] || '',
-        commission: 45,
+        profileImage: row[3] || '',
+        commissionMode: 'percent',
+        commission: 40,
+        commissionFixedAmount: 0,
         days: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'],
         shifts: ['09:00 - 18:00'],
         services: []
       };
+    }
+
+    function professionalCommissionLabel(pro){
+      if (pro?.commissionMode === 'fixed') return `${fmt(Number(pro.commissionFixedAmount || 0))} fijo`;
+      return `${Number.isFinite(Number(pro?.commission)) ? Number(pro.commission) : 40}%`;
+    }
+
+    function syncProfessionalCommissionFields(){
+      const selected = proCommissionOptions.find(option => option.checked)?.value || '40';
+      const isCustom = selected === 'custom';
+      proCommissionCustom.hidden = !isCustom;
+      const isFixed = proCommissionCustomType.value === 'fixed';
+      proCommissionFixedGroup.hidden = !isCustom || !isFixed;
+      proCommissionPercentGroup.hidden = !isCustom || isFixed;
+    }
+
+    function setProfessionalCommissionFields(pro){
+      const mode = pro?.commissionMode === 'fixed' ? 'fixed' : 'percent';
+      const percent = Number.isFinite(Number(pro?.commission)) ? Number(pro.commission) : 40;
+      const preset = mode === 'percent' && [10, 20, 40].includes(percent) ? String(percent) : 'custom';
+      const selectedOption = proCommissionOptions.find(option => option.value === preset);
+      if (selectedOption) selectedOption.checked = true;
+      proCommissionCustomType.value = mode === 'fixed' ? 'fixed' : 'percent';
+      proCommissionFixed.value = mode === 'fixed' && Number(pro?.commissionFixedAmount) > 0 ? Number(pro.commissionFixedAmount) : '';
+      proCommissionPercent.value = mode === 'percent' && ![10, 20, 40].includes(percent) ? percent : '';
+      syncProfessionalCommissionFields();
     }
 
     function getProfessionals(){
@@ -2432,6 +2652,7 @@
       if (settingsPageCta) settingsPageCta.value = state.pageCta || '';
       if (settingsBannerStyle) settingsBannerStyle.value = state.bannerStyle || 'soft';
       if (settingsBannerImage) settingsBannerImage.value = state.bannerImage || '';
+      updateUserProfileUI();
       
       if (settingsThemeSelector) {
         const currentTheme = renderThemeSelectorForType(state.type, state.activeTheme);
@@ -2494,16 +2715,17 @@
       `).join('');
 
       professionalsTableBody.innerHTML = professionals.length ? professionals.map(x => {
-        const comText = typeof x.commission !== 'undefined' ? `${x.commission}%` : '45%';
+        const comText = professionalCommissionLabel(x);
         const daysText = x.days && x.days.length ? x.days.map(d => d.slice(0,3)).join(', ') : 'Ninguno';
         const shiftsText = x.shifts && x.shifts.length ? x.shifts.join('<br>') : 'Sin turnos';
         const servicesText = x.services && x.services.length ? x.services.join(', ') : 'Disponible para todo';
+        const profileImage = safeProfileImageSource(x.profileImage);
         
         return `
           <tr>
             <td>
               <div style="display: flex; align-items: center; gap: 10px;">
-                <div class="avatar">${x.name.charAt(0)}</div>
+                <div class="avatar">${profileImage ? `<img src="${profileImage}" alt="Foto del profesional">` : profileInitials(x.name)}</div>
                 <div>
                   <strong>${x.name}</strong><br>
                   <small style="color: var(--muted)">${x.role}</small>
@@ -2742,7 +2964,9 @@
       proName.value = pro?.name || '';
       proRole.value = pro?.role || '';
       proNote.value = pro?.note || '';
-      document.getElementById('proCommission').value = typeof pro?.commission !== 'undefined' ? pro.commission : 45;
+      pendingProfessionalPhoto = safeProfileImageSource(pro?.profileImage || '');
+      updateProfessionalPhotoPreview(pro?.name || 'Profesional');
+      setProfessionalCommissionFields(pro);
       
       const container = document.getElementById('proShiftsContainer');
       container.innerHTML = '';
@@ -2812,6 +3036,7 @@
       professionalModal.setAttribute('aria-hidden','true');
       document.body.style.overflow = '';
       editingProfessionalId = null;
+      pendingProfessionalPhoto = null;
       professionalForm.reset();
       document.getElementById('proShiftsContainer').innerHTML = '';
     }
@@ -2833,7 +3058,22 @@
       const services = [];
       document.querySelectorAll('input[name="proServices"]:checked').forEach(cb => services.push(cb.value));
       
-      const commissionVal = Number(document.getElementById('proCommission').value || 0);
+      const commissionPreset = proCommissionOptions.find(option => option.checked)?.value || '40';
+      let commissionMode = 'percent';
+      let commissionVal = Number(commissionPreset);
+      let commissionFixedAmount = 0;
+
+      if (commissionPreset === 'custom') {
+        commissionMode = proCommissionCustomType.value === 'fixed' ? 'fixed' : 'percent';
+        if (commissionMode === 'fixed') {
+          commissionFixedAmount = Number(proCommissionFixed.value || 0);
+          commissionVal = 0;
+          if (commissionFixedAmount <= 0) { proCommissionFixed.focus(); return; }
+        } else {
+          commissionVal = Number(proCommissionPercent.value);
+          if (!Number.isFinite(commissionVal) || commissionVal < 0 || commissionVal > 100) { proCommissionPercent.focus(); return; }
+        }
+      }
 
       // Extract unique days list from shifts
       const uniqueDays = Array.from(new Set(shifts.map(s => s.day)));
@@ -2843,7 +3083,10 @@
         name: proName.value.trim(), 
         role: proRole.value.trim(), 
         note: proNote.value.trim(),
+        profileImage: safeProfileImageSource(pendingProfessionalPhoto || ''),
+        commissionMode,
         commission: commissionVal,
+        commissionFixedAmount,
         days: uniqueDays,
         shifts: shifts,
         services: services
@@ -3311,6 +3554,62 @@
       settingsBusiness.addEventListener('input', () => updateBusinessLogoPreviews());
     }
 
+    if (settingsUserPhotoFile) {
+      settingsUserPhotoFile.addEventListener('change', async () => {
+        const file = settingsUserPhotoFile.files?.[0];
+        if (!file) return;
+        if (settingsUserPhotoFeedback) settingsUserPhotoFeedback.textContent = 'Optimizando tu fotografía…';
+        try {
+          pendingUserProfileImage = await resizeProfilePhoto(file);
+          updateUserProfileUI();
+          if (settingsUserPhotoFeedback) settingsUserPhotoFeedback.textContent = 'Foto lista. Presiona “Guardar mi foto” para confirmar.';
+        } catch (error) {
+          pendingUserProfileImage = null;
+          if (settingsUserPhotoFeedback) settingsUserPhotoFeedback.textContent = error.message;
+        } finally {
+          settingsUserPhotoFile.value = '';
+        }
+      });
+    }
+
+    if (clearUserPhoto) {
+      clearUserPhoto.addEventListener('click', () => {
+        pendingUserProfileImage = '';
+        updateUserProfileUI();
+        if (settingsUserPhotoFeedback) settingsUserPhotoFeedback.textContent = 'La foto se quitará cuando guardes el cambio.';
+      });
+    }
+
+    if (saveUserPhoto) {
+      saveUserPhoto.addEventListener('click', async () => {
+        const selectedImage = pendingUserProfileImage !== null
+          ? safeProfileImageSource(pendingUserProfileImage)
+          : safeProfileImageSource(currentAccount?.user?.profileImage || '');
+        saveUserPhoto.disabled = true;
+        if (settingsUserPhotoFeedback) settingsUserPhotoFeedback.textContent = 'Guardando tu perfil…';
+        try {
+          const response = await fetch(`${BACKEND_URL}/api/account/profile-image`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'same-origin',
+            body: JSON.stringify({profileImage: selectedImage})
+          });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(data.message || 'No fue posible guardar tu foto.');
+          currentAccount.user.profileImage = data.profileImage || '';
+          pendingUserProfileImage = null;
+          updateUserProfileUI();
+          if (settingsUserPhotoFeedback) settingsUserPhotoFeedback.textContent = currentAccount.user.profileImage
+            ? 'Foto guardada únicamente en tu cuenta.'
+            : 'Tu cuenta volvió a mostrar las iniciales.';
+        } catch (error) {
+          if (settingsUserPhotoFeedback) settingsUserPhotoFeedback.textContent = error.message;
+        } finally {
+          saveUserPhoto.disabled = false;
+        }
+      });
+    }
+
     if (settingsLogoUrl) {
       settingsLogoUrl.addEventListener('input', () => {
         pendingLogoData = null;
@@ -3345,6 +3644,40 @@
         if (settingsLogoFeedback) settingsLogoFeedback.textContent = 'Logo quitado de la vista previa. Guarda los cambios para confirmar.';
         updateBusinessLogoPreviews();
       });
+    }
+
+    if (proPhotoFile) {
+      proPhotoFile.addEventListener('change', async () => {
+        const file = proPhotoFile.files?.[0];
+        if (!file) return;
+        try {
+          pendingProfessionalPhoto = await resizeProfilePhoto(file);
+          updateProfessionalPhotoPreview();
+        } catch (error) {
+          alert(error.message);
+        } finally {
+          proPhotoFile.value = '';
+        }
+      });
+    }
+
+    if (clearProPhoto) {
+      clearProPhoto.addEventListener('click', () => {
+        pendingProfessionalPhoto = '';
+        updateProfessionalPhotoPreview();
+      });
+    }
+
+    if (proName) {
+      proName.addEventListener('input', () => updateProfessionalPhotoPreview());
+    }
+
+    proCommissionOptions.forEach(option => option.addEventListener('change', () => {
+      if (option.checked && option.value === 'custom') proCommissionCustomType.value = 'fixed';
+      syncProfessionalCommissionFields();
+    }));
+    if (proCommissionCustomType) {
+      proCommissionCustomType.addEventListener('change', syncProfessionalCommissionFields);
     }
 
     saveSettings.addEventListener('click',()=>{ 

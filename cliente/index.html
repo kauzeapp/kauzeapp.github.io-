@@ -444,6 +444,14 @@
       color: var(--blue);
       font-weight: 900;
       margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .pro-avatar img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
     }
 
     .slots {
@@ -2304,7 +2312,7 @@
         serviceItems: Array.isArray(item.services) ? item.services : [],
         professionalItems: Array.isArray(item.professionals) ? item.professionals : [],
         services: (item.services || []).map(service => [service.name, service.duration, Number(service.price || 0)]),
-        pros: (item.professionals || []).map(pro => [pro.name, pro.role || 'Profesional', pro.note || 'Disponible para reservas.']),
+        pros: (item.professionals || []).map(pro => [pro.name, pro.role || 'Profesional', pro.note || 'Disponible para reservas.', pro.profileImage || '']),
         availableSlots: Array.isArray(item.nextSlots) ? item.nextSlots : slots
       };
     }
@@ -2784,7 +2792,7 @@
       const p = profile();
       document.getElementById('professionalsGrid').innerHTML = p.pros.map((pro, index) => `
         <button class="option-card ${selectedProfessional === index ? 'selected' : ''}" type="button" data-pro="${index}">
-          <div class="pro-avatar">${pro[0].charAt(0)}</div>
+          <div class="pro-avatar">${safePublicLogoSource(pro[3]) ? `<img src="${safePublicLogoSource(pro[3])}" alt="Foto del profesional">` : pro[0].charAt(0)}</div>
           <h3>${pro[0]}</h3>
           <p><strong>${pro[1]}</strong><br>${pro[2]}</p>
         </button>

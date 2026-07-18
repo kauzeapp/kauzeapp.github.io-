@@ -17,6 +17,7 @@ from backend.auth import (
     request_password_reset,
     reset_password,
     save_business_state,
+    update_user_profile_image,
 )
 from backend.db import DatabaseNotConfigured, is_configured
 from backend.public_booking import (
@@ -360,6 +361,26 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                 self._json_response(503, {"error": "database_not_configured"})
             except ValueError as exc:
                 self._json_response(400, {"error": "invalid_state", "message": str(exc)})
+            return
+
+        if path == "/api/account/profile-image":
+            try:
+                account = self._require_session()
+                if not account:
+                    return
+                data = self._read_json()
+                result = update_user_profile_image(
+                    account["user"]["id"], data.get("profileImage")
+                )
+                self._json_response(200, {"status": "success", **result})
+            except DatabaseNotConfigured:
+                self._json_response(503, {"error": "database_not_configured"})
+            except AccountUnavailable:
+                self._json_response(404, {"error": "account_unavailable"})
+            except ValueError as exc:
+                self._json_response(
+                    400, {"error": "invalid_profile_image", "message": str(exc)}
+                )
             return
 
         if path == "/api/tasks":
