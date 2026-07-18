@@ -2258,7 +2258,9 @@
       mIngresos.textContent=fmt(revenue);
       mClientes.textContent=uniqueClients;
       if (mBusinessRating) mBusinessRating.textContent = state.publicRating ? `${Number(state.publicRating).toFixed(1)} ★` : '—';
-      if (mBusinessReviews) mBusinessReviews.textContent = state.publicReviews ? `${state.publicReviews} reseñas públicas` : 'Sin reseñas públicas';
+      if (mBusinessReviews) mBusinessReviews.textContent = state.publicReviews
+        ? `${state.publicReviews} ${state.publicReviews === 1 ? 'reseña pública' : 'reseñas públicas'}`
+        : 'Sin reseñas públicas';
       billingToday.textContent=fmt(revenue);
       billingAvg.textContent=fmt(active.length ? Math.round(revenue/active.length) : 0);
       phoneCats.innerHTML=p.cats.map(c=>`<div class="cat-card">${p.emoji}<br>${c}</div>`).join('');
