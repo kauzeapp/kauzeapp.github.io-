@@ -140,6 +140,7 @@ def register_subscription(data):
     phone = str(data.get("phone") or "").strip()
     business_name = str(data.get("businessName") or "").strip()
     plan_tipo = str(data.get("planTipo") or "trial").strip().lower()
+    categoria_slug = str(data.get("categoriaSlug") or "barberia").strip().lower()
 
     if not name or not email or not phone or not business_name:
         raise ValueError("Todos los campos (nombre, email, teléfono, nombre barbería) son requeridos.")
@@ -164,10 +165,10 @@ def register_subscription(data):
                 INSERT INTO usuarios (
                     nombre_completo, email, telefono_whatsapp, 
                     plan_tipo, estado_suscripcion, fecha_vencimiento, 
-                    requiere_aprobacion, nombre_barberia, estado
-                ) VALUES (%s, %s, %s, %s, 'trial', %s, TRUE, %s, 'activo')
+                    requiere_aprobacion, nombre_barberia, estado, categoria_slug
+                ) VALUES (%s, %s, %s, %s, 'trial', %s, TRUE, %s, 'activo', %s)
                 """,
-                (name, email, phone, plan_tipo, expiry, business_name)
+                (name, email, phone, plan_tipo, expiry, business_name, categoria_slug)
             )
             conn.commit()
     else:
@@ -186,6 +187,7 @@ def register_subscription(data):
             "estado_suscripcion": "trial",
             "fecha_vencimiento": expiry.isoformat(),
             "requiere_aprobacion": True,
+            "categoria_slug": categoria_slug,
             "subdominio": None,
             "creado_en": datetime.now(timezone.utc).isoformat()
         }
@@ -241,7 +243,8 @@ def get_admin_clients(status_filter=None, search_query=None):
             query = """
                 SELECT id, nombre_completo, email, telefono_whatsapp, 
                        plan_tipo, estado_suscripcion, fecha_vencimiento, 
-                       subdominio, requiere_aprobacion, nombre_barberia, creado_en
+                       subdominio, requiere_aprobacion, nombre_barberia, creado_en,
+                       categoria_slug
                 FROM usuarios
                 WHERE plan_tipo IS NOT NULL
             """
@@ -268,6 +271,7 @@ def get_admin_clients(status_filter=None, search_query=None):
                     "subdominio": r["subdominio"],
                     "requiereAprobacion": r["requiere_aprobacion"],
                     "businessName": r["nombre_barberia"],
+                    "categoriaSlug": r["categoria_slug"] or "barberia",
                     "creadoEn": r["creado_en"].isoformat() if r["creado_en"] else None
                 })
     else:
@@ -303,6 +307,7 @@ def get_admin_clients(status_filter=None, search_query=None):
                     "subdominio": sub["subdominio"],
                     "requiereAprobacion": sub["requiere_aprobacion"],
                     "businessName": sub["nombre_barberia"],
+                    "categoriaSlug": sub.get("categoria_slug", "barberia"),
                     "creadoEn": sub.get("creado_en")
                 })
         if modified:
@@ -319,6 +324,7 @@ def create_admin_client(data):
     business_name = str(data.get("businessName") or "").strip()
     plan_tipo = str(data.get("planTipo") or "trial").strip().lower()
     estado_suscripcion = str(data.get("estadoSuscripcion") or "trial").strip().lower()
+    categoria_slug = str(data.get("categoriaSlug") or "barberia").strip().lower()
 
     if not name or not email or not phone or not business_name:
         raise ValueError("Todos los campos (nombre, email, teléfono, nombre barbería) son requeridos.")
@@ -355,11 +361,12 @@ def create_admin_client(data):
                 INSERT INTO usuarios (
                     nombre_completo, email, telefono_whatsapp, 
                     plan_tipo, estado_suscripcion, fecha_vencimiento, 
-                    subdominio, requiere_aprobacion, nombre_barberia, estado
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, FALSE, %s, 'activo')
+                    subdominio, requiere_aprobacion, nombre_barberia, estado,
+                    categoria_slug
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, FALSE, %s, 'activo', %s)
                 RETURNING id
                 """,
-                (name, email, phone, plan_tipo, estado_suscripcion, expiry, subdomain, business_name)
+                (name, email, phone, plan_tipo, estado_suscripcion, expiry, subdomain, business_name, categoria_slug)
             ).fetchone()
             user_id = user_row[0]
 
@@ -370,7 +377,7 @@ def create_admin_client(data):
             )
 
             # Create Business Local
-            cat = conn.execute("SELECT id FROM categorias WHERE slug = 'barberia'").fetchone()
+            cat = conn.execute("SELECT id FROM categorias WHERE slug = %s", (categoria_slug,)).fetchone()
             cat_id = cat[0] if cat else None
             local_row = conn.execute(
                 """
@@ -406,6 +413,7 @@ def create_admin_client(data):
             "plan_tipo": plan_tipo,
             "estado_suscripcion": estado_suscripcion,
             "fecha_vencimiento": expiry.isoformat(),
+            "categoria_slug": categoria_slug,
             "subdominio": subdomain,
             "requiere_aprobacion": False,
             "creado_en": now.isoformat()
@@ -434,7 +442,8 @@ def confirm_client_activation(client_id):
             conn.row_factory = dict_row
             user = conn.execute(
                 """
-                SELECT id, nombre_completo, email, plan_tipo, nombre_barberia 
+                SELECT id, nombre_completo, email, plan_tipo, nombre_barberia,
+                       categoria_slug
                 FROM usuarios WHERE id = %s
                 """,
                 (client_id,)
@@ -485,7 +494,8 @@ def confirm_client_activation(client_id):
             )
 
             # Create Local
-            cat = conn.execute("SELECT id FROM categorias WHERE slug = 'barberia'").fetchone()
+            cat_slug = user["categoria_slug"] or "barberia"
+            cat = conn.execute("SELECT id FROM categorias WHERE slug = %s", (cat_slug,)).fetchone()
             cat_id = cat["id"] if cat else None
             local_row = conn.execute(
                 """
