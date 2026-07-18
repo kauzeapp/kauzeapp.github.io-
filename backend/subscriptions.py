@@ -1,0 +1,585 @@
+import os
+import re
+import json
+import uuid
+import secrets
+import smtplib
+import unicodedata
+from datetime import datetime, timedelta, timezone
+from email.message import EmailMessage
+from argon2 import PasswordHasher
+from psycopg.rows import dict_row
+
+from backend.db import connection, is_configured
+from backend.auth import _sha256, _smtp_is_configured
+
+DB_FILE = "subscriptions_db.json"
+EMAIL_LOG_FILE = "sent_emails_log.txt"
+
+hasher = PasswordHasher(
+    time_cost=2,
+    memory_cost=19456,
+    parallelism=1,
+    hash_len=32,
+    salt_len=16,
+)
+
+def clean_subdomain(name):
+    nfkd_form = unicodedata.normalize('NFKD', name)
+    only_ascii = nfkd_form.encode('ASCII', 'ignore').decode('utf-8')
+    cleaned = only_ascii.lower().strip()
+    cleaned = re.sub(r'\s+', '', cleaned) # remove all spaces
+    cleaned = re.sub(r'[^a-z0-9]', '', cleaned) # only alphanumeric
+    return cleaned
+
+def log_email_simulation(recipient, subject, content):
+    log_entry = f"=== EMAIL TO: {recipient} ===\nSubject: {subject}\nDate: {datetime.now().isoformat()}\n\n{content}\n=====================================\n\n"
+    with open(EMAIL_LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(log_entry)
+    print(f"[EMAIL SIMULATION] Sent to {recipient} (Logged to {EMAIL_LOG_FILE})")
+
+def send_credentials_email(recipient, fullname, temp_password, subdominio):
+    subject = "¡Bienvenido a KAUZE! Tu cuenta ha sido activada"
+    url = f"https://{subdominio}" if not subdominio.endswith(".kauze.cl") else f"https://{subdominio}"
+    content = (
+        f"Hola {fullname},\n\n"
+        f"Nos alegra contarte que tu cuenta de barbero en KAUZE ya está activa.\n\n"
+        f"Aquí tienes tus credenciales de acceso para administrar tu negocio:\n"
+        f"- Enlace de tu Barbería: {url}\n"
+        f"- Usuario: {recipient}\n"
+        f"- Contraseña Temporal: {temp_password}\n\n"
+        f"Te recomendamos cambiar tu contraseña al ingresar por primera vez.\n\n"
+        f"Atentamente,\n"
+        f"El equipo de KAUZE.cl"
+    )
+
+    if _smtp_is_configured():
+        try:
+            message = EmailMessage()
+            message["Subject"] = subject
+            message["From"] = os.environ["SMTP_FROM"]
+            message["To"] = recipient
+            message.set_content(content)
+
+            host = os.environ["SMTP_HOST"]
+            port = int(os.environ.get("SMTP_PORT", "587"))
+            use_ssl = os.environ.get("SMTP_SSL", "0") == "1"
+            smtp_class = smtplib.SMTP_SSL if use_ssl else smtplib.SMTP
+            with smtp_class(host, port, timeout=15) as smtp:
+                if not use_ssl and os.environ.get("SMTP_STARTTLS", "1") == "1":
+                    smtp.starttls()
+                smtp.login(os.environ["SMTP_USER"], os.environ["SMTP_PASSWORD"])
+                smtp.send_message(message)
+            print(f"[SMTP] Email sent to {recipient}")
+        except Exception as e:
+            print(f"[SMTP ERROR] Failed to send email: {e}")
+            log_email_simulation(recipient, subject, content)
+    else:
+        log_email_simulation(recipient, subject, content)
+
+def send_reset_password_email(recipient, fullname, temp_password):
+    subject = "Restablecimiento de contraseña KAUZE"
+    content = (
+        f"Hola {fullname},\n\n"
+        f"El administrador ha restablecido tu contraseña para ingresar a KAUZE.\n\n"
+        f"Tus nuevas credenciales de acceso son:\n"
+        f"- Usuario: {recipient}\n"
+        f"- Nueva Contraseña Temporal: {temp_password}\n\n"
+        f"Te sugerimos cambiarla en tu panel de configuración a la brevedad.\n\n"
+        f"Atentamente,\n"
+        f"El equipo de KAUZE.cl"
+    )
+
+    if _smtp_is_configured():
+        try:
+            message = EmailMessage()
+            message["Subject"] = subject
+            message["From"] = os.environ["SMTP_FROM"]
+            message["To"] = recipient
+            message.set_content(content)
+
+            host = os.environ["SMTP_HOST"]
+            port = int(os.environ.get("SMTP_PORT", "587"))
+            use_ssl = os.environ.get("SMTP_SSL", "0") == "1"
+            smtp_class = smtplib.SMTP_SSL if use_ssl else smtplib.SMTP
+            with smtp_class(host, port, timeout=15) as smtp:
+                if not use_ssl and os.environ.get("SMTP_STARTTLS", "1") == "1":
+                    smtp.starttls()
+                smtp.login(os.environ["SMTP_USER"], os.environ["SMTP_PASSWORD"])
+                smtp.send_message(message)
+            print(f"[SMTP] Reset email sent to {recipient}")
+        except Exception as e:
+            print(f"[SMTP ERROR] Failed to send email: {e}")
+            log_email_simulation(recipient, subject, content)
+    else:
+        log_email_simulation(recipient, subject, content)
+
+# ----------------- LOCAL JSON STORAGE FALLBACK -----------------
+
+def read_local_db():
+    if not os.path.exists(DB_FILE):
+        return {"subscriptions": []}
+    try:
+        with open(DB_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {"subscriptions": []}
+
+def write_local_db(data):
+    try:
+        with open(DB_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"Error writing to local JSON db: {e}")
+
+# ----------------- SUBSCRIPTION FLOW ACTIONS -----------------
+
+def register_subscription(data):
+    name = str(data.get("name") or "").strip()
+    email = str(data.get("email") or "").strip().lower()
+    phone = str(data.get("phone") or "").strip()
+    business_name = str(data.get("businessName") or "").strip()
+    plan_tipo = str(data.get("planTipo") or "trial").strip().lower()
+
+    if not name or not email or not phone or not business_name:
+        raise ValueError("Todos los campos (nombre, email, teléfono, nombre barbería) son requeridos.")
+    if plan_tipo not in ('trial', 'mensual', 'trimestral', 'anual'):
+        raise ValueError("El tipo de plan seleccionado no es válido.")
+
+    # Calculate default 7 days trial
+    expiry = datetime.now(timezone.utc) + timedelta(days=7)
+
+    if is_configured():
+        with connection() as conn:
+            # Check duplicate email
+            exists = conn.execute(
+                "SELECT 1 FROM usuarios WHERE LOWER(email) = %s", (email,)
+            ).fetchone()
+            if exists:
+                raise ValueError("El correo ya está registrado en la plataforma.")
+
+            # Insert as user requesting approval
+            conn.execute(
+                """
+                INSERT INTO usuarios (
+                    nombre_completo, email, telefono_whatsapp, 
+                    plan_tipo, estado_suscripcion, fecha_vencimiento, 
+                    requiere_aprobacion, nombre_barberia, estado
+                ) VALUES (%s, %s, %s, %s, 'trial', %s, TRUE, %s, 'activo')
+                """,
+                (name, email, phone, plan_tipo, expiry, business_name)
+            )
+            conn.commit()
+    else:
+        db = read_local_db()
+        for sub in db["subscriptions"]:
+            if sub["email"].lower() == email:
+                raise ValueError("El correo ya está registrado en la plataforma.")
+
+        new_sub = {
+            "id": str(uuid.uuid4()),
+            "nombre_completo": name,
+            "email": email,
+            "telefono": phone,
+            "nombre_barberia": business_name,
+            "plan_tipo": plan_tipo,
+            "estado_suscripcion": "trial",
+            "fecha_vencimiento": expiry.isoformat(),
+            "requiere_aprobacion": True,
+            "subdominio": None,
+            "creado_en": datetime.now(timezone.utc).isoformat()
+        }
+        db["subscriptions"].append(new_sub)
+        write_local_db(db)
+
+    print(f"[INTERNAL NOTIFICATION] Nuevo registro de Barbero: {business_name} ({email}) - Plan: {plan_tipo}. Requiere Aprobación.")
+    return {"status": "success", "message": "Registro completado con éxito. Su cuenta está pendiente de aprobación."}
+
+# ----------------- ADMIN DASHBOARD CONTROL -----------------
+
+def get_dashboard_stats():
+    stats = {"trial": 0, "activo": 0, "en_mora": 0, "desactivado": 0}
+
+    if is_configured():
+        with connection() as conn:
+            rows = conn.execute(
+                """
+                SELECT estado_suscripcion, COUNT(*) as count 
+                FROM usuarios 
+                WHERE plan_tipo IS NOT NULL 
+                GROUP BY estado_suscripcion
+                """
+            ).fetchall()
+            for r in rows:
+                k = r[0]
+                if k in stats:
+                    stats[k] = r[1]
+    else:
+        db = read_local_db()
+        now = datetime.now(timezone.utc)
+        # Update trial/active to en_mora if expired
+        modified = False
+        for sub in db["subscriptions"]:
+            venc = datetime.fromisoformat(sub["fecha_vencimiento"].replace("Z", "+00:00"))
+            if sub["estado_suscripcion"] in ("trial", "activo") and venc < now:
+                sub["estado_suscripcion"] = "en_mora"
+                modified = True
+            k = sub["estado_suscripcion"]
+            if k in stats:
+                stats[k] += 1
+        if modified:
+            write_local_db(db)
+
+    return stats
+
+def get_admin_clients(status_filter=None, search_query=None):
+    clients = []
+
+    if is_configured():
+        with connection() as conn:
+            conn.row_factory = dict_row
+            query = """
+                SELECT id, nombre_completo, email, telefono_whatsapp, 
+                       plan_tipo, estado_suscripcion, fecha_vencimiento, 
+                       subdominio, requiere_aprobacion, nombre_barberia, creado_en
+                FROM usuarios
+                WHERE plan_tipo IS NOT NULL
+            """
+            params = []
+            if status_filter:
+                query += " AND estado_suscripcion = %s"
+                params.append(status_filter)
+            if search_query:
+                query += " AND (nombre_completo ILIKE %s OR email ILIKE %s OR nombre_barberia ILIKE %s)"
+                term = f"%{search_query}%"
+                params.extend([term, term, term])
+
+            query += " ORDER BY creado_en DESC"
+            rows = conn.execute(query, params).fetchall()
+            for r in rows:
+                clients.append({
+                    "id": str(r["id"]),
+                    "name": r["nombre_completo"],
+                    "email": r["email"],
+                    "phone": r["telefono_whatsapp"],
+                    "planTipo": r["plan_tipo"],
+                    "estadoSuscripcion": r["estado_suscripcion"],
+                    "fechaVencimiento": r["fecha_vencimiento"].isoformat() if r["fecha_vencimiento"] else None,
+                    "subdominio": r["subdominio"],
+                    "requiereAprobacion": r["requiere_aprobacion"],
+                    "businessName": r["nombre_barberia"],
+                    "creadoEn": r["creado_en"].isoformat() if r["creado_en"] else None
+                })
+    else:
+        db = read_local_db()
+        now = datetime.now(timezone.utc)
+        modified = False
+        for sub in db["subscriptions"]:
+            # Auto-update status to en_mora if expired
+            venc = datetime.fromisoformat(sub["fecha_vencimiento"].replace("Z", "+00:00"))
+            if sub["estado_suscripcion"] in ("trial", "activo") and venc < now:
+                sub["estado_suscripcion"] = "en_mora"
+                modified = True
+
+            match = True
+            if status_filter and sub["estado_suscripcion"] != status_filter:
+                match = False
+            if search_query:
+                sq = search_query.lower()
+                if (sq not in sub["nombre_completo"].lower() and
+                    sq not in sub["email"].lower() and
+                    sq not in sub["nombre_barberia"].lower()):
+                    match = False
+
+            if match:
+                clients.append({
+                    "id": sub["id"],
+                    "name": sub["nombre_completo"],
+                    "email": sub["email"],
+                    "phone": sub["telefono"],
+                    "planTipo": sub["plan_tipo"],
+                    "estadoSuscripcion": sub["estado_suscripcion"],
+                    "fechaVencimiento": sub["fecha_vencimiento"],
+                    "subdominio": sub["subdominio"],
+                    "requiereAprobacion": sub["requiere_aprobacion"],
+                    "businessName": sub["nombre_barberia"],
+                    "creadoEn": sub.get("creado_en")
+                })
+        if modified:
+            write_local_db(db)
+
+        clients.sort(key=lambda x: x["creadoEn"] or "", reverse=True)
+
+    return clients
+
+def create_admin_client(data):
+    name = str(data.get("name") or "").strip()
+    email = str(data.get("email") or "").strip().lower()
+    phone = str(data.get("phone") or "").strip()
+    business_name = str(data.get("businessName") or "").strip()
+    plan_tipo = str(data.get("planTipo") or "trial").strip().lower()
+    estado_suscripcion = str(data.get("estadoSuscripcion") or "trial").strip().lower()
+
+    if not name or not email or not phone or not business_name:
+        raise ValueError("Todos los campos (nombre, email, teléfono, nombre barbería) son requeridos.")
+
+    # Calculate expiration based on plan
+    now = datetime.now(timezone.utc)
+    if plan_tipo == 'mensual':
+        days = 30
+    elif plan_tipo == 'trimestral':
+        days = 90
+    elif plan_tipo == 'anual':
+        days = 365
+    else:
+        days = 7 # trial
+    expiry = now + timedelta(days=days)
+
+    subdomain_slug = clean_subdomain(business_name) + "-" + secrets.token_hex(2)
+    subdomain = f"{subdomain_slug}.kauze.cl"
+
+    temp_password = secrets.token_urlsafe(10)
+
+    if is_configured():
+        with connection() as conn:
+            # Check duplicate email
+            exists = conn.execute(
+                "SELECT id FROM usuarios WHERE LOWER(email) = %s", (email,)
+            ).fetchone()
+            if exists:
+                raise ValueError("El correo ya está registrado.")
+
+            # Create User
+            user_row = conn.execute(
+                """
+                INSERT INTO usuarios (
+                    nombre_completo, email, telefono_whatsapp, 
+                    plan_tipo, estado_suscripcion, fecha_vencimiento, 
+                    subdominio, requiere_aprobacion, nombre_barberia, estado
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, FALSE, %s, 'activo')
+                RETURNING id
+                """,
+                (name, email, phone, plan_tipo, estado_suscripcion, expiry, subdomain, business_name)
+            ).fetchone()
+            user_id = user_row[0]
+
+            # Create Password Credentials
+            conn.execute(
+                "INSERT INTO credenciales_password (usuario_id, password_hash) VALUES (%s, %s)",
+                (user_id, hasher.hash(temp_password))
+            )
+
+            # Create Business Local
+            cat = conn.execute("SELECT id FROM categorias WHERE slug = 'barberia'").fetchone()
+            cat_id = cat[0] if cat else None
+            local_row = conn.execute(
+                """
+                INSERT INTO locales (categoria_id, nombre, slug, estado)
+                VALUES (%s, %s, %s, 'activo')
+                RETURNING id
+                """,
+                (cat_id, business_name, subdomain_slug)
+            ).fetchone()
+            local_id = local_row[0]
+
+            # Assign Owner Role
+            role = conn.execute("SELECT id FROM roles WHERE slug = 'dueno'").fetchone()
+            if role:
+                conn.execute(
+                    "INSERT INTO usuario_roles (usuario_id, rol_id, local_id) VALUES (%s, %s, %s)",
+                    (user_id, role[0], local_id)
+                )
+
+            conn.commit()
+    else:
+        db = read_local_db()
+        for sub in db["subscriptions"]:
+            if sub["email"].lower() == email:
+                raise ValueError("El correo ya está registrado.")
+
+        new_sub = {
+            "id": str(uuid.uuid4()),
+            "nombre_completo": name,
+            "email": email,
+            "telefono": phone,
+            "nombre_barberia": business_name,
+            "plan_tipo": plan_tipo,
+            "estado_suscripcion": estado_suscripcion,
+            "fecha_vencimiento": expiry.isoformat(),
+            "subdominio": subdomain,
+            "requiere_aprobacion": False,
+            "creado_en": now.isoformat()
+        }
+        db["subscriptions"].append(new_sub)
+        write_local_db(db)
+
+    send_credentials_email(email, name, temp_password, subdomain)
+
+    return {
+        "status": "success",
+        "client": {
+            "name": name,
+            "email": email,
+            "subdominio": subdomain,
+            "expiry": expiry.isoformat()
+        }
+    }
+
+def confirm_client_activation(client_id):
+    temp_password = secrets.token_urlsafe(10)
+    now = datetime.now(timezone.utc)
+
+    if is_configured():
+        with connection() as conn:
+            conn.row_factory = dict_row
+            user = conn.execute(
+                """
+                SELECT id, nombre_completo, email, plan_tipo, nombre_barberia 
+                FROM usuarios WHERE id = %s
+                """,
+                (client_id,)
+            ).fetchone()
+            if not user:
+                raise ValueError("Cliente no encontrado.")
+
+            plan_tipo = user["plan_tipo"] or "trial"
+            if plan_tipo == 'mensual':
+                days = 30
+            elif plan_tipo == 'trimestral':
+                days = 90
+            elif plan_tipo == 'anual':
+                days = 365
+            else:
+                days = 7
+            expiry = now + timedelta(days=days)
+
+            subdomain_slug = clean_subdomain(user["nombre_barberia"]) + "-" + secrets.token_hex(2)
+            subdomain = f"{subdomain_slug}.kauze.cl"
+
+            # Update User
+            conn.execute(
+                """
+                UPDATE usuarios 
+                SET estado_suscripcion = 'activo',
+                    fecha_vencimiento = %s,
+                    subdominio = %s,
+                    requiere_aprobacion = FALSE,
+                    estado = 'activo'
+                WHERE id = %s
+                """,
+                (expiry, subdomain, client_id)
+            )
+
+            # Insert/Update password
+            conn.execute(
+                """
+                INSERT INTO credenciales_password (usuario_id, password_hash)
+                VALUES (%s, %s)
+                ON CONFLICT (usuario_id) DO UPDATE
+                SET password_hash = EXCLUDED.password_hash,
+                    intentos_fallidos = 0,
+                    bloqueado_hasta = NULL,
+                    password_actualizada_en = NOW()
+                """,
+                (client_id, hasher.hash(temp_password))
+            )
+
+            # Create Local
+            cat = conn.execute("SELECT id FROM categorias WHERE slug = 'barberia'").fetchone()
+            cat_id = cat["id"] if cat else None
+            local_row = conn.execute(
+                """
+                INSERT INTO locales (categoria_id, nombre, slug, estado)
+                VALUES (%s, %s, %s, 'activo')
+                ON CONFLICT (slug) DO UPDATE SET estado = 'activo'
+                RETURNING id
+                """,
+                (cat_id, user["nombre_barberia"], subdomain_slug)
+            ).fetchone()
+            local_id = local_row["id"]
+
+            # Link Role
+            role = conn.execute("SELECT id FROM roles WHERE slug = 'dueno'").fetchone()
+            if role:
+                conn.execute(
+                    """
+                    INSERT INTO usuario_roles (usuario_id, rol_id, local_id)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT (usuario_id, rol_id, local_id) WHERE local_id IS NOT NULL
+                    DO NOTHING
+                    """,
+                    (client_id, role["id"], local_id)
+                )
+
+            conn.commit()
+            email = user["email"]
+            name = user["nombre_completo"]
+    else:
+        db = read_local_db()
+        sub = next((item for item in db["subscriptions"] if item["id"] == client_id), None)
+        if not sub:
+            raise ValueError("Cliente no encontrado.")
+
+        plan_tipo = sub["plan_tipo"] or "trial"
+        if plan_tipo == 'mensual':
+            days = 30
+        elif plan_tipo == 'trimestral':
+            days = 90
+        elif plan_tipo == 'anual':
+            days = 365
+        else:
+            days = 7
+        expiry = now + timedelta(days=days)
+
+        subdomain_slug = clean_subdomain(sub["nombre_barberia"]) + "-" + secrets.token_hex(2)
+        subdomain = f"{subdomain_slug}.kauze.cl"
+
+        sub["estado_suscripcion"] = "activo"
+        sub["fecha_vencimiento"] = expiry.isoformat()
+        sub["subdominio"] = subdomain
+        sub["requiere_aprobacion"] = False
+        write_local_db(db)
+
+        email = sub["email"]
+        name = sub["nombre_completo"]
+
+    send_credentials_email(email, name, temp_password, subdomain)
+    return {"status": "success", "subdominio": subdomain}
+
+def reset_client_password(client_id):
+    temp_password = secrets.token_urlsafe(10)
+
+    if is_configured():
+        with connection() as conn:
+            conn.row_factory = dict_row
+            user = conn.execute(
+                "SELECT id, nombre_completo, email FROM usuarios WHERE id = %s", (client_id,)
+            ).fetchone()
+            if not user:
+                raise ValueError("Cliente no encontrado.")
+
+            conn.execute(
+                """
+                INSERT INTO credenciales_password (usuario_id, password_hash)
+                VALUES (%s, %s)
+                ON CONFLICT (usuario_id) DO UPDATE
+                SET password_hash = EXCLUDED.password_hash,
+                    intentos_fallidos = 0,
+                    bloqueado_hasta = NULL,
+                    password_actualizada_en = NOW()
+                """,
+                (client_id, hasher.hash(temp_password))
+            )
+            conn.commit()
+            email = user["email"]
+            name = user["nombre_completo"]
+    else:
+        db = read_local_db()
+        sub = next((item for item in db["subscriptions"] if item["id"] == client_id), None)
+        if not sub:
+            raise ValueError("Cliente no encontrado.")
+        email = sub["email"]
+        name = sub["nombre_completo"]
+
+    send_reset_password_email(email, name, temp_password)
+    return {"status": "success", "message": "Contraseña restablecida correctamente."}
