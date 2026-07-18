@@ -848,6 +848,70 @@
     .note-delete-btn:hover {
       color: #ef4444;
     }
+
+    /* Modal de Creación de Cliente Manual */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(11, 23, 54, 0.5);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .modal-content {
+      background: white;
+      padding: 32px;
+      border-radius: 24px;
+      width: 90%;
+      max-width: 480px;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+      border: 1px solid var(--border-color);
+      position: relative;
+    }
+    .modal-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 14px;
+      text-align: left;
+    }
+    .form-group label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%;
+      height: 42px;
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 13.5px;
+      background: white;
+      transition: all 0.2s ease;
+    }
+    .form-input:focus {
+      border-color: var(--blue);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+    }
   </style>
 
 </head>
@@ -916,6 +980,75 @@
         <div class="hint" id="globalProgressHint">0 de 125 tareas completadas.</div>
       </article>
     </section>
+
+    <div class="section-title" style="margin-top: 56px;">
+      <div>
+        <h2>Gestión de Suscripciones (MVP)</h2>
+        <p>Ciclo de vida de los barberos registrados en Kauze.</p>
+      </div>
+      <button class="button primary" onclick="openCreateClientModal()">+ Crear Cliente Manual</button>
+    </div>
+
+    <!-- Contadores Visuales de Suscripción -->
+    <section class="grid-4" style="margin-bottom: 24px;">
+      <article class="card metric border-blue">
+        <div class="label">Clientes en Trial</div>
+        <div class="value" id="statsTrial">0</div>
+        <div class="hint">Días de prueba activos.</div>
+      </article>
+      <article class="card metric border-teal">
+        <div class="label">Suscritos Activos</div>
+        <div class="value" id="statsActivo">0</div>
+        <div class="hint">Planes vigentes pagados.</div>
+      </article>
+      <article class="card metric border-amber">
+        <div class="label">Clientes en Mora</div>
+        <div class="value" id="statsMora">0</div>
+        <div class="hint">Trial o periodo vencido.</div>
+      </article>
+      <article class="card metric border-red">
+        <div class="label">Clientes Desactivados</div>
+        <div class="value" id="statsDesactivado">0</div>
+        <div class="hint">Cuentas suspendidas.</div>
+      </article>
+    </section>
+
+    <!-- Barra de Filtros y Búsqueda -->
+    <div class="card" style="padding: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+      <div style="display: flex; gap: 8px;">
+        <button class="button small" onclick="filterClients('todos')" id="btnFilter_todos">Todos</button>
+        <button class="button small" onclick="filterClients('trial')" id="btnFilter_trial">Trial</button>
+        <button class="button small" onclick="filterClients('activo')" id="btnFilter_activo">Activos</button>
+        <button class="button small" onclick="filterClients('en_mora')" id="btnFilter_en_mora">Mora</button>
+        <button class="button small" onclick="filterClients('desactivado')" id="btnFilter_desactivado">Desactivados</button>
+      </div>
+      <div style="flex: 1; max-width: 350px;">
+        <input type="text" id="adminSearchInput" oninput="searchClients()" placeholder="Buscar por barbería, nombre o email..." style="width: 100%; height: 38px; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px;">
+      </div>
+    </div>
+
+    <!-- Tabla de Clientes -->
+    <div class="card" style="padding: 0; overflow-x: auto; margin-bottom: 40px;">
+      <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+          <tr style="background: #f8fafc; border-bottom: 1px solid var(--border-color);">
+            <th style="padding: 14px 18px; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Barbería / Subdominio</th>
+            <th style="padding: 14px 18px; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Cliente / Email</th>
+            <th style="padding: 14px 18px; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Teléfono</th>
+            <th style="padding: 14px 18px; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Plan</th>
+            <th style="padding: 14px 18px; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Estado</th>
+            <th style="padding: 14px 18px; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Vencimiento</th>
+            <th style="padding: 14px 18px; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; text-align: right;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="adminClientsTableBody">
+          <!-- Carga dinámica -->
+          <tr>
+            <td colspan="7" style="padding: 24px; text-align: center; color: var(--text-muted);">Cargando clientes...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <div class="section-title">
       <div>
@@ -2359,7 +2492,270 @@
         }
         await loadTasks();
         await loadNotes();
+        await loadStats();
+        await loadClients();
     })();
+
+    // Lógica global del Dashboard de Suscripciones
+    let currentFilter = 'todos';
+    let searchQuery = '';
+    let clientsData = [];
+
+    window.openCreateClientModal = function() {
+        document.getElementById("createClientModal").style.display = "flex";
+        document.getElementById("createClientForm").reset();
+        document.getElementById("modalErrorMsg").style.display = "none";
+    };
+
+    window.closeCreateClientModal = function() {
+        document.getElementById("createClientModal").style.display = "none";
+    };
+
+    window.filterClients = function(status) {
+        currentFilter = status;
+        const buttons = ["todos", "trial", "activo", "en_mora", "desactivado"];
+        buttons.forEach(b => {
+            const btn = document.getElementById(`btnFilter_${b}`);
+            if (btn) {
+                if (b === status) {
+                    btn.classList.add("primary");
+                } else {
+                    btn.classList.remove("primary");
+                }
+            }
+        });
+        renderClientsTable();
+    };
+
+    window.searchClients = function() {
+        searchQuery = document.getElementById("adminSearchInput").value.trim().toLowerCase();
+        renderClientsTable();
+    };
+
+    async function loadStats() {
+        try {
+            const res = await fetch("/api/admin/dashboard/stats");
+            if (res.ok) {
+                const stats = await res.json();
+                document.getElementById("statsTrial").textContent = stats.trial || 0;
+                document.getElementById("statsActivo").textContent = stats.activo || 0;
+                document.getElementById("statsMora").textContent = stats.en_mora || 0;
+                document.getElementById("statsDesactivado").textContent = stats.desactivado || 0;
+            }
+        } catch (err) {
+            console.error("Error al cargar estadísticas de suscripción:", err);
+        }
+    }
+
+    async function loadClients() {
+        try {
+            const res = await fetch("/api/admin/clientes");
+            if (res.ok) {
+                clientsData = await res.json();
+                renderClientsTable();
+            }
+        } catch (err) {
+            console.error("Error al cargar clientes:", err);
+        }
+    }
+
+    function renderClientsTable() {
+        const tbody = document.getElementById("adminClientsTableBody");
+        tbody.innerHTML = "";
+        
+        let filtered = clientsData;
+        if (currentFilter !== "todos") {
+            filtered = filtered.filter(c => c.estadoSuscripcion === currentFilter);
+        }
+        
+        if (searchQuery) {
+            filtered = filtered.filter(c => 
+                (c.name && c.name.toLowerCase().includes(searchQuery)) ||
+                (c.email && c.email.toLowerCase().includes(searchQuery)) ||
+                (c.businessName && c.businessName.toLowerCase().includes(searchQuery))
+            );
+        }
+        
+        if (filtered.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="padding: 24px; text-align: center; color: var(--text-muted);">No se encontraron barberos con los filtros actuales.</td>
+                </tr>
+            `;
+            return;
+        }
+        
+        filtered.forEach(client => {
+            const tr = document.createElement("tr");
+            tr.style.borderBottom = "1px solid var(--border-color)";
+            
+            // Subdomain link
+            const url = client.subdominio ? `https://${client.subdominio}` : "#";
+            const subNameMarkup = client.subdominio 
+                ? `<a href="${url}" target="_blank" style="color: var(--blue); font-weight: 700; text-decoration: none;">${client.businessName}</a><div style="font-size: 11px; color: var(--text-muted);">${client.subdominio}</div>`
+                : `<span style="font-weight: 700; color: var(--navy);">${client.businessName}</span><div style="font-size: 11px; color: #ef4444; font-weight: 700;">Pendiente activación</div>`;
+            
+            // Status badge
+            let badgeStyle = "background: #e2e8f0; color: #475569;";
+            if (client.estadoSuscripcion === "trial") badgeStyle = "background: rgba(37,99,235,0.1); color: var(--blue);";
+            else if (client.estadoSuscripcion === "activo") badgeStyle = "background: rgba(16,185,129,0.1); color: #059669;";
+            else if (client.estadoSuscripcion === "en_mora") badgeStyle = "background: rgba(245,158,11,0.1); color: #d97706;";
+            else if (client.estadoSuscripcion === "desactivado") badgeStyle = "background: rgba(239,68,68,0.1); color: #dc2626;";
+            
+            const badge = `<span style="padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; text-transform: uppercase; ${badgeStyle}">${client.estadoSuscripcion}</span>`;
+            
+            // Vencimiento formatting
+            let vencDate = "—";
+            if (client.fechaVencimiento) {
+                vencDate = new Date(client.fechaVencimiento).toLocaleDateString("es-CL", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric"
+                });
+            }
+            
+            // Actions
+            let actionsMarkup = "";
+            if (client.requiereAprobacion) {
+                actionsMarkup += `<button class="button small primary" onclick="confirmClient('${client.id}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle;">Confirmar Ingreso</button>`;
+            }
+            actionsMarkup += `<button class="button small" onclick="resetClientPassword('${client.id}')" style="padding: 4px 8px; font-size: 11px; vertical-align: middle;">Restablecer Clave</button>`;
+            
+            tr.innerHTML = `
+                <td style="padding: 14px 18px; font-size: 13.5px;">${subNameMarkup}</td>
+                <td style="padding: 14px 18px; font-size: 13.5px; font-weight: 600; color: var(--navy);">${client.name}<div style="font-size: 11px; color: var(--text-muted); font-weight: 400;">${client.email}</div></td>
+                <td style="padding: 14px 18px; font-size: 13.5px; color: var(--text-muted);">${client.phone || "—"}</td>
+                <td style="padding: 14px 18px; font-size: 13px; font-weight: 700; color: var(--navy); text-transform: uppercase;">${client.planTipo}</td>
+                <td style="padding: 14px 18px; font-size: 13.5px;">${badge}</td>
+                <td style="padding: 14px 18px; font-size: 13.5px; font-weight: 600; color: var(--navy);">${vencDate}</td>
+                <td style="padding: 14px 18px; font-size: 13.5px; text-align: right;">${actionsMarkup}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    window.confirmClient = async function(id) {
+        if (!confirm("¿Estás seguro de confirmar el ingreso de este barbero? Se generará su subdominio y se enviarán sus credenciales de acceso.")) return;
+        try {
+            const res = await fetch(`/api/admin/clientes/${id}/confirmar`, { method: "PUT" });
+            if (res.ok) {
+                alert("¡Cliente activado y correo con credenciales enviado!");
+                await loadStats();
+                await loadClients();
+            } else {
+                const err = await res.json();
+                alert("Error al confirmar: " + (err.message || err.error));
+            }
+        } catch (e) {
+            alert("Error de conexión al confirmar.");
+        }
+    };
+
+    window.resetClientPassword = async function(id) {
+        if (!confirm("¿Estás seguro de restablecer la contraseña de este barbero? Se enviará una nueva contraseña temporal a su correo.")) return;
+        try {
+            const res = await fetch(`/api/admin/clientes/${id}/reset-password`, { method: "POST" });
+            if (res.ok) {
+                alert("¡Nueva contraseña temporal generada y enviada al correo del barbero!");
+            } else {
+                const err = await res.json();
+                alert("Error al restablecer contraseña: " + (err.message || err.error));
+            }
+        } catch (e) {
+            alert("Error de conexión.");
+        }
+    };
+
+    // Submisión del Formulario del Modal
+    document.getElementById("createClientForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const errorMsg = document.getElementById("modalErrorMsg");
+        errorMsg.style.display = "none";
+        
+        const payload = {
+            name: document.getElementById("mName").value.trim(),
+            email: document.getElementById("mEmail").value.trim(),
+            phone: document.getElementById("mPhone").value.trim(),
+            businessName: document.getElementById("mBusiness").value.trim(),
+            planTipo: document.getElementById("mPlan").value,
+            estadoSuscripcion: document.getElementById("mState").value
+        };
+        
+        try {
+            const res = await fetch("/api/admin/clientes/crear", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (res.ok) {
+                closeCreateClientModal();
+                alert("¡Cliente creado exitosamente! Se le ha enviado un correo con sus credenciales de acceso.");
+                await loadStats();
+                await loadClients();
+            } else {
+                errorMsg.textContent = result.message || result.error || "Error al crear el cliente.";
+                errorMsg.style.display = "block";
+            }
+        } catch (err) {
+            errorMsg.textContent = "Error de conexión con el servidor.";
+            errorMsg.style.display = "block";
+        }
+    });
+
+    // Cargar estadísticas iniciales al cargar la página
+    document.addEventListener("DOMContentLoaded", () => {
+        filterClients('todos');
+    });
   </script>
+
+  <!-- Modal de Creación de Cliente Manual -->
+  <div class="modal-overlay" id="createClientModal">
+    <div class="modal-content">
+      <div class="modal-title">Crear Cliente de Forma Manual</div>
+      <form id="createClientForm">
+        <div class="form-group">
+          <label for="mName">Nombre Completo del Barbero</label>
+          <input type="text" id="mName" class="form-input" placeholder="Ej. Carlos Valenzuela" required>
+        </div>
+        <div class="form-group">
+          <label for="mEmail">Correo Electrónico</label>
+          <input type="email" id="mEmail" class="form-input" placeholder="Ej. carlos@barberia.cl" required>
+        </div>
+        <div class="form-group">
+          <label for="mPhone">Teléfono / WhatsApp</label>
+          <input type="tel" id="mPhone" class="form-input" placeholder="Ej. +56998765432" required>
+        </div>
+        <div class="form-group">
+          <label for="mBusiness">Nombre de la Barbería</label>
+          <input type="text" id="mBusiness" class="form-input" placeholder="Ej. Barbería Golden" required>
+        </div>
+        <div class="form-group">
+          <label for="mPlan">Plan de Suscripción</label>
+          <select id="mPlan" class="form-input" style="padding-top:4px;">
+            <option value="trial">Trial (7 días gratis)</option>
+            <option value="mensual">Plan Mensual</option>
+            <option value="trimestral">Plan Trimestral</option>
+            <option value="anual">Plan Anual</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="mState">Estado Inicial</label>
+          <select id="mState" class="form-input" style="padding-top:4px;">
+            <option value="activo">Activo (Pago al día)</option>
+            <option value="trial">Trial (Prueba)</option>
+            <option value="en_mora">En Mora</option>
+            <option value="desactivado">Desactivado</option>
+          </select>
+        </div>
+        <p id="modalErrorMsg" style="color: #ef4444; font-size: 12px; font-weight: 700; margin-top: 8px; display: none; text-align: left;"></p>
+        
+        <div class="modal-footer">
+          <button type="button" class="button" onclick="closeCreateClientModal()">Cancelar</button>
+          <button type="submit" class="button primary">Crear y Activar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </body>
 </html>
