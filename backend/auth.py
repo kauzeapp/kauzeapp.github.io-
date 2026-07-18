@@ -1,5 +1,6 @@
 import hashlib
 import os
+import re
 import secrets
 import smtplib
 from datetime import datetime, timedelta, timezone
@@ -56,12 +57,27 @@ def _verify_or_dummy(password, encoded_hash=None):
         return False
 
 
+def _profile_image_value(value):
+    candidate = str(value or "").strip()
+    if not candidate:
+        return None
+    if re.fullmatch(
+        r"data:image/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+",
+        candidate,
+    ) and len(candidate) <= 750_000:
+        return candidate
+    if candidate.startswith("https://") and len(candidate) <= 1_000:
+        return candidate
+    raise ValueError("La imagen de perfil no es válida.")
+
+
 def _account_payload(row):
     return {
         "user": {
             "id": str(row["usuario_id"]),
             "name": row["nombre_completo"],
             "email": row["email"],
+            "profileImage": row.get("foto_perfil_url") or "",
         },
         "business": {
             "id": str(row["local_id"]),
@@ -146,6 +162,7 @@ def login(email, password, remember=False, local_slug=None, user_agent=""):
               u.id AS usuario_id,
               u.nombre_completo,
               u.email,
+              u.foto_perfil_url,
               l.id AS local_id,
               l.nombre AS local_nombre,
               l.slug AS local_slug,
@@ -262,6 +279,7 @@ def current_session(session_token):
               u.id AS usuario_id,
               u.nombre_completo,
               u.email,
+              u.foto_perfil_url,
               l.id AS local_id,
               l.nombre AS local_nombre,
               l.slug AS local_slug,
@@ -345,6 +363,25 @@ def save_business_state(local_id, user_id, state):
             "version": int(row["version"]),
             "updatedAt": row["actualizado_en"].isoformat(),
         }
+
+
+def update_user_profile_image(user_id, profile_image):
+    normalized = _profile_image_value(profile_image)
+    with connection() as conn:
+        conn.row_factory = dict_row
+        row = conn.execute(
+            """
+            UPDATE usuarios
+            SET foto_perfil_url = %s,
+                actualizado_en = NOW()
+            WHERE id = %s AND estado = 'activo'
+            RETURNING foto_perfil_url
+            """,
+            (normalized, user_id),
+        ).fetchone()
+        if not row:
+            raise AccountUnavailable("La cuenta no está disponible.")
+        return {"profileImage": row["foto_perfil_url"] or ""}
 
 
 def _smtp_is_configured():

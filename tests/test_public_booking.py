@@ -23,7 +23,12 @@ class PublicBookingTests(unittest.TestCase):
             },
             "professionals": {
                 "barberia": [
-                    {"id": "professional-1", "name": "Camila Soto", "role": "Barbera"}
+                    {
+                        "id": "professional-1",
+                        "name": "Camila Soto",
+                        "role": "Barbera",
+                        "profileImage": "data:image/webp;base64,QUJDRA==",
+                    }
                 ]
             },
             "appointments": {
@@ -54,6 +59,10 @@ class PublicBookingTests(unittest.TestCase):
         )
         self.assertEqual(business["services"][0]["name"], "Fade")
         self.assertEqual(business["professionals"][0]["name"], "Camila Soto")
+        self.assertEqual(
+            business["professionals"][0]["profileImage"],
+            "data:image/webp;base64,QUJDRA==",
+        )
         self.assertTrue(business["demoMode"])
         self.assertEqual(business["route"], "masterplan.kauze.cl")
         self.assertEqual(business["instagramHandle"], "@masterplan.soluciones")

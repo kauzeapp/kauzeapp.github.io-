@@ -126,12 +126,14 @@ def _professional_payload(row, index):
             "name": _public_text(row[0] if len(row) > 0 else "Profesional", 100),
             "role": _public_text(row[1] if len(row) > 1 else "Profesional", 100),
             "note": _public_text(row[2] if len(row) > 2 else "", 180),
+            "profileImage": _public_logo_url(row[3] if len(row) > 3 else ""),
         }
     return {
         "id": str(row.get("id") or f"professional-{index}"),
         "name": _public_text(row.get("name") or "Profesional", 100),
         "role": _public_text(row.get("role") or "Profesional", 100),
         "note": _public_text(row.get("note") or "", 180),
+        "profileImage": _public_logo_url(row.get("profileImage")),
     }
 
 

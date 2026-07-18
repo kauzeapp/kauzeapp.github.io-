@@ -62,7 +62,12 @@ if PREVIEW_BUSINESS_SLUG not in BUSINESS_STATES:
     PREVIEW_BUSINESS_SLUG = DEMO_SLUG
 PREVIEW_STATE = BUSINESS_STATES[PREVIEW_BUSINESS_SLUG]
 ACCOUNT = {
-    "user": {"id": "preview-owner", "name": "Sergio Molina", "email": "preview@kauze.cl"},
+    "user": {
+        "id": "preview-owner",
+        "name": "Sergio Molina",
+        "email": "preview@kauze.cl",
+        "profileImage": "",
+    },
     "business": {
         "id": f"preview-{PREVIEW_BUSINESS_SLUG}",
         "name": PREVIEW_STATE["name"],
@@ -171,6 +176,16 @@ class PreviewHandler(SimpleHTTPRequestHandler):
         if path == "/api/app-state":
             BUSINESS_STATES[PREVIEW_BUSINESS_SLUG] = self.read_json()
             return self.json_response(200, {"status": "success", "version": 1})
+        if path == "/api/account/profile-image":
+            data = self.read_json()
+            ACCOUNT["user"]["profileImage"] = str(data.get("profileImage") or "")
+            return self.json_response(
+                200,
+                {
+                    "status": "success",
+                    "profileImage": ACCOUNT["user"]["profileImage"],
+                },
+            )
         if path == "/api/auth/logout":
             return self.json_response(200, {"status": "success"})
         if path != "/api/public/appointments":

@@ -19,6 +19,8 @@ for (const required of [
   "logoUrl",
   "businessLogoMarkup",
   "businessPublicLogo",
+  "profileImage",
+  "pro-avatar",
   "Reservas conectadas a PostgreSQL",
 ]) {
   if (!source.includes(required)) throw new Error(`Falta integración: ${required}`);
