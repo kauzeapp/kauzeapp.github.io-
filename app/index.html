@@ -1209,7 +1209,11 @@
           if (res.ok) {
             const data = await res.json();
             if (data && data.type) {
+              const previousPublicRating = state.publicRating;
+              const previousPublicReviews = state.publicReviews;
               state = normalizeBusinessState(data);
+              if (!state.publicRating && previousPublicRating) state.publicRating = previousPublicRating;
+              if (!state.publicReviews && previousPublicReviews) state.publicReviews = previousPublicReviews;
               if (currentAccount?.business) {
                 state.name = currentAccount.business.name;
                 state.type = currentAccount.business.type || state.type;
@@ -1889,6 +1893,22 @@
           if (theme) updateMockupPreview(theme);
           renderThemeMiniList();
         });
+      }
+    }
+
+    async function syncPublicBusinessRating() {
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/public/businesses`, { cache: 'no-store' });
+        if (!res.ok) return false;
+        const data = await res.json();
+        const publicBusiness = (data.businesses || []).find(item => item.slug === currentAccount?.business?.slug);
+        if (!publicBusiness) return false;
+        state.publicRating = publicBusiness.rating || null;
+        state.publicReviews = Number(publicBusiness.reviews || 0);
+        return true;
+      } catch (error) {
+        console.warn('No fue posible sincronizar la valoración pública del negocio:', error);
+        return false;
       }
     }
 
@@ -2946,6 +2966,7 @@
       loginScreen.style.display='none'; 
       app.style.display='grid'; 
       await syncOnlineState(false);
+      await syncPublicBusinessRating();
       const initialTheme = ensureThemeForType(state.type, state.activeTheme);
       state.activeTheme = initialTheme.name;
       applyTheme(initialTheme.name);
