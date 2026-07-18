@@ -418,7 +418,7 @@ def create_public_appointment(payload, client_key="unknown"):
             "lastService": service["name"],
             "nextAction": "Confirmar asistencia",
             "totalBilling": 0,
-            "stars": 5,
+            "internalRating": None,
         }
         if client_index is None:
             clients.append(client_payload)
