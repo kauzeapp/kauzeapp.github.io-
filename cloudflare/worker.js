@@ -3,10 +3,23 @@ const ALLOWED_ORIGINS = new Set([
   "https://kauze.cl",
   "https://www.kauze.cl",
 ]);
+const BUSINESS_SUBDOMAINS = new Map([
+  ["masterplan", "masterplan"],
+]);
 
 export default {
   async fetch(request) {
     const incomingUrl = new URL(request.url);
+    const hostParts = incomingUrl.hostname.toLowerCase().split(".");
+    const businessSubdomain = hostParts.length === 3 && hostParts.slice(1).join(".") === "kauze.cl"
+      ? hostParts[0]
+      : "";
+
+    if (BUSINESS_SUBDOMAINS.has(businessSubdomain)) {
+      const destination = new URL("https://kauze.cl/cliente/");
+      destination.searchParams.set("negocio", BUSINESS_SUBDOMAINS.get(businessSubdomain));
+      return Response.redirect(destination.toString(), 302);
+    }
 
     if (!incomingUrl.pathname.startsWith("/api/")) {
       return new Response("Not found", { status: 404 });

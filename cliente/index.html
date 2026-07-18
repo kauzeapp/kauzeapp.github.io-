@@ -1202,6 +1202,29 @@
 
     .detail-actions .btn:first-child { flex: 1; }
 
+    .business-contact {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .business-contact-note {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    body.direct-business-mode .business-switch,
+    body.direct-business-mode .flow-explain {
+      display: none;
+    }
+
+    body.direct-business-mode #clientWelcome {
+      align-items: stretch;
+    }
+
     .subdomain-note {
       margin-top: 10px;
       color: var(--muted);
@@ -1629,6 +1652,7 @@
             <div class="meta-row"><span>Valoración</span><span id="businessRating">4.9 · 120 reseñas</span></div>
             <div class="meta-row"><span>Kauze</span><span id="businessAssociation">Asociado verificado</span></div>
           </div>
+          <div class="business-contact" id="businessContactAction"></div>
           <div class="flow-explain">
             <strong>Flujo Kauze</strong>
             Aquí solo se muestran negocios asociados a Kauze. El cliente explora locales, elige uno, reserva y Kauze actualiza App, Calendar y WhatsApp demo.
@@ -2138,6 +2162,7 @@
     let explorerCoords = { lat: -33.4326, lng: -70.6161 };
     let selectedPreviewBusinessId = null;
     let bookingStarted = false;
+    let directBusinessMode = false;
     let customerFlow = 'inicio';
     let currentStep = 1;
     let selectedService = null;
@@ -2156,6 +2181,7 @@
     ];
 
     const money = (value) => value.toLocaleString('es-CL', { style:'currency', currency:'CLP', maximumFractionDigits:0 });
+    const reviewCountLabel = (count) => `${Number(count || 0)} ${Number(count || 0) === 1 ? 'reseña' : 'reseñas'}`;
 
     function depositAmount(price) {
       if (!price) return 0;
@@ -2238,6 +2264,18 @@
       };
     }
 
+    function requestedBusinessSlug() {
+      const params = new URLSearchParams(window.location.search);
+      const explicitSlug = normalizeExplorerText(params.get('negocio') || params.get('business') || '')
+        .replace(/[^a-z0-9-]/g, '');
+      if (explicitSlug) return explicitSlug;
+
+      const hostname = window.location.hostname.toLowerCase();
+      if (!hostname.endsWith('.kauze.cl')) return '';
+      const subdomain = hostname.slice(0, -'.kauze.cl'.length);
+      return ['www', 'admin'].includes(subdomain) ? '' : subdomain;
+    }
+
     async function loadPublicBusinesses() {
       try {
         const response = await fetch(`${PUBLIC_API_URL}/api/public/businesses`, { cache: 'no-store' });
@@ -2287,7 +2325,7 @@
     function showClientFlow(flow = 'inicio', shouldScroll = true) {
       customerFlow = flow;
 
-      if (flow === 'booking') {
+      if (flow === 'booking' && !directBusinessMode) {
         bookingStarted = false;
         selectedPreviewBusinessId = null;
         explorerType = 'todos';
@@ -2301,12 +2339,12 @@
       const appointmentManagement = document.getElementById('appointmentManagement');
 
       if (welcome) {
-        welcome.classList.toggle('flow-hidden', flow !== 'inicio');
-        welcome.classList.toggle('hero-centered', flow === 'inicio');
+        welcome.classList.toggle('flow-hidden', flow !== 'inicio' && !directBusinessMode);
+        welcome.classList.toggle('hero-centered', flow === 'inicio' && !directBusinessMode);
       }
-      if (welcomeActions) welcomeActions.classList.toggle('flow-hidden', flow !== 'inicio');
-      if (businessPanel) businessPanel.classList.add('flow-hidden');
-      if (explore) explore.classList.toggle('flow-hidden', flow !== 'booking');
+      if (welcomeActions) welcomeActions.classList.toggle('flow-hidden', flow !== 'inicio' || directBusinessMode);
+      if (businessPanel) businessPanel.classList.toggle('flow-hidden', !directBusinessMode);
+      if (explore) explore.classList.toggle('flow-hidden', flow !== 'booking' || directBusinessMode);
       if (booking) booking.classList.toggle('flow-hidden', flow !== 'booking' || !bookingStarted);
       if (appointmentManagement) appointmentManagement.classList.toggle('flow-hidden', flow !== 'appointment');
 
@@ -2331,6 +2369,7 @@
 
     function renderProfile() {
       const p = profile();
+      const business = currentBusiness();
       document.getElementById('businessName').textContent = p.business;
       document.getElementById('businessDescription').textContent = p.description;
       if (customerFlow === 'booking') {
@@ -2341,10 +2380,23 @@
         document.getElementById('heroSubtitle').textContent = 'Agenda una nueva cita o administra una reserva existente desde un solo lugar.';
       }
       document.getElementById('businessType').value = currentType;
-      document.getElementById('businessLocation').textContent = `${p.location} · ${p.distance}`;
+      document.getElementById('businessLocation').textContent = directBusinessMode ? p.location : `${p.location} · ${p.distance}`;
       document.getElementById('businessAvailability').textContent = p.statusLabel;
-      document.getElementById('businessRating').textContent = `${p.rating} · ${p.reviews} reseñas`;
+      document.getElementById('businessRating').textContent = `${p.rating} · ${reviewCountLabel(p.reviews)}`;
       document.getElementById('businessAssociation').textContent = 'Asociado verificado';
+
+      const contactAction = document.getElementById('businessContactAction');
+      if (contactAction) {
+        if (business.instagramUrl) {
+          const label = business.instagramHandle || 'Instagram del negocio';
+          contactAction.innerHTML = `<a class="btn" href="${business.instagramUrl}" target="_blank" rel="noopener noreferrer">Ver trabajos en ${label}</a><span class="business-contact-note">Las imágenes y ejemplos permanecen en Instagram.</span>`;
+        } else if (business.phone) {
+          const phoneHref = String(business.phone).replace(/[^+\d]/g, '');
+          contactAction.innerHTML = `<a class="btn" href="tel:${phoneHref}">Llamar al negocio</a>`;
+        } else {
+          contactAction.innerHTML = '<span class="business-contact-note">Sin Instagram ni teléfono público configurado.</span>';
+        }
+      }
 
       renderServices();
       renderProfessionals();
@@ -2406,7 +2458,7 @@
     }
 
     function businessStartingPrice(item) {
-      const services = (profiles[item.type]?.services || []);
+      const services = item.services?.length ? item.services : (profiles[item.type]?.services || []);
       const prices = services.map(service => Number(service[2]) || 0).filter(Boolean);
       return prices.length ? Math.min(...prices) : 0;
     }
@@ -2486,6 +2538,11 @@
       const base = profiles[item.type] || profiles.barberia;
       const services = (item.services?.length ? item.services : base.services || []).slice(0, 3);
       const colors = item.logoColors || ['#2563EB', '#6366F1'];
+      const publicContact = item.instagramUrl
+        ? `<a class="btn" href="${item.instagramUrl}" target="_blank" rel="noopener noreferrer">Ver Instagram</a><span class="business-contact-note">${item.instagramHandle || 'Perfil del negocio'}</span>`
+        : item.phone
+          ? `<a class="btn" href="tel:${String(item.phone).replace(/[^+\d]/g, '')}">Llamar</a>`
+          : '<span class="business-contact-note">Sin teléfono público</span>';
 
       holder.innerHTML = `
         <div>
@@ -2500,7 +2557,7 @@
           <div class="detail-pills">
             <span class="detail-pill">📍 ${item.address}, ${item.location}</span>
             <span class="detail-pill">A ${businessDistanceLabel(item)} de tu sector</span>
-            <span class="detail-pill">⭐ ${item.rating} · ${item.reviews} reseñas</span>
+            <span class="detail-pill">⭐ ${item.rating} · ${reviewCountLabel(item.reviews)}</span>
           </div>
         </div>
         <div class="detail-side">
@@ -2516,7 +2573,8 @@
             <button class="btn primary" type="button" data-reserve-business="${item.id}">Reservar en este negocio</button>
             <button class="btn" type="button" id="closeBusinessDetail">Cerrar</button>
           </div>
-          <p class="subdomain-note">La reserva continuará con este negocio. Más adelante esta dirección será <strong>${item.route}</strong>.</p>
+          <div class="business-contact">${publicContact}</div>
+          <p class="subdomain-note">La reserva continuará con este negocio. Dirección pública: <strong>${item.route}</strong>.</p>
         </div>
       `;
 
@@ -2577,7 +2635,7 @@
 
             <div class="business-tags">
               <span class="business-tag ${item.statusTone === 'warn' ? 'warn' : 'good'}">${item.statusLabel}</span>
-              <span class="business-tag">⭐ ${item.rating} · ${item.reviews} reseñas</span>
+              <span class="business-tag">⭐ ${item.rating} · ${reviewCountLabel(item.reviews)}</span>
             </div>
 
             <button class="btn business-cta ${detailOpen ? 'primary' : ''}" type="button" data-business-detail="${item.id}">
@@ -3017,15 +3075,28 @@
 
     async function initializeClientPortal() {
       await loadPublicBusinesses();
-      const initialBusiness = featuredBusinesses.find(item => item.id === selectedBusinessId) || featuredBusinesses[0];
+      const requestedSlug = requestedBusinessSlug();
+      const requestedBusiness = requestedSlug
+        ? featuredBusinesses.find(item => item.slug === requestedSlug || item.route === `${requestedSlug}.kauze.cl`)
+        : null;
+      const initialBusiness = requestedBusiness || featuredBusinesses.find(item => item.id === selectedBusinessId) || featuredBusinesses[0];
       selectedBusinessId = initialBusiness.id;
       currentType = initialBusiness.type;
       explorerType = currentType;
+      directBusinessMode = !!requestedBusiness;
+      bookingStarted = directBusinessMode;
+      document.body.classList.toggle('direct-business-mode', directBusinessMode);
+      const topStartButton = document.getElementById('topStartBtn');
+      if (directBusinessMode && topStartButton) {
+        topStartButton.textContent = 'Buscar negocios';
+        topStartButton.onclick = () => window.location.assign('/cliente/');
+      }
       localStorage.setItem(SELECTED_BUSINESS_KEY, selectedBusinessId);
       renderProfile();
       renderBusinessExplorer();
       goStep(1);
-      showClientFlow('inicio', false);
+      showClientFlow(directBusinessMode ? 'booking' : 'inicio', false);
+      if (directBusinessMode) window.scrollTo({ top: 0, behavior: 'auto' });
     }
 
     initializeClientPortal();

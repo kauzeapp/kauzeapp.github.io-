@@ -13,6 +13,9 @@ for (const required of [
   "/api/public/appointments",
   "createOnlineAppointment",
   "refreshAvailability",
+  "requestedBusinessSlug",
+  "directBusinessMode",
+  "instagramUrl",
   "Reservas conectadas a PostgreSQL",
 ]) {
   if (!source.includes(required)) throw new Error(`Falta integración: ${required}`);
