@@ -494,6 +494,7 @@
     cursor: pointer;
 }
 
+
 .kz-access-link:hover {
     color: #2563EB;
 }
@@ -507,6 +508,171 @@
     .kz-access-card h2 {
         font-size: 23px;
     }
+}
+
+/* Planes y Formulario de Suscripción */
+.planes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.plan-card {
+    border: 2px solid var(--border-color);
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.plan-card:hover {
+    border-color: var(--accent-blue);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+}
+
+.plan-card.selected {
+    border-color: var(--accent-blue);
+    background: rgba(37, 99, 235, 0.03);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.plan-card.selected::before {
+    content: "✓";
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--accent-blue);
+    color: white;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+}
+
+.plan-card-popular {
+    border-color: var(--accent-purple);
+}
+
+.plan-card-popular .plan-badge {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-purple);
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    text-transform: uppercase;
+}
+
+.plan-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--navy);
+    margin-bottom: 8px;
+}
+
+.plan-price {
+    font-size: 24px;
+    font-weight: 900;
+    color: var(--accent-blue);
+    margin-bottom: 6px;
+}
+
+.plan-duration {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+.plan-save {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--accent-teal);
+    background: rgba(16, 185, 129, 0.1);
+    padding: 4px 8px;
+    border-radius: 999px;
+    display: inline-block;
+}
+
+.subscription-form {
+    display: grid;
+    gap: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+}
+
+.form-input {
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 14px;
+    background: white;
+    transition: border-color 0.15s ease;
+}
+
+.form-input:focus {
+    border-color: var(--accent-blue);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.transfer-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0;
+    background: #f8fafc;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.transfer-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 14px;
+}
+
+.transfer-table tr:last-child td {
+    border-bottom: 0;
+}
+
+.transfer-table td:first-child {
+    font-weight: 700;
+    color: var(--text-muted);
+    width: 35%;
+}
+
+.transfer-table td:last-child {
+    font-weight: 800;
+    color: var(--navy);
 }
     </style>
 </head>
@@ -607,12 +773,112 @@
         </div>
 
         <!-- 5. FORMULARIO CONECTADO A GOOGLE FORMS -->
+        <!-- 5. FORMULARIO DE SUSCRIPCIÓN Y PLANES -->
         <div class="section" id="postular">
-            <h2>Postula aquí</h2>
-            <p style="margin-bottom: 24px; color: var(--text-muted);">Completa tus datos a continuación. Revisaremos tu postulación y, si tu negocio califica, te contactaremos directamente.</p>
+            <h2 style="text-align: center; margin-bottom: 8px;">Conoce los Planes y Suscríbete</h2>
+            <p style="text-align: center; margin-bottom: 32px; color: var(--text-muted);">Elige la opción que mejor se adapte a tu barbería y comienza a automatizar hoy mismo.</p>
             
-            <div class="iframe-container">
-                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSf4uF0gpSasdglJ4JDbvn06RGFI3IJ3-FC6rEJUHqgOzTeEmg/viewform?embedded=true">Cargando…</iframe>
+            <div id="subscriptionFlowContainer">
+                <!-- Selector de Planes -->
+                <div class="planes-grid">
+                    <div class="plan-card selected" data-plan="trial">
+                        <div class="plan-title">Prueba Trial</div>
+                        <div class="plan-price">$0</div>
+                        <div class="plan-duration">Por 7 días</div>
+                        <div class="plan-save">Demo Gratis</div>
+                    </div>
+                    <div class="plan-card" data-plan="mensual">
+                        <div class="plan-title">Plan Mensual</div>
+                        <div class="plan-price">$14.990</div>
+                        <div class="plan-duration">Facturado mensual</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Sin compromisos</div>
+                    </div>
+                    <div class="plan-card plan-card-popular" data-plan="trimestral">
+                        <div class="plan-badge">Popular</div>
+                        <div class="plan-title">Plan Trimestral</div>
+                        <div class="plan-price">$39.990</div>
+                        <div class="plan-duration">Cada 3 meses</div>
+                        <div class="plan-save">Ahorra 10%</div>
+                    </div>
+                    <div class="plan-card" data-plan="anual">
+                        <div class="plan-title">Plan Anual</div>
+                        <div class="plan-price">$119.990</div>
+                        <div class="plan-duration">Cada 12 meses</div>
+                        <div class="plan-save">Ahorra 33%</div>
+                    </div>
+                </div>
+
+                <!-- Formulario de Registro -->
+                <form class="subscription-form" id="subscriptionForm">
+                    <input type="hidden" id="selectedPlanType" value="trial">
+
+                    <div class="form-group">
+                        <label for="subName">Nombre Completo</label>
+                        <input type="text" id="subName" class="form-input" placeholder="Ej. Juan Pérez" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subEmail">Correo Electrónico</label>
+                        <input type="email" id="subEmail" class="form-input" placeholder="Ej. contacto@barberia.cl" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subPhone">Teléfono / WhatsApp</label>
+                        <input type="tel" id="subPhone" class="form-input" placeholder="Ej. +56912345678" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subBusinessName">Nombre de tu Barbería</label>
+                        <input type="text" id="subBusinessName" class="form-input" placeholder="Ej. Barbería Corte Fino" required>
+                    </div>
+
+                    <button type="submit" class="btn primary" style="width: 100%; min-height: 48px; font-weight: 700; margin-top: 10px;">Suscribirse y Ver Datos de Pago</button>
+                    <p id="subErrorMsg" style="color: #ef4444; font-size: 13px; font-weight: 700; display: none; text-align: center; margin-top: 8px;"></p>
+                </form>
+            </div>
+
+            <!-- Contenedor de Éxito y Datos de Transferencia -->
+            <div id="subscriptionSuccessContainer" style="display: none; max-width: 600px; margin: 0 auto; background: white; border: 1px solid var(--border-color); border-radius: 24px; padding: 32px; box-shadow: var(--shadow-soft); text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
+                <h3 style="font-family: 'Sora', sans-serif; font-size: 22px; color: var(--navy); margin-bottom: 8px;">¡Registro de Suscripción Recibido!</h3>
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Tu cuenta ha sido registrada con un periodo de prueba de 7 días. Si deseas contratar un plan de pago mediante transferencia electrónica, utiliza los siguientes datos:</p>
+                
+                <table class="transfer-table">
+                    <tr>
+                        <td>Banco</td>
+                        <td>Banco Estado</td>
+                    </tr>
+                    <tr>
+                        <td>Tipo de Cuenta</td>
+                        <td>Cuenta Corriente</td>
+                    </tr>
+                    <tr>
+                        <td>Número Cuenta</td>
+                        <td>123456789</td>
+                    </tr>
+                    <tr>
+                        <td>RUT</td>
+                        <td>12.345.678-9</td>
+                    </tr>
+                    <tr>
+                        <td>Email de Envío</td>
+                        <td>pagos@kauze.cl</td>
+                    </tr>
+                    <tr>
+                        <td>Monto a Transferir</td>
+                        <td id="transferAmountText">$0 (Trial Gratis)</td>
+                    </tr>
+                    <tr>
+                        <td>Concepto / Asunto</td>
+                        <td id="transferConceptText">Suscripción KAUZE</td>
+                    </tr>
+                </table>
+
+                <div style="background: rgba(37,99,235,0.06); border-radius: 12px; padding: 14px; font-size: 12px; color: var(--navy); font-weight: 600; text-align: left; line-height: 1.5; margin-bottom: 24px;">
+                    💡 <strong>¿Qué pasa ahora?</strong> Nuestro equipo validará tu transferencia en un plazo máximo de 2 horas. Una vez confirmado el pago, recibirás un correo electrónico automático con el link de acceso a tu subdominio personalizado y tus credenciales de ingreso temporales.
+                </div>
+
+                <button type="button" class="btn" onclick="window.location.reload()" style="min-height: 44px; padding: 8px 24px;">Volver al inicio</button>
             </div>
         </div>
 
@@ -667,6 +933,70 @@
             }
             if (clientLink) {
                 clientLink.href = isLocal ? "/cliente/" : "https://kauze.cl/cliente";
+            }
+        });
+
+        // Lógica de Selección de Planes y Registro de Suscripción
+        document.addEventListener("DOMContentLoaded", () => {
+            const planCards = document.querySelectorAll(".plan-card");
+            const selectedPlanInput = document.getElementById("selectedPlanType");
+            
+            planCards.forEach(card => {
+                card.addEventListener("click", () => {
+                    planCards.forEach(c => c.classList.remove("selected"));
+                    card.classList.add("selected");
+                    
+                    const plan = card.getAttribute("data-plan");
+                    selectedPlanInput.value = plan;
+                });
+            });
+
+            const subForm = document.getElementById("subscriptionForm");
+            if (subForm) {
+                subForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    
+                    const name = document.getElementById("subName").value.trim();
+                    const email = document.getElementById("subEmail").value.trim();
+                    const phone = document.getElementById("subPhone").value.trim();
+                    const businessName = document.getElementById("subBusinessName").value.trim();
+                    const planTipo = selectedPlanInput.value;
+                    const errorMsg = document.getElementById("subErrorMsg");
+                    
+                    errorMsg.style.display = "none";
+                    
+                    const payload = { name, email, phone, businessName, planTipo };
+                    
+                    try {
+                        const res = await fetch("/api/subscriptions/register", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload)
+                        });
+                        
+                        const result = await res.json();
+                        if (!res.ok) {
+                            throw new Error(result.error || result.message || "Error al registrar la suscripción.");
+                        }
+                        
+                        // Configurar montos y concepto en base al plan
+                        let amountText = "$0 (Trial 7 Días)";
+                        if (planTipo === "mensual") amountText = "$14.990 (Mensual)";
+                        else if (planTipo === "trimestral") amountText = "$39.990 (Trimestral)";
+                        else if (planTipo === "anual") amountText = "$119.990 (Anual)";
+                        
+                        document.getElementById("transferAmountText").textContent = amountText;
+                        document.getElementById("transferConceptText").textContent = `Suscripción - ${businessName}`;
+                        
+                        // Mostrar pantalla de éxito
+                        document.getElementById("subscriptionFlowContainer").style.display = "none";
+                        document.getElementById("subscriptionSuccessContainer").style.display = "block";
+                        
+                    } catch (err) {
+                        errorMsg.textContent = err.message;
+                        errorMsg.style.display = "block";
+                    }
+                });
             }
         });
     </script>
