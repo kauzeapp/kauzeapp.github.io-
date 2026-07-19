@@ -2,9 +2,7 @@ import hashlib
 import os
 import re
 import secrets
-import smtplib
 from datetime import datetime, timedelta, timezone
-from email.message import EmailMessage
 
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerifyMismatchError
@@ -12,6 +10,7 @@ from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
 from backend.db import connection
+from backend.email_delivery import email_delivery_configured, send_email
 from backend.tenant import tenant_connection
 
 
@@ -386,33 +385,17 @@ def update_user_profile_image(user_id, profile_image):
 
 
 def _smtp_is_configured():
-    return all(
-        os.environ.get(name)
-        for name in ("SMTP_HOST", "SMTP_USER", "SMTP_PASSWORD", "SMTP_FROM")
-    )
+    return email_delivery_configured()
 
 
 def _send_reset_email(recipient, reset_url):
-    message = EmailMessage()
-    message["Subject"] = "Restablece tu acceso a KAUZE"
-    message["From"] = os.environ["SMTP_FROM"]
-    message["To"] = recipient
-    message.set_content(
+    content = (
         "Recibimos una solicitud para restablecer tu contraseña de KAUZE.\n\n"
         f"Abre este enlace durante los próximos {RESET_MINUTES} minutos:\n"
         f"{reset_url}\n\n"
         "Si no solicitaste este cambio, ignora este mensaje."
     )
-
-    host = os.environ["SMTP_HOST"]
-    port = int(os.environ.get("SMTP_PORT", "587"))
-    use_ssl = os.environ.get("SMTP_SSL", "0") == "1"
-    smtp_class = smtplib.SMTP_SSL if use_ssl else smtplib.SMTP
-    with smtp_class(host, port, timeout=15) as smtp:
-        if not use_ssl and os.environ.get("SMTP_STARTTLS", "1") == "1":
-            smtp.starttls()
-        smtp.login(os.environ["SMTP_USER"], os.environ["SMTP_PASSWORD"])
-        smtp.send_message(message)
+    send_email(recipient, "Restablece tu acceso a KAUZE", content)
 
 
 def request_password_reset(email):

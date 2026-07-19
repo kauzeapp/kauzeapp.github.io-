@@ -18,9 +18,9 @@ from backend.auth import (
     reset_password,
     save_business_state,
     update_user_profile_image,
-    _smtp_is_configured,
 )
 from backend.db import DatabaseNotConfigured, is_configured
+from backend.email_delivery import email_delivery_configured, email_provider
 from backend.public_booking import (
     PublicBookingError,
     create_public_appointment,
@@ -164,7 +164,8 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                 {
                     "status": "ok",
                     "databaseConfigured": is_configured(),
-                    "emailConfigured": _smtp_is_configured(),
+                    "emailConfigured": email_delivery_configured(),
+                    "emailProvider": email_provider(),
                     "authMode": "postgresql",
                 },
             )

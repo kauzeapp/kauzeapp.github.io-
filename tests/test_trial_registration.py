@@ -1,7 +1,9 @@
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 from backend.trials import TrialRegistrationError, _phone, register_trial
+from backend.email_delivery import email_provider
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,6 +35,21 @@ class TrialRegistrationTests(unittest.TestCase):
         self.assertIn("acceso_inicial", TRIAL_SQL)
         self.assertIn("'tatuajes'", TRIAL_SQL)
         self.assertIn("'talleres'", TRIAL_SQL)
+
+    def test_resend_is_preferred_over_smtp(self):
+        with patch.dict(
+            "os.environ",
+            {
+                "RESEND_API_KEY": "test-key",
+                "KAUZE_EMAIL_FROM": "Kauze <acceso@kauze.cl>",
+                "SMTP_HOST": "smtp.example.com",
+                "SMTP_USER": "user",
+                "SMTP_PASSWORD": "secret",
+                "SMTP_FROM": "legacy@kauze.cl",
+            },
+            clear=True,
+        ):
+            self.assertEqual(email_provider(), "resend")
 
 
 if __name__ == "__main__":

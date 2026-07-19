@@ -1,16 +1,15 @@
 import os
 import re
 import secrets
-import smtplib
 import threading
 import time
-from email.message import EmailMessage
 
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
-from backend.auth import _sha256, _smtp_is_configured
+from backend.auth import _sha256
 from backend.db import connection
+from backend.email_delivery import email_delivery_configured, send_email
 from backend.onboarding import business_slug
 from backend.tenant import set_tenant_context
 
@@ -79,14 +78,10 @@ def _available_slug(conn, name):
 
 
 def _send_initial_access_email(recipient, owner_name, business_name, access_url):
-    if not _smtp_is_configured():
+    if not email_delivery_configured():
         raise RuntimeError("El servicio de correo de Kauze todavía no está configurado.")
 
-    message = EmailMessage()
-    message["Subject"] = "Activa tu prueba gratis de Kauze"
-    message["From"] = os.environ["SMTP_FROM"]
-    message["To"] = recipient
-    message.set_content(
+    content = (
         f"Hola {owner_name},\n\n"
         f"Tu negocio {business_name} ya fue preparado en Kauze.\n"
         f"Crea tu contraseña desde este enlace durante las próximas {INITIAL_ACCESS_HOURS} horas:\n\n"
@@ -96,16 +91,7 @@ def _send_initial_access_email(recipient, owner_name, business_name, access_url)
         "Si no solicitaste esta cuenta, puedes ignorar este mensaje.\n\n"
         "Equipo Kauze"
     )
-
-    host = os.environ["SMTP_HOST"]
-    port = int(os.environ.get("SMTP_PORT", "587"))
-    use_ssl = os.environ.get("SMTP_SSL", "0") == "1"
-    smtp_class = smtplib.SMTP_SSL if use_ssl else smtplib.SMTP
-    with smtp_class(host, port, timeout=15) as smtp:
-        if not use_ssl and os.environ.get("SMTP_STARTTLS", "1") == "1":
-            smtp.starttls()
-        smtp.login(os.environ["SMTP_USER"], os.environ["SMTP_PASSWORD"])
-        smtp.send_message(message)
+    send_email(recipient, "Activa tu prueba gratis de Kauze", content)
 
 
 def register_trial(data, client_key="unknown"):
@@ -129,7 +115,7 @@ def register_trial(data, client_key="unknown"):
         raise TrialRegistrationError("El rubro no es válido.", "invalid_category")
 
     _rate_limit(client_key, email)
-    if not _smtp_is_configured():
+    if not email_delivery_configured():
         raise TrialRegistrationError(
             "El envío de correos aún no está disponible. Intenta más tarde.",
             "email_unavailable",
