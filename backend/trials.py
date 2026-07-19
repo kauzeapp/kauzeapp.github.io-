@@ -283,7 +283,12 @@ def register_trial(data, client_key="unknown"):
             503,
         )
 
+    # ── Paso 1: guardar todo en PostgreSQL (transacción independiente del email) ──
     raw_token = secrets.token_urlsafe(48)
+    saved_owner_id = None
+    saved_slug = None
+    saved_local_id = None
+
     with connection() as conn:
         with conn.transaction():
             conn.row_factory = dict_row
@@ -394,34 +399,54 @@ def register_trial(data, client_key="unknown"):
                 (owner["id"], _sha256(raw_token), INITIAL_ACCESS_HOURS),
             )
 
-            public_url = os.environ.get("KAUZE_PUBLIC_URL", "https://kauze.cl").rstrip("/")
-            access_url = f"{public_url}/app/?reset_token={raw_token}&welcome=1"
-            delivery = _send_initial_access_email(
-                email,
-                owner_name,
-                business_name,
-                access_url,
-                f"trial-access/{owner['id']}",
-            )
-            try:
-                from backend.simulations import log_simulation
-                log_simulation("Base de Datos (Producción)", email, f"Creado barbero y local '{business_name}' en PostgreSQL.")
-                log_simulation("Ruteo de Subdominio (Producción)", f"{slug}.kauze.cl", f"Subdominio registrado exitosamente.")
-            except Exception:
-                pass
-            try:
-                from backend.simulations import log_simulation
-                log_simulation("Base de Datos (Producción)", email, f"Creado barbero y local '{business_name}' en PostgreSQL.")
-                log_simulation("Ruteo de Subdominio (Producción)", f"{slug}.kauze.cl", f"Subdominio registrado exitosamente.")
-            except Exception:
-                pass
+            # Guardar IDs para usar después de la transacción
+            saved_owner_id = owner["id"]
+            saved_slug = slug
+            saved_local_id = local["id"]
+
+    # ── Paso 2: loguear en simulaciones (fuera de la transacción) ──
+    try:
+        from backend.simulations import log_simulation
+        log_simulation("Base de Datos (Producción)", email, f"Creado negocio '{business_name}' en PostgreSQL. ID: {saved_owner_id}")
+        log_simulation("Ruteo de Subdominio (Producción)", f"{saved_slug}.kauze.cl", f"Subdominio registrado exitosamente.")
+    except Exception:
+        pass
+
+    # ── Paso 3: enviar email de bienvenida (fuera de la transacción) ──
+    # Si el email falla, el usuario YA está guardado en la BD y puede recuperar acceso.
+    public_url = os.environ.get("KAUZE_PUBLIC_URL", "https://kauze.cl").rstrip("/")
+    access_url = f"{public_url}/app/?reset_token={raw_token}&welcome=1"
+    email_provider = "none"
+    try:
+        delivery = _send_initial_access_email(
+            email,
+            owner_name,
+            business_name,
+            access_url,
+            f"trial-access/{saved_owner_id}",
+        )
+        email_provider = delivery.get("provider", "resend")
+        try:
+            from backend.simulations import log_simulation
+            log_simulation("Envío de Correo (Producción)", email, f"Email de bienvenida enviado vía {email_provider}. Enlace: {access_url}")
+        except Exception:
+            pass
+    except Exception as email_exc:
+        # Email falló pero el usuario YA está guardado → no revertir nada
+        print(f"[trials] Email falló para {email}: {type(email_exc).__name__}: {email_exc}")
+        try:
+            from backend.simulations import log_simulation
+            log_simulation("Email Fallido (Producción)", email, f"El negocio fue creado pero el email falló: {email_exc}. El usuario puede recuperar acceso desde la landing.")
+        except Exception:
+            pass
 
     return {
         "status": "success",
         "message": "Tu negocio fue creado. Revisa tu correo para activar el acceso.",
         "businessName": business_name,
-        "businessSlug": slug,
+        "businessSlug": saved_slug,
         "trialDays": TRIAL_DAYS,
         "emailAccepted": True,
-        "emailProvider": delivery["provider"],
+        "emailProvider": email_provider,
     }
+
