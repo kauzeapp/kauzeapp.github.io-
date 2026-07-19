@@ -558,18 +558,6 @@
     place-items: center;
 }
 
-.plan-card.disabled {
-    cursor: not-allowed;
-    opacity: 0.58;
-    background: #f8fafc;
-}
-
-.plan-card.disabled:hover {
-    border-color: var(--border-color);
-    transform: none;
-    box-shadow: none;
-}
-
 .plan-card-popular {
     border-color: var(--accent-purple);
 }
@@ -787,8 +775,8 @@
         <!-- 5. FORMULARIO CONECTADO A GOOGLE FORMS -->
         <!-- 5. FORMULARIO DE SUSCRIPCIÓN Y PLANES -->
         <div class="section" id="postular">
-            <h2 style="text-align: center; margin-bottom: 8px;">Comienza tu prueba gratis</h2>
-            <p style="text-align: center; margin-bottom: 32px; color: var(--text-muted);">Crea tu negocio, activa tu acceso por correo y configura el panel durante 7 días sin costo.</p>
+            <h2 style="text-align: center; margin-bottom: 8px;">Conoce los Planes y Suscríbete</h2>
+            <p style="text-align: center; margin-bottom: 32px; color: var(--text-muted);">Elige la opción que mejor se adapte a tu barbería y comienza a automatizar hoy mismo.</p>
             
             <div id="subscriptionFlowContainer">
                 <!-- Selector de Planes -->
@@ -799,30 +787,30 @@
                         <div class="plan-duration">Por 7 días</div>
                         <div class="plan-save">Demo Gratis</div>
                     </div>
-                    <div class="plan-card disabled" data-plan="mensual" aria-disabled="true">
+                    <div class="plan-card" data-plan="mensual">
                         <div class="plan-title">Plan Mensual</div>
                         <div class="plan-price">$14.990</div>
                         <div class="plan-duration">Facturado mensual</div>
-                        <div class="plan-save">Próximamente</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Sin compromisos</div>
                     </div>
-                    <div class="plan-card disabled" data-plan="trimestral" aria-disabled="true">
+                    <div class="plan-card plan-card-popular" data-plan="trimestral">
+                        <div class="plan-badge">Popular</div>
                         <div class="plan-title">Plan Trimestral</div>
                         <div class="plan-price">$39.990</div>
                         <div class="plan-duration">Cada 3 meses</div>
-                        <div class="plan-save">Próximamente</div>
+                        <div class="plan-save">Ahorra 10%</div>
                     </div>
-                    <div class="plan-card disabled" data-plan="anual" aria-disabled="true">
+                    <div class="plan-card" data-plan="anual">
                         <div class="plan-title">Plan Anual</div>
                         <div class="plan-price">$119.990</div>
                         <div class="plan-duration">Cada 12 meses</div>
-                        <div class="plan-save">Próximamente</div>
+                        <div class="plan-save">Ahorra 33%</div>
                     </div>
                 </div>
 
                 <!-- Formulario de Registro -->
                 <form class="subscription-form" id="subscriptionForm">
                     <input type="hidden" id="selectedPlanType" value="trial">
-                    <input type="text" id="subWebsite" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;">
 
                     <div class="form-group">
                         <label for="subName">Nombre Completo</label>
@@ -857,21 +845,53 @@
                         </select>
                     </div>
 
-                    <button type="submit" id="trialSubmitButton" class="btn primary" style="width: 100%; min-height: 48px; font-weight: 700; margin-top: 10px;">Crear mi prueba gratis</button>
-                    <p style="font-size: 11px; color: var(--text-muted); text-align: center;">Los planes pagados no se cobrarán ni activarán hasta integrar el sistema de pagos.</p>
+                    <button type="submit" class="btn primary" style="width: 100%; min-height: 48px; font-weight: 700; margin-top: 10px;">Suscribirse y Ver Datos de Pago</button>
                     <p id="subErrorMsg" style="color: #ef4444; font-size: 13px; font-weight: 700; display: none; text-align: center; margin-top: 8px;"></p>
                 </form>
             </div>
 
-            <!-- Confirmación de creación del trial -->
+            <!-- Contenedor de Éxito y Datos de Transferencia -->
             <div id="subscriptionSuccessContainer" style="display: none; max-width: 600px; margin: 0 auto; background: white; border: 1px solid var(--border-color); border-radius: 24px; padding: 32px; box-shadow: var(--shadow-soft); text-align: center;">
                 <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
-                <h3 style="font-family: 'Sora', sans-serif; font-size: 22px; color: var(--navy); margin-bottom: 8px;">¡Tu negocio fue creado!</h3>
-                <p id="trialSuccessText" style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Enviamos a tu correo un enlace seguro para crear tu contraseña y entrar al panel.</p>
+                <h3 style="font-family: 'Sora', sans-serif; font-size: 22px; color: var(--navy); margin-bottom: 8px;">¡Registro de Suscripción Recibido!</h3>
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Tu cuenta ha sido registrada con un periodo de prueba de 7 días. Si deseas contratar un plan de pago mediante transferencia electrónica, utiliza los siguientes datos:</p>
+                
+                <table class="transfer-table">
+                    <tr>
+                        <td>Banco</td>
+                        <td>Banco Estado</td>
+                    </tr>
+                    <tr>
+                        <td>Tipo de Cuenta</td>
+                        <td>Cuenta Corriente</td>
+                    </tr>
+                    <tr>
+                        <td>Número Cuenta</td>
+                        <td>123456789</td>
+                    </tr>
+                    <tr>
+                        <td>RUT</td>
+                        <td>12.345.678-9</td>
+                    </tr>
+                    <tr>
+                        <td>Email de Envío</td>
+                        <td>pagos@kauze.cl</td>
+                    </tr>
+                    <tr>
+                        <td>Monto a Transferir</td>
+                        <td id="transferAmountText">$0 (Trial Gratis)</td>
+                    </tr>
+                    <tr>
+                        <td>Concepto / Asunto</td>
+                        <td id="transferConceptText">Suscripción KAUZE</td>
+                    </tr>
+                </table>
+
                 <div style="background: rgba(37,99,235,0.06); border-radius: 12px; padding: 14px; font-size: 12px; color: var(--navy); font-weight: 600; text-align: left; line-height: 1.5; margin-bottom: 24px;">
-                    💡 <strong>¿Qué pasa ahora?</strong> Abre el correo durante las próximas 24 horas, define una contraseña de al menos 12 caracteres y luego configura tu logo, servicios, trabajadores y agenda.
+                    💡 <strong>¿Qué pasa ahora?</strong> Nuestro equipo validará tu transferencia en un plazo máximo de 2 horas. Una vez confirmado el pago, recibirás un correo electrónico automático con el link de acceso a tu subdominio personalizado y tus credenciales de ingreso temporales.
                 </div>
-                <a href="/app/" class="btn primary" style="min-height: 44px; padding: 8px 24px;">Ir al panel</a>
+
+                <button type="button" class="btn" onclick="window.location.reload()" style="min-height: 44px; padding: 8px 24px;">Volver al inicio</button>
             </div>
         </div>
 
@@ -936,7 +956,6 @@
             
             planCards.forEach(card => {
                 card.addEventListener("click", () => {
-                    if (card.getAttribute("aria-disabled") === "true") return;
                     planCards.forEach(c => c.classList.remove("selected"));
                     card.classList.add("selected");
                     
@@ -957,36 +976,39 @@
                     const planTipo = selectedPlanInput.value;
                     const categoriaSlug = document.getElementById("subCategory").value;
                     const errorMsg = document.getElementById("subErrorMsg");
-                    const submitButton = document.getElementById("trialSubmitButton");
                     
                     errorMsg.style.display = "none";
                     
-                    const website = document.getElementById("subWebsite").value;
-                    const payload = { name, email, phone, businessName, planTipo, categoriaSlug, website };
+                    const payload = { name, email, phone, businessName, planTipo, categoriaSlug };
                     
                     try {
-                        submitButton.disabled = true;
-                        submitButton.textContent = "Creando tu negocio...";
                         const res = await fetch("/api/subscriptions/register", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify(payload)
                         });
                         
-                        const result = await res.json().catch(() => ({}));
+                        const result = await res.json();
                         if (!res.ok) {
-                            throw new Error(result.message || "No fue posible crear la prueba gratis.");
+                            throw new Error(result.error || result.message || "Error al registrar la suscripción.");
                         }
-                        document.getElementById("trialSuccessText").textContent = `Creamos ${result.businessName || businessName}. Revisa ${email} para activar tu acceso.`;
+                        
+                        // Configurar montos y concepto en base al plan
+                        let amountText = "$0 (Trial 7 Días)";
+                        if (planTipo === "mensual") amountText = "$14.990 (Mensual)";
+                        else if (planTipo === "trimestral") amountText = "$39.990 (Trimestral)";
+                        else if (planTipo === "anual") amountText = "$119.990 (Anual)";
+                        
+                        document.getElementById("transferAmountText").textContent = amountText;
+                        document.getElementById("transferConceptText").textContent = `Suscripción - ${businessName}`;
+                        
+                        // Mostrar pantalla de éxito
                         document.getElementById("subscriptionFlowContainer").style.display = "none";
                         document.getElementById("subscriptionSuccessContainer").style.display = "block";
                         
                     } catch (err) {
                         errorMsg.textContent = err.message;
                         errorMsg.style.display = "block";
-                    } finally {
-                        submitButton.disabled = false;
-                        submitButton.textContent = "Crear mi prueba gratis";
                     }
                 });
             }
