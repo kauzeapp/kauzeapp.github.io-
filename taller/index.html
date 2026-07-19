@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kauze | Panel de Taller Automotriz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0F172A;
+      --navy-dark: #070A13;
+      --navy-card: #1E293B;
+      --yellow: #FACC15;
+      --yellow-glow: rgba(250, 204, 21, 0.15);
+      --teal: #10B981;
+      --green: #22C55E;
+      --orange: #F97316;
+      --red: #EF4444;
+      --bg: #0B0F19;
+      --text: #F1F5F9;
+      --muted: #94A3B8;
+      --border: #334155;
+      --shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+    }
+    
+    button, input, select, textarea {
+      font: inherit;
+    }
+    
+    /* SIDEBAR */
+    .sidebar {
+      width: 280px;
+      background: var(--navy-dark);
+      border-right: 1px solid var(--border);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    
+    .logo-badge {
+      background: var(--yellow);
+      color: var(--navy);
+      font-family: 'Sora', sans-serif;
+      font-weight: 800;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+    }
+    
+    .logo-text {
+      font-family: 'Sora', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    
+    .logo-text span {
+      color: var(--yellow);
+    }
+    
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+    
+    .nav-btn {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 12px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: left;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s;
+    }
+    
+    .nav-btn:hover, .nav-btn.active {
+      color: #fff;
+      background: var(--navy-card);
+    }
+    
+    .nav-btn.active {
+      border-left: 3px solid var(--yellow);
+      border-radius: 0 12px 12px 0;
+    }
+    
+    /* MAIN CONTAINER */
+    .main {
+      flex: 1;
+      padding: 32px;
+      overflow-y: auto;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    
+    .header h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+    
+    .header p {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    
+    .profile-chip {
+      background: var(--navy-card);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 99px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--yellow-glow);
+      color: var(--yellow);
+      font-weight: 800;
+      display: grid;
+      place-items: center;
+    }
+    
+    /* STATS GRID */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+    
+    .stat-card {
+      background: var(--navy-card);
+      border: 1px solid var(--border);
+      padding: 24px;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .stat-card .label {
+      text-transform: uppercase;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+    
+    .stat-card .value {
+      font-family: 'Sora', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+    }
+    
+    .stat-card .footer {
+      font-size: 12px;
+      color: var(--teal);
+      font-weight: 600;
+    }
+    
+    /* VIEWS */
+    .view {
+      display: none;
+    }
+    
+    .view.active {
+      display: block;
+    }
+    
+    .card {
+      background: var(--navy-card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+    
+    .card-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    /* BUTTONS */
+    .btn {
+      background: #fff;
+      color: var(--navy);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+    
+    .btn.primary {
+      background: var(--yellow);
+      color: var(--navy-dark);
+      box-shadow: 0 4px 12px var(--yellow-glow);
+    }
+    
+    .btn.secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: #fff;
+    }
+    
+    .btn.small {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+    
+    /* REPAIR STATUS BADGES */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      gap: 6px;
+    }
+    
+    .status-badge.diagnostico { background: rgba(250,204,21,0.1); color: var(--yellow); }
+    .status-badge.esperando_repuestos { background: rgba(249,115,22,0.1); color: var(--orange); }
+    .status-badge.en_progreso { background: rgba(59,130,246,0.1); color: #3b82f6; }
+    .status-badge.prueba_ruta { background: rgba(139,92,246,0.1); color: #8b5cf6; }
+    .status-badge.listo { background: rgba(34,197,94,0.1); color: var(--green); }
+    
+    /* TABLE */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    
+    th, td {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    
+    th {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+    
+    /* FORM INPUTS */
+    .form-group {
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      text-align: left;
+    }
+    
+    .form-group label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    
+    .form-control {
+      background: var(--navy);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      color: #fff;
+      outline: none;
+    }
+    
+    .form-control:focus {
+      border-color: var(--yellow);
+    }
+    
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(7, 10, 19, 0.85);
+      backdrop-filter: blur(4px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    
+    .modal {
+      background: var(--navy-card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 550px;
+      padding: 32px;
+      box-shadow: var(--shadow);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-head {
+      font-family: 'Sora', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    /* DETALLES DE REPARACIÓN Y MULTIMEDIA */
+    .repair-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 20px;
+    }
+    
+    .timeline-node {
+      display: flex;
+      gap: 16px;
+    }
+    
+    .timeline-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--border);
+      position: relative;
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+    
+    .timeline-indicator.active {
+      background: var(--yellow);
+      box-shadow: 0 0 8px var(--yellow);
+    }
+    
+    .timeline-indicator::after {
+      content: '';
+      position: absolute;
+      width: 2px;
+      height: 40px;
+      background: var(--border);
+      left: 5px;
+      top: 12px;
+    }
+    
+    .timeline-node:last-child .timeline-indicator::after {
+      display: none;
+    }
+    
+    .timeline-content {
+      font-size: 13px;
+    }
+    
+    .timeline-content strong {
+      display: block;
+      color: #fff;
+    }
+    
+    .timeline-content span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+    
+    .photo-gallery {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    
+    .photo-item {
+      aspect-ratio: 4/3;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      position: relative;
+      background: var(--navy);
+    }
+    
+    .photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .photo-item .photo-desc {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(15,23,42,0.85);
+      padding: 4px 8px;
+      font-size: 10px;
+      text-align: center;
+      color: #fff;
+    }
+    
+    /* FILE UPLOAD HOVER */
+    .file-drop-area {
+      border: 2px dashed var(--border);
+      padding: 24px;
+      border-radius: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--navy);
+    }
+    
+    .file-drop-area:hover {
+      border-color: var(--yellow);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="logo-container">
+      <div class="logo-badge">K</div>
+      <div class="logo-text">KAUZE<span>Taller</span></div>
+    </div>
+    
+    <div class="nav">
+      <button class="nav-btn active" onclick="switchView('dashboard', this)">
+        📊 Dashboard Taller
+      </button>
+      <button class="nav-btn" onclick="switchView('orders', this)">
+        🚗 Vehículos & Órdenes
+      </button>
+      <button class="nav-btn" onclick="switchView('services', this)">
+        🛠️ Catálogo de Servicios
+      </button>
+      <button class="nav-btn" onclick="switchView('calendar', this)">
+        📅 Calendario de Recepción
+      </button>
+    </div>
+    
+    <button class="btn secondary" onclick="location.href='/admin/index.html'">
+      ⬅️ Volver a Admin
+    </button>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="header">
+      <div>
+        <h1 id="viewTitle">Dashboard Operativo</h1>
+        <p id="viewSubtitle">Información en tiempo real del estado de reparaciones.</p>
+      </div>
+      
+      <div class="profile-chip">
+        <div class="avatar">M</div>
+        <div>
+          <div style="font-size: 13px; font-weight: 700;">Taller Master Auto</div>
+          <div style="font-size: 11px; color: var(--muted);">Taller Premium</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="label">Vehículos en Taller</span>
+        <span class="value" id="statsInShop">3</span>
+        <span class="footer">Activos en reparación</span>
+      </div>
+      <div class="stat-card">
+        <span class="label">Listo para Entrega</span>
+        <span class="value" id="statsReady">1</span>
+        <span class="footer" style="color: var(--green);">Esperando cliente</span>
+      </div>
+      <div class="stat-card">
+        <span class="label">Servicios Configurados</span>
+        <span class="value" id="statsServices">6</span>
+        <span class="footer" style="color: var(--yellow);">En el catálogo</span>
+      </div>
+      <div class="stat-card">
+        <span class="label">Citas Agendadas Hoy</span>
+        <span class="value">4</span>
+        <span class="footer" style="color: #3b82f6;">Recepción de vehículos</span>
+      </div>
+    </div>
+
+    <!-- VIEW 1: DASHBOARD -->
+    <div id="view_dashboard" class="view active">
+      <div class="card" style="background: linear-gradient(135deg, rgba(250,204,21,0.03) 0%, rgba(249,115,22,0.03) 100%);">
+        <h2 style="font-family: 'Sora', sans-serif; font-size: 24px; margin-bottom: 8px;">¡Bienvenido al Panel de Diagnóstico y Reparación!</h2>
+        <p style="color: var(--muted); font-size: 14px; max-width: 700px; line-height: 1.6;">
+          Aquí puedes gestionar la admisión de vehículos, actualizar el progreso de las reparaciones paso a paso, subir evidencias fotográficas del estado del vehículo, y notificar de manera automática a tus clientes vía WhatsApp sobre su estado.
+        </p>
+        <div style="margin-top: 16px; display: flex; gap: 12px;">
+          <button class="btn primary" onclick="openCreateOrderModal()">➕ Ingresar Vehículo</button>
+          <button class="btn secondary" onclick="switchView('orders', document.querySelector('.nav-btn:nth-child(2)'))">🔍 Ver Todos los Vehículos</button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">Vehículos Activos en Trabajo</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Vehículo / Patente</th>
+                <th>Cliente / Contacto</th>
+                <th>Servicio</th>
+                <th>Estado de Reparación</th>
+                <th>Evidencia</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="dashboardVehiclesBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 2: VEHICLES & ORDERS -->
+    <div id="view_orders" class="view">
+      <div class="card">
+        <div class="card-title">
+          <span>Registro Maestro de Órdenes de Trabajo</span>
+          <button class="btn primary small" onclick="openCreateOrderModal()">➕ Ingresar Vehículo</button>
+        </div>
+        
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Vehículo / Patente</th>
+                <th>Cliente / Contacto</th>
+                <th>Servicio Principal</th>
+                <th>Estado de Reparación</th>
+                <th>Evidencia</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="ordersVehiclesBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 3: CATALOG SERVICES -->
+    <div id="view_services" class="view">
+      <div class="card">
+        <div class="card-title">
+          <span>Servicios del Taller</span>
+          <button class="btn primary small" onclick="openCreateServiceModal()">➕ Crear Nuevo Servicio</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Servicio</th>
+                <th>Descripción</th>
+                <th>Duración Estimada</th>
+                <th>Precio Base</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="servicesTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 4: CALENDAR -->
+    <div id="view_calendar" class="view">
+      <div class="card">
+        <div class="card-title">Agenda de Recepción y Citas</div>
+        <p style="color: var(--muted); font-size: 14px; margin-bottom: 24px;">Recepción de vehículos agendados para mantenciones y diagnósticos.</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; text-align: center;">
+          <div style="font-weight: 800; font-size: 12px; color: var(--muted);">LUNES</div>
+          <div style="font-weight: 800; font-size: 12px; color: var(--muted);">MARTES</div>
+          <div style="font-weight: 800; font-size: 12px; color: var(--muted);">MIÉRCOLES</div>
+          <div style="font-weight: 800; font-size: 12px; color: var(--muted);">JUEVES</div>
+          <div style="font-weight: 800; font-size: 12px; color: var(--muted);">VIERNES</div>
+          <div style="font-weight: 800; font-size: 12px; color: var(--muted);">SÁBADO</div>
+          <div style="font-weight: 800; font-size: 12px; color: var(--muted);">DOMINGO</div>
+          
+          <!-- Mock Calendar Days -->
+          <div style="background: var(--navy-dark); padding: 16px; border-radius: 12px; border: 1px solid var(--border); min-height: 90px; text-align: left;">
+            <span style="font-weight: 800; font-size: 12px; color: var(--muted);">19</span>
+          </div>
+          <div style="background: var(--navy-dark); padding: 16px; border-radius: 12px; border: 1px solid var(--border); min-height: 90px; text-align: left; position: relative;">
+            <span style="font-weight: 800; font-size: 12px; color: var(--muted);">20</span>
+            <div style="background: var(--yellow-glow); border-left: 3px solid var(--yellow); padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #fff; margin-top: 6px; font-weight: 700;">10:00 · Patente GG-WP-88</div>
+          </div>
+          <div style="background: var(--navy-dark); padding: 16px; border-radius: 12px; border: 1px solid var(--border); min-height: 90px; text-align: left;">
+            <span style="font-weight: 800; font-size: 12px; color: var(--muted);">21</span>
+            <div style="background: rgba(59,130,246,0.1); border-left: 3px solid #3b82f6; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #fff; margin-top: 6px; font-weight: 700;">15:30 · Patente HR-YY-22</div>
+          </div>
+          <div style="background: var(--navy-dark); padding: 16px; border-radius: 12px; border: 1px solid var(--border); min-height: 90px; text-align: left;">
+            <span style="font-weight: 800; font-size: 12px; color: var(--muted);">22</span>
+          </div>
+          <div style="background: var(--navy-dark); padding: 16px; border-radius: 12px; border: 1px solid var(--border); min-height: 90px; text-align: left;">
+            <span style="font-weight: 800; font-size: 12px; color: var(--muted);">23</span>
+          </div>
+          <div style="background: var(--navy-dark); padding: 16px; border-radius: 12px; border: 1px solid var(--border); min-height: 90px; text-align: left;">
+            <span style="font-weight: 800; font-size: 12px; color: var(--muted);">24</span>
+          </div>
+          <div style="background: var(--navy-dark); padding: 16px; border-radius: 12px; border: 1px solid var(--border); min-height: 90px; text-align: left;">
+            <span style="font-weight: 800; font-size: 12px; color: var(--muted);">25</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL: CREAR ORDEN / INGRESAR VEHICULO -->
+  <div class="modal-overlay" id="createOrderModal">
+    <div class="modal">
+      <div class="modal-head">
+        <span>Ingresar Vehículo al Taller</span>
+        <button onclick="closeModal('createOrderModal')" style="background:transparent; border:none; color:var(--muted); font-size:24px; cursor:pointer;">&times;</button>
+      </div>
+      <form id="createOrderForm" onsubmit="saveNewOrder(event)">
+        <div class="form-group">
+          <label>Marca & Modelo</label>
+          <input type="text" id="oModel" class="form-control" placeholder="Ej. Toyota RAV4 (2021)" required>
+        </div>
+        <div class="form-group">
+          <label>Patente (Matrícula)</label>
+          <input type="text" id="oPlate" class="form-control" placeholder="Ej. GG-WP-88" required style="text-transform: uppercase;">
+        </div>
+        <div class="form-group">
+          <label>Nombre del Cliente</label>
+          <input type="text" id="oClient" class="form-control" placeholder="Ej. Esteban Muñoz" required>
+        </div>
+        <div class="form-group">
+          <label>Teléfono Cliente</label>
+          <input type="tel" id="oPhone" class="form-control" placeholder="Ej. +56912345678" required>
+        </div>
+        <div class="form-group">
+          <label>Servicio Solicitado</label>
+          <select id="oService" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label>Estado Inicial de Reparación</label>
+          <select id="oState" class="form-control">
+            <option value="diagnostico">Diagnóstico Inicial</option>
+            <option value="esperando_repuestos">Esperando Repuestos</option>
+            <option value="en_progreso">En Trabajo / Reparación</option>
+          </select>
+        </div>
+        
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+          <button type="button" class="btn secondary" onclick="closeModal('createOrderModal')">Cancelar</button>
+          <button type="submit" class="btn primary">Registrar Ingreso</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DETALLES DE VEHICULO, MULTIMEDIA & NOTIFICACIONES -->
+  <div class="modal-overlay" id="detailOrderModal">
+    <div class="modal" style="max-width: 650px;">
+      <div class="modal-head">
+        <span id="detTitle">Orden de Trabajo: Toyota RAV4</span>
+        <button onclick="closeModal('detailOrderModal')" style="background:transparent; border:none; color:var(--muted); font-size:24px; cursor:pointer;">&times;</button>
+      </div>
+      
+      <div style="background:var(--navy); padding:16px; border-radius:16px; border:1px solid var(--border); margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-size:12px; color:var(--muted); font-weight:700;">PATENTE</div>
+          <div style="font-size:20px; font-weight:800; font-family:monospace; color:var(--yellow);" id="detPlate">GG-WP-88</div>
+        </div>
+        <div>
+          <div style="font-size:12px; color:var(--muted); font-weight:700;">CLIENTE</div>
+          <div style="font-size:15px; font-weight:700;" id="detClient">Esteban Muñoz</div>
+        </div>
+        <div>
+          <div style="font-size:12px; color:var(--muted); font-weight:700;">ESTADO ACTUAL</div>
+          <div id="detBadgeContainer"></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:20px; text-align:left;">
+        <label style="font-size:13px; font-weight:700; display:block; margin-bottom:8px;">Actualizar Estado de Reparación</label>
+        <div style="display:flex; gap:12px;">
+          <select id="detStateSelect" class="form-control" style="flex:1;"></select>
+          <button class="btn primary small" onclick="updateOrderStatus()">Guardar Estado</button>
+        </div>
+      </div>
+
+      <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
+
+      <!-- SECCIÓN FOTOS / EVIDENCIAS -->
+      <div style="text-align:left; margin-bottom:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <span style="font-family:'Sora',sans-serif; font-size:16px; font-weight:800;">📸 Evidencias & Reporte Visual</span>
+          <span style="font-size:12px; color:var(--muted); font-weight:600;">Sube fotos del daño o repuesto instalado</span>
+        </div>
+        
+        <div class="file-drop-area" onclick="triggerFileInput()">
+          <span style="font-size:14px; font-weight:700; color:var(--muted);">Haga clic aquí para simular subir una foto de evidencia</span>
+          <input type="file" id="detFileInput" style="display:none;" onchange="handleFileSelect(event)" accept="image/*">
+        </div>
+        
+        <div class="photo-gallery" id="detPhotoGallery">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
+
+      <!-- NOTIFICAR CLIENTE -->
+      <div style="background:rgba(59,130,246,0.05); border:1px solid rgba(59,130,246,0.15); padding:16px; border-radius:16px; display:flex; justify-content:space-between; align-items:center; text-align:left;">
+        <div>
+          <strong style="font-size:14px; color:#fff; display:block; margin-bottom:4px;">Enviar Actualización al Cliente (WhatsApp)</strong>
+          <span style="font-size:12px; color:var(--muted);">Notifica al dueño el estado actual con el enlace de fotos.</span>
+        </div>
+        <button class="btn primary" onclick="sendClientNotification()" style="background:#25d366; color:#fff; box-shadow:none;">
+          💬 Enviar WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CREAR SERVICIO -->
+  <div class="modal-overlay" id="createServiceModal">
+    <div class="modal">
+      <div class="modal-head">
+        <span>Agregar Servicio al Catálogo</span>
+        <button onclick="closeModal('createServiceModal')" style="background:transparent; border:none; color:var(--muted); font-size:24px; cursor:pointer;">&times;</button>
+      </div>
+      <form id="createServiceForm" onsubmit="saveNewService(event)">
+        <div class="form-group">
+          <label>Nombre del Servicio</label>
+          <input type="text" id="sName" class="form-control" placeholder="Ej. Alineación y Balanceo" required>
+        </div>
+        <div class="form-group">
+          <label>Descripción del Trabajo</label>
+          <textarea id="sDesc" class="form-control" placeholder="Ej. Ajuste de geometría de ruedas y contrapesos..." required style="resize:none; height:80px;"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Duración Estimada</label>
+          <input type="text" id="sDuration" class="form-control" placeholder="Ej. 1 Hora" required>
+        </div>
+        <div class="form-group">
+          <label>Precio Base ($ CL)</label>
+          <input type="number" id="sPrice" class="form-control" placeholder="Ej. 29900" required>
+        </div>
+        
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+          <button type="button" class="btn secondary" onclick="closeModal('createServiceModal')">Cancelar</button>
+          <button type="submit" class="btn primary">Guardar Servicio</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ESTADOS Y DATOS MOCK
+    let services = [
+      { id: 1, name: "🔧 Diagnóstico Computarizado Scanner", desc: "Escaneo electrónico de ECU, sensores y reporte de códigos de falla OBD2.", duration: "45 Minutos", price: 19990 },
+      { id: 2, name: "🛑 Reemplazo de Pastillas de Freno", desc: "Instalación de pastillas nuevas delanteras/traseras y rectificado de discos.", duration: "1.5 Horas", price: 34990 },
+      { id: 3, name: "🛢️ Cambio de Aceite y Filtros", desc: "Cambio de aceite sintético 5W30/10W40, filtro de aceite, aire y habitáculo.", duration: "1 Hora", price: 49990 },
+      { id: 4, name: "⚙️ Mantención de Kilometraje (10K / 20K)", desc: "Puntos clave de revisión, frenos, bujías, niveles, lubricantes y reapriete.", duration: "3 Horas", price: 89900 },
+      { id: 5, name: "❄️ Recarga de Aire Acondicionado", desc: "Vacío del sistema, detección de fugas y recarga de gas refrigerante R134a.", duration: "1 Hora", price: 25000 },
+      { id: 6, name: "🏎️ Alineación y Balanceo 3D", desc: "Alineación de ejes láser 3D, balanceo dinámico y rotación de neumáticos.", duration: "1 Hora", price: 29900 }
+    ];
+
+    let vehicles = [
+      {
+        id: "1",
+        model: "Suzuki Swift (2020)",
+        plate: "HR-YY-22",
+        clientName: "Valeria Jara",
+        clientPhone: "+56987654321",
+        serviceName: "🛑 Reemplazo de Pastillas de Freno",
+        state: "en_progreso",
+        photos: [
+          { url: "https://images.unsplash.com/photo-1486006920555-c77dce18193b?auto=format&fit=crop&w=300&q=80", desc: "Pastillas desgastadas" }
+        ]
+      },
+      {
+        id: "2",
+        model: "Chevrolet Silverado (2019)",
+        plate: "SP-RR-10",
+        clientName: "Andrés Delgado",
+        clientPhone: "+56944556677",
+        serviceName: "🛢️ Cambio de Aceite y Filtros",
+        state: "listo",
+        photos: [
+          { url: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=300&q=80", desc: "Filtros nuevos" }
+        ]
+      },
+      {
+        id: "3",
+        model: "Mazda CX-5 (2022)",
+        plate: "GG-WP-88",
+        clientName: "Esteban Muñoz",
+        clientPhone: "+56911223344",
+        serviceName: "🔧 Diagnóstico Computarizado Scanner",
+        state: "diagnostico",
+        photos: []
+      }
+    ];
+
+    let selectedOrderId = null;
+
+    // INICIALIZACIÓN
+    document.addEventListener("DOMContentLoaded", () => {
+      renderServicesSelect();
+      renderServicesTable();
+      renderVehicles();
+      updateStats();
+    });
+
+    function renderServicesSelect() {
+      const select = document.getElementById("oService");
+      select.innerHTML = "";
+      services.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s.name;
+        opt.textContent = `${s.name} (${formatPrice(s.price)})`;
+        select.appendChild(opt);
+      });
+      
+      // Select en modal de detalles
+      const selectDet = document.getElementById("detStateSelect");
+      selectDet.innerHTML = `
+        <option value="diagnostico">Diagnóstico Inicial</option>
+        <option value="esperando_repuestos">Esperando Repuestos</option>
+        <option value="en_progreso">En Trabajo / Reparación</option>
+        <option value="prueba_ruta">Prueba de Ruta</option>
+        <option value="listo">Listo para Entrega</option>
+      `;
+    }
+
+    function formatPrice(val) {
+      return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(val);
+    }
+
+    function switchView(viewId, btn) {
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      document.getElementById(`view_${viewId}`).classList.add("active");
+      
+      document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      
+      const titles = {
+        dashboard: ["Dashboard Operativo", "Información en tiempo real del estado de reparaciones."],
+        orders: ["Registro de Órdenes de Trabajo", "Lista completa de admisión y vehículos en taller."],
+        services: ["Catálogo de Servicios", "Configura las prestaciones, tiempos y precios base."],
+        calendar: ["Calendario de Recepción", "Agenda de ingreso para mantención preventiva."]
+      };
+      
+      document.getElementById("viewTitle").textContent = titles[viewId][0];
+      document.getElementById("viewSubtitle").textContent = titles[viewId][1];
+    }
+
+    // MODAL HELPERS
+    function openModal(id) {
+      document.getElementById(id).style.display = "flex";
+    }
+    function closeModal(id) {
+      document.getElementById(id).style.display = "none";
+    }
+
+    // RENDER VEHICLES
+    function renderVehicles() {
+      const dashBody = document.getElementById("dashboardVehiclesBody");
+      const orderBody = document.getElementById("ordersVehiclesBody");
+      dashBody.innerHTML = "";
+      orderBody.innerHTML = "";
+      
+      const statusLabels = {
+        diagnostico: "🔍 Diagnóstico",
+        esperando_repuestos: "📦 Esperando Repuestos",
+        en_progreso: "⚙️ En Trabajo",
+        prueba_ruta: "🏎️ Prueba de Ruta",
+        listo: "✅ Listo para Retiro"
+      };
+
+      vehicles.forEach(v => {
+        const photosCount = v.photos.length;
+        const photosLabel = photosCount === 0 ? "Sin evidencias" : `📸 ${photosCount} foto(s)`;
+        
+        const rowHTML = `
+          <tr>
+            <td style="font-weight: 700; color: #fff;">${v.model}<div style="font-family: monospace; font-size:12px; color: var(--yellow);">${v.plate}</div></td>
+            <td>${v.clientName}<div style="font-size:11px; color: var(--muted);">${v.clientPhone}</div></td>
+            <td style="font-size: 13px;">${v.serviceName}</td>
+            <td><span class="status-badge ${v.state}">${statusLabels[v.state]}</span></td>
+            <td style="font-size: 12px; font-weight: 600; color: var(--muted);">${photosLabel}</td>
+            <td>
+              <button class="btn secondary small" onclick="openDetailOrderModal('${v.id}')">⚙️ Reporte / Diagnóstico</button>
+            </td>
+          </tr>
+        `;
+        
+        orderBody.insertAdjacentHTML("beforeend", rowHTML);
+        if (v.state !== "entregado") {
+          dashBody.insertAdjacentHTML("beforeend", rowHTML);
+        }
+      });
+    }
+
+    // RENDER SERVICES
+    function renderServicesTable() {
+      const tbody = document.getElementById("servicesTableBody");
+      tbody.innerHTML = "";
+      services.forEach(s => {
+        tbody.insertAdjacentHTML("beforeend", `
+          <tr>
+            <td style="font-weight:700; color:#fff;">${s.name}</td>
+            <td style="font-size: 13px; color: var(--muted); max-width: 320px;">${s.desc}</td>
+            <td>${s.duration}</td>
+            <td style="font-weight: 800; color: var(--yellow);">${formatPrice(s.price)}</td>
+            <td>
+              <button class="btn secondary small" onclick="deleteService(${s.id})" style="color:var(--red); border-color: rgba(239,68,68,0.2);">Eliminar</button>
+            </td>
+          </tr>
+        `);
+      });
+    }
+
+    // STATS UPDATE
+    function updateStats() {
+      document.getElementById("statsInShop").textContent = vehicles.filter(v => v.state !== "listo").length;
+      document.getElementById("statsReady").textContent = vehicles.filter(v => v.state === "listo").length;
+      document.getElementById("statsServices").textContent = services.length;
+    }
+
+    // ACTIONS: ORDER
+    function openCreateOrderModal() {
+      openModal("createOrderModal");
+    }
+    
+    function saveNewOrder(e) {
+      e.preventDefault();
+      const model = document.getElementById("oModel").value.trim();
+      const plate = document.getElementById("oPlate").value.trim().toUpperCase();
+      const client = document.getElementById("oClient").value.trim();
+      const phone = document.getElementById("oPhone").value.trim();
+      const service = document.getElementById("oService").value;
+      const state = document.getElementById("oState").value;
+      
+      const newOrder = {
+        id: String(Date.now()),
+        model,
+        plate,
+        clientName: client,
+        clientPhone: phone,
+        serviceName: service,
+        state,
+        photos: []
+      };
+      
+      vehicles.push(newOrder);
+      renderVehicles();
+      updateStats();
+      closeModal("createOrderModal");
+      document.getElementById("createOrderForm").reset();
+      
+      // Log Simulation
+      logLocalSimulation("Admisión de Vehículo (Taller)", plate, `Vehículo '${model}' registrado con orden de trabajo para '${service}'.`);
+    }
+
+    // ACTIONS: DETAIL ORDER / PHOTOS / NOTIFICATIONS
+    function openDetailOrderModal(id) {
+      selectedOrderId = id;
+      const v = vehicles.find(item => item.id === id);
+      if (!v) return;
+      
+      document.getElementById("detTitle").textContent = `Orden de Trabajo: ${v.model}`;
+      document.getElementById("detPlate").textContent = v.plate;
+      document.getElementById("detClient").textContent = v.clientName;
+      document.getElementById("detStateSelect").value = v.state;
+      
+      const statusLabels = {
+        diagnostico: "🔍 Diagnóstico",
+        esperando_repuestos: "📦 Esperando Repuestos",
+        en_progreso: "⚙️ En Trabajo",
+        prueba_ruta: "🏎️ Prueba de Ruta",
+        listo: "✅ Listo para Retiro"
+      };
+      
+      const badgeContainer = document.getElementById("detBadgeContainer");
+      badgeContainer.innerHTML = `<span class="status-badge ${v.state}">${statusLabels[v.state]}</span>`;
+      
+      renderDetailPhotos(v);
+      openModal("detailOrderModal");
+    }
+
+    function updateOrderStatus() {
+      if (!selectedOrderId) return;
+      const v = vehicles.find(item => item.id === selectedOrderId);
+      if (!v) return;
+      
+      const newState = document.getElementById("detStateSelect").value;
+      v.state = newState;
+      
+      renderVehicles();
+      updateStats();
+      openDetailOrderModal(selectedOrderId); // Refresh modal view
+      
+      // Log Simulation
+      logLocalSimulation("Actualización de Estado (Taller)", v.plate, `Cambio de estado en reparación a '${newState}'.`);
+    }
+
+    function renderDetailPhotos(v) {
+      const gallery = document.getElementById("detPhotoGallery");
+      gallery.innerHTML = "";
+      
+      if (v.photos.length === 0) {
+        gallery.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--muted); padding: 12px; font-size:12px;">No se han subido evidencias fotográficas todavía.</div>`;
+        return;
+      }
+      
+      v.forEach ? null : v.photos.forEach((ph, idx) => {
+        gallery.insertAdjacentHTML("beforeend", `
+          <div class="photo-item">
+            <img src="${ph.url}" alt="Evidencia">
+            <div class="photo-desc">${ph.desc}</div>
+          </div>
+        `);
+      });
+    }
+
+    function triggerFileInput() {
+      document.getElementById("detFileInput").click();
+    }
+
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file || !selectedOrderId) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const v = vehicles.find(item => item.id === selectedOrderId);
+        if (v) {
+          const descPrompt = prompt("Ingrese una descripción breve para esta foto:", "Repuesto instalado / Reparación activa");
+          if (descPrompt === null) return; // cancel
+          
+          v.photos.push({
+            url: evt.target.result, // base64 representation loaded locally
+            desc: descPrompt || "Evidencia cargada"
+          });
+          
+          renderDetailPhotos(v);
+          renderVehicles();
+          
+          // Log Simulation
+          logLocalSimulation("Evidencia Multimedia (Taller)", v.plate, `Se subió foto de evidencia descriptiva: '${descPrompt || 'Evidencia'}'.`);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // SEND CLIENT NOTIFICATION BRIDGE CALL
+    async function sendClientNotification() {
+      if (!selectedOrderId) return;
+      const v = vehicles.find(item => item.id === selectedOrderId);
+      if (!v) return;
+      
+      const statusLabels = {
+        diagnostico: "Diagnóstico Inicial",
+        esperando_repuestos: "Esperando Repuestos",
+        en_progreso: "En Trabajo / Reparación",
+        prueba_ruta: "Prueba de Ruta",
+        listo: "Listo para Retiro"
+      };
+
+      const msg = `Hola ${v.clientName}, tu vehículo ${v.model} (Patente: ${v.plate}) se encuentra en estado: *${statusLabels[v.state]}*. Puedes ver las fotos y evidencias de reparación ingresando al enlace adjunto.`;
+      
+      try {
+        // Log to Bridge
+        const res = await fetch("/api/admin/simulations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "Notificación de Taller (WhatsApp)",
+            target: v.clientPhone,
+            details: msg
+          })
+        });
+        
+        if (res.ok) {
+          alert("¡Mensaje de WhatsApp enviado al cliente y registrado en el Puente de Simulaciones!");
+        } else {
+          alert("WhatsApp enviado de forma local.");
+        }
+      } catch (err) {
+        alert("WhatsApp simulado de forma local.");
+      }
+    }
+
+    // LOCAL SIMULATION HELPERS
+    async function logLocalSimulation(type, target, details) {
+      try {
+        await fetch("/api/admin/simulations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type, target, details })
+        });
+      } catch (e) {
+        console.log("Local simulation log warning:", e);
+      }
+    }
+
+    // ACTIONS: SERVICES
+    function openCreateServiceModal() {
+      openModal("createServiceModal");
+    }
+    
+    function saveNewService(e) {
+      e.preventDefault();
+      const name = document.getElementById("sName").value.trim();
+      const desc = document.getElementById("sDesc").value.trim();
+      const duration = document.getElementById("sDuration").value.trim();
+      const price = parseFloat(document.getElementById("sPrice").value);
+      
+      services.push({
+        id: Date.now(),
+        name,
+        desc,
+        duration,
+        price
+      });
+      
+      renderServicesTable();
+      renderServicesSelect();
+      updateStats();
+      closeModal("createServiceModal");
+      document.getElementById("createServiceForm").reset();
+    }
+    
+    function deleteService(id) {
+      services = services.filter(s => s.id !== id);
+      renderServicesTable();
+      renderServicesSelect();
+      updateStats();
+    }
+  </script>
+</body>
+</html>
