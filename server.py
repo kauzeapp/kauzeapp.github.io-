@@ -301,6 +301,29 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
 
         self._json_response(405, {"error": "method_not_allowed"})
 
+    def do_DELETE(self):
+        path = urlparse(self.path).path
+
+        if not self._origin_allowed():
+            self._json_response(403, {"error": "origin_not_allowed"})
+            return
+
+        if path.startswith("/api/admin/clientes/"):
+            try:
+                parts = path.strip("/").split("/")
+                if len(parts) != 4:
+                    self._json_response(404, {"error": "not_found"})
+                    return
+                client_id = parts[3]
+                from backend.subscriptions import delete_admin_client
+                result = delete_admin_client(client_id)
+                self._json_response(200, result)
+            except Exception as e:
+                self._json_response(500, {"error": "internal_error", "message": str(e)})
+            return
+
+        self._json_response(405, {"error": "method_not_allowed"})
+
     def do_POST(self):
         path = urlparse(self.path).path
 
