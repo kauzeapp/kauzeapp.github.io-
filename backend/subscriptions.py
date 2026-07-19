@@ -593,3 +593,14 @@ def reset_client_password(client_id):
 
     send_reset_password_email(email, name, temp_password)
     return {"status": "success", "message": "Contraseña restablecida correctamente."}
+
+def delete_admin_client(client_id):
+    if is_configured():
+        with connection() as conn:
+            conn.execute("DELETE FROM usuarios WHERE id = %s", (client_id,))
+            conn.commit()
+    else:
+        db = read_local_db()
+        db["subscriptions"] = [s for s in db["subscriptions"] if s["id"] != client_id]
+        write_local_db(db)
+    return {"status": "success", "message": "Cliente eliminado."}
