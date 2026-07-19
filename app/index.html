@@ -134,6 +134,43 @@
     .chart-grid{stroke:#E2E8F0;stroke-width:1}
     .chart-line{fill:none;stroke:url(#grad);stroke-width:4;stroke-linecap:round}
     .chart-fill{fill:url(#area)}
+    .welcome-card{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:22px;margin-bottom:14px;background:linear-gradient(135deg,rgba(37,99,235,.10),rgba(99,102,241,.06) 52%,rgba(255,255,255,.96));border-color:rgba(37,99,235,.20)}
+    .welcome-card:after{content:"";position:absolute;width:240px;height:240px;border-radius:50%;right:-130px;top:-145px;background:rgba(37,99,235,.08);pointer-events:none}
+    .welcome-badge{display:inline-flex;width:max-content;align-items:center;gap:7px;padding:7px 11px;border-radius:999px;background:#fff;color:var(--blue);border:1px solid rgba(37,99,235,.18);font-size:12px;font-weight:900;margin-bottom:12px}
+    .welcome-card h2{font-family:'Sora',sans-serif;font-size:clamp(24px,3vw,36px);letter-spacing:-1px;color:var(--navy);margin-bottom:9px}
+    .welcome-card p{color:var(--muted);font-size:14px;line-height:1.65;max-width:640px}
+    .welcome-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+    .welcome-actions .btn.primary{width:auto}
+    .onboarding-summary{position:relative;z-index:1;background:rgba(255,255,255,.78);border:1px solid rgba(37,99,235,.16);border-radius:20px;padding:16px}
+    .onboarding-summary-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px}
+    .onboarding-summary-head strong{color:var(--navy);font-size:14px}
+    .onboarding-summary-head span{color:var(--blue);font-size:12px;font-weight:900}
+    .onboarding-progress{height:8px;border-radius:999px;background:var(--soft);overflow:hidden;margin-bottom:12px}
+    .onboarding-progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .2s ease}
+    .onboarding-steps{display:grid;gap:7px}
+    .onboarding-step{border:0;background:transparent;color:var(--muted);display:flex;align-items:center;gap:9px;text-align:left;padding:4px 0;cursor:pointer;font-size:12px;font-weight:800}
+    .onboarding-step:hover{color:var(--blue)}
+    .onboarding-dot{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;background:var(--soft-blue);color:var(--blue);font-size:11px;font-weight:900}
+    .onboarding-step.done{color:#047857}
+    .onboarding-step.done .onboarding-dot{background:rgba(16,185,129,.12);color:#047857}
+    .panel-guide{display:none;align-items:center;justify-content:space-between;gap:16px;margin:-6px 0 18px;padding:15px 17px;border:1px solid rgba(37,99,235,.20);border-radius:20px;background:linear-gradient(135deg,rgba(37,99,235,.08),rgba(99,102,241,.04),#fff);box-shadow:var(--shadow-soft)}
+    .panel-guide.open{display:flex}
+    .panel-guide-copy{display:flex;align-items:flex-start;gap:12px;min-width:0}
+    .panel-guide-icon{width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;flex:0 0 auto;font-weight:900}
+    .panel-guide strong{display:block;color:var(--navy);font-size:14px;margin-bottom:3px}
+    .panel-guide p{color:var(--muted);font-size:12px;line-height:1.5}
+    .panel-guide-actions{display:flex;gap:8px;flex-wrap:wrap;flex:0 0 auto}
+    .panel-guide-actions .btn.primary{width:auto}
+    .help-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .help-card{display:flex;flex-direction:column;gap:10px;min-height:220px}
+    .help-icon{width:45px;height:45px;border-radius:15px;display:grid;place-items:center;background:var(--soft-blue);color:var(--blue);font-size:20px}
+    .help-card h3{font-family:'Sora',sans-serif;font-size:18px;color:var(--navy)}
+    .help-card p{color:var(--muted);font-size:13px;line-height:1.6;flex:1}
+    .help-card .btn{width:100%}
+    .faq-list{display:grid;gap:9px}
+    .faq-item{border:1px solid var(--border);border-radius:16px;background:var(--soft);padding:13px 14px}
+    .faq-item summary{cursor:pointer;color:var(--navy);font-size:13px;font-weight:900}
+    .faq-item p{color:var(--muted);font-size:12px;line-height:1.55;margin-top:8px}
     .phone-preview{width:230px;margin:0 auto;background:#0B1736;border-radius:34px;padding:10px;box-shadow:0 22px 55px rgba(15,23,42,.18)}
     .phone-inner{background:#fff;border-radius:26px;min-height:430px;overflow:hidden;padding:16px}
     .phone-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
@@ -154,9 +191,9 @@
     .campaign.amber{border-left-color:var(--amber)}
     .notice{padding:15px;border-radius:18px;border:1px solid rgba(245,158,11,.25);background:rgba(245,158,11,.07);color:#854D0E;font-size:13px;line-height:1.65}
     .save-msg{display:none;color:var(--teal);font-size:13px;font-weight:900;margin-top:10px}
-    @media(max-width:1120px){.grid-4{grid-template-columns:1fr 1fr}.grid-3{grid-template-columns:1fr 1fr}.dashboard-layout{grid-template-columns:1fr}.login-wrap{grid-template-columns:1fr}.brand-side{min-height:560px}}
+    @media(max-width:1120px){.grid-4{grid-template-columns:1fr 1fr}.grid-3{grid-template-columns:1fr 1fr}.dashboard-layout{grid-template-columns:1fr}.welcome-card{grid-template-columns:1fr}.help-grid{grid-template-columns:1fr 1fr}.login-wrap{grid-template-columns:1fr}.brand-side{min-height:560px}}
     @media(max-width:880px){.app{grid-template-columns:1fr}.sidebar{position:fixed;inset:0 auto 0 0;width:280px;z-index:40;transform:translateX(-110%);transition:.22s}.sidebar.open{transform:translateX(0)}.mobile-menu{display:inline-flex}.main{padding:18px}}
-    @media(max-width:650px){.brand-side{padding:28px;min-height:560px}.official-logo{width:92%}.login-side{padding:20px}.login-card{padding:24px}.topbar{align-items:flex-start;flex-direction:column}.top-right,.type-switch,.user-chip{width:100%}.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}.section-head{align-items:flex-start;flex-direction:column}.item{align-items:flex-start;flex-direction:column}table{min-width:720px}}
+    @media(max-width:650px){.brand-side{padding:28px;min-height:560px}.official-logo{width:92%}.login-side{padding:20px}.login-card{padding:24px}.topbar{align-items:flex-start;flex-direction:column}.top-right,.type-switch,.user-chip{width:100%}.grid-4,.grid-3,.grid-2,.help-grid{grid-template-columns:1fr}.section-head{align-items:flex-start;flex-direction:column}.item{align-items:flex-start;flex-direction:column}.panel-guide{align-items:flex-start;flex-direction:column}.panel-guide-actions{width:100%}.panel-guide-actions .btn{flex:1}.welcome-actions .btn{width:100%}table{min-width:720px}}
 
 
     /* MODALES Y EDICIÓN LOCAL */
@@ -560,7 +597,7 @@
   <section class="app" id="app">
     <aside class="sidebar" id="sidebar">
       <div class="side-logo"><div class="side-mark">K</div><span>Kauze</span></div>
-      <div class="business-mini"><strong id="sideBusiness">Negocio demo</strong><small id="sideType">Tipo de negocio</small></div>
+      <div class="business-mini"><strong id="sideBusiness">Mi negocio</strong><small id="sideType">Tipo de negocio</small></div>
       <nav class="nav" id="nav">
         <button type="button" class="active" data-view="inicio">⌂ Inicio</button>
         <button type="button" data-view="agenda">◷ Agenda</button>
@@ -569,6 +606,7 @@
         <button type="button" data-view="profesionales" id="navProfessionals">☷ Profesionales</button>
         <button type="button" data-view="marketing">✧ Marketing</button>
         <button type="button" data-view="facturacion">$ Facturación</button>
+        <button type="button" data-view="ayuda">? Centro de ayuda</button>
         <button type="button" data-view="ajustes">⚙ Ajustes</button>
       </nav>
       <div class="side-bottom"><a class="btn" href="/" target="_blank">Ver landing</a><button type="button" class="btn" id="logoutBtn">Cerrar sesión</button></div>
@@ -579,20 +617,49 @@
         <button type="button" class="btn mobile-menu" id="mobileMenu">☰ Menú</button>
         <div class="title"><h1 id="pageTitle">Inicio</h1><p id="pageSubtitle">Resumen general del negocio.</p></div>
         <div class="top-right">
+          <button type="button" class="btn small" id="panelHelpBtn">? Cómo funciona</button>
           <!-- Status Badge -->
           <div class="status-badge disponible" id="businessStatusBadge" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px; font-size: 13px; font-weight: 700; border: 1px solid var(--border); background: rgba(16, 185, 129, 0.08); color: var(--teal); border-color: rgba(16, 185, 129, 0.22); cursor: pointer; transition: all 0.2s ease;">
             🟢 DISPONIBLE
           </div>
           <select class="type-switch" id="businessTypeSwitch"></select>
-          <div class="user-chip"><div class="avatar" id="headerUserAvatar">S</div><div><strong id="headerUserName">Sergio Molina</strong><small id="headerUserRole">Demo · Administrador</small></div></div>
+          <div class="user-chip"><div class="avatar" id="headerUserAvatar">K</div><div><strong id="headerUserName">Usuario Kauze</strong><small id="headerUserRole">Dueño del negocio</small></div></div>
         </div>
       </header>
 
+      <aside class="panel-guide" id="panelGuide" aria-live="polite">
+        <div class="panel-guide-copy">
+          <div class="panel-guide-icon">?</div>
+          <div><strong id="panelGuideTitle">Inicio</strong><p id="panelGuideText">Aquí verás el resumen real de tu negocio.</p></div>
+        </div>
+        <div class="panel-guide-actions">
+          <button type="button" class="btn small" id="panelGuidePrev">Anterior</button>
+          <button type="button" class="btn small primary" id="panelGuideNext">Siguiente</button>
+          <button type="button" class="btn small" id="panelGuideClose">Cerrar</button>
+        </div>
+      </aside>
+
       <section class="view active" id="view-inicio">
+        <article class="card welcome-card" id="welcomeCard">
+          <div>
+            <span class="welcome-badge">⚡ Primeros pasos</span>
+            <h2 id="welcomeTitle">¡Bienvenido a Kauze!</h2>
+            <p>Tu negocio ya está creado. Ahora te acompañaremos para configurar lo esencial y comenzar a recibir reservas con información real.</p>
+            <div class="welcome-actions">
+              <button type="button" class="btn primary" id="startPanelTour">Iniciar tutorial del panel</button>
+              <button type="button" class="btn" id="hideWelcomeCard">Ocultar bienvenida</button>
+            </div>
+          </div>
+          <div class="onboarding-summary">
+            <div class="onboarding-summary-head"><strong>Configura tu negocio</strong><span id="onboardingProgressLabel">0 de 5</span></div>
+            <div class="onboarding-progress"><span id="onboardingProgressFill"></span></div>
+            <div class="onboarding-steps" id="onboardingSteps"></div>
+          </div>
+        </article>
         <div class="grid-4">
-          <article class="card metric"><div class="label">Citas hoy</div><div class="value" id="mCitas">0</div><div class="trend">+12% vs ayer</div></article>
-          <article class="card metric"><div class="label">Ingresos hoy</div><div class="value" id="mIngresos">$0</div><div class="trend">+8% esta semana</div></article>
-          <article class="card metric"><div class="label">Nuevos clientes</div><div class="value" id="mClientes">0</div><div class="trend">+3 últimos 7 días</div></article>
+          <article class="card metric"><div class="label">Citas hoy</div><div class="value" id="mCitas">0</div><div class="trend" id="mCitasTrend">Sin actividad todavía</div></article>
+          <article class="card metric"><div class="label">Ingresos hoy</div><div class="value" id="mIngresos">$0</div><div class="trend" id="mIngresosTrend">Sin ventas registradas</div></article>
+          <article class="card metric"><div class="label">Nuevos clientes</div><div class="value" id="mClientes">0</div><div class="trend" id="mClientesTrend">Tu base comenzará aquí</div></article>
           <article class="card metric"><div class="label">Valoración del negocio</div><div class="value" id="mBusinessRating">—</div><div class="trend" id="mBusinessReviews">Sin reseñas públicas</div></article>
         </div>
         <div class="section-head">
@@ -608,14 +675,14 @@
         </div>
         <div class="dashboard-layout">
           <article class="card"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Agenda de hoy</h2><div class="list" id="todayList"></div></article>
-          <article class="card chart"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:2px">Ingresos de la semana</h2><p style="color:var(--muted);font-size:13px">Proyección visual para presentación.</p><svg viewBox="0 0 420 190" preserveAspectRatio="none"><defs><linearGradient id="grad" x1="0" x2="1"><stop offset="0" stop-color="#2563EB"/><stop offset="1" stop-color="#6366F1"/></linearGradient><linearGradient id="area" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2563EB" stop-opacity=".20"/><stop offset="1" stop-color="#2563EB" stop-opacity="0"/></linearGradient></defs><path class="chart-grid" d="M0 35H420M0 80H420M0 125H420M0 170H420"/><path class="chart-fill" d="M0 145 C40 120,60 130,95 95 S155 70,190 82 S250 125,285 80 S350 30,420 48 L420 190 L0 190Z"/><path class="chart-line" d="M0 145 C40 120,60 130,95 95 S155 70,190 82 S250 125,285 80 S350 30,420 48"/></svg></article>
+          <article class="card chart" id="revenueChartCard"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:2px">Ingresos de la semana</h2><p style="color:var(--muted);font-size:13px">Se construirá con pagos y atenciones reales.</p><div class="empty-state" style="margin-top:18px">Aún no hay movimientos suficientes para mostrar una tendencia.</div></article>
         </div>
-        <div class="section-head"><div><h2>Vista móvil cliente</h2><p>Simulación de reserva desde celular.</p></div></div>
+        <div class="section-head"><div><h2>Vista móvil cliente</h2><p>Vista previa de cómo se presentarán tus servicios.</p></div></div>
         <div class="grid-2"><article class="card"><div class="phone-preview"><div class="phone-inner"><div class="phone-top"><strong>Kauze</strong><div class="phone-pill"></div></div><h3 style="font-family:Sora,sans-serif;color:var(--navy);margin-bottom:8px">¿Qué servicio necesitas?</h3><p style="color:var(--muted);font-size:12px;margin-bottom:14px">Categorías disponibles según el negocio.</p><div class="category-grid" id="phoneCats"></div><button type="button" class="btn primary" style="margin-top:18px;width:100%">Elegir fecha y hora</button></div></div></article><article class="card"><h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:14px">Acciones sugeridas</h2><div class="list" id="actionsList"></div></article>
           <article class="card">
             <h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:6px">Centro de notificaciones</h2>
             <p style="color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:10px">
-              Simulación del flujo real: WhatsApp al cliente, aviso al dueño, evento en Calendar y actualización dentro de Kauze.
+              Aquí verás el estado real de los avisos al cliente, al dueño y de las integraciones conectadas.
             </p>
             <div class="notification-list" id="notificationCenter"></div>
           </article>
@@ -651,12 +718,27 @@
         <div class="notice" style="margin-top:14px">Los profesionales se guardan en el negocio conectado a PostgreSQL. Si asignas citas a un profesional y luego lo eliminas, las citas antiguas se mantienen como registro.</div>
       </section>
       <section class="view" id="view-marketing"><div class="section-head"><div><h2>Marketing</h2><p>Promociones, fidelización y recuperación.</p></div><button type="button" class="btn primary" id="newCampaignBtn" style="width:auto">Crear campaña</button></div><div class="grid-3" id="marketingGrid"></div><div class="section-head"><div><h2>Análisis de integraciones</h2><p>Vista comercial para explicar cómo Kauze conectará WhatsApp e Instagram.</p></div></div><div class="grid-3" id="integrationGrid"></div><article class="card" style="margin-top:14px"><h3 style="font-family:Sora,sans-serif;font-size:18px;color:var(--navy);margin-bottom:8px">Checklist antes de conectar Meta</h3><div class="checklist"><div class="check-item"><span class="check-dot">1</span><span>Número de WhatsApp corporativo libre, sin WhatsApp normal activo en celular.</span></div><div class="check-item"><span class="check-dot">2</span><span>Cuenta de Meta Business verificada y permisos para WhatsApp Business Cloud API.</span></div><div class="check-item"><span class="check-dot">3</span><span>Plantillas de confirmación, recordatorio, reactivación y postventa aprobadas por Meta.</span></div><div class="check-item"><span class="check-dot">4</span><span>Instagram conectado para automatizar respuestas, seguimiento y recuperación de clientes.</span></div></div></article></section>
-      <section class="view" id="view-facturacion"><div class="section-head"><div><h2>Facturación</h2><p>Ingresos, métodos de pago y movimientos.</p></div><button type="button" class="btn primary" style="width:auto">Registrar pago</button></div><div class="grid-4"><article class="card metric"><div class="label">Ventas del día</div><div class="value" id="billingToday">$0</div><div class="trend">Registradas</div></article><article class="card metric"><div class="label">Ticket promedio</div><div class="value" id="billingAvg">$0</div><div class="trend">Por atención</div></article><article class="card metric"><div class="label">Pagos pendientes</div><div class="value">2</div><div class="trend warn">Revisar hoy</div></article><article class="card metric"><div class="label">Método principal</div><div class="value">Débito</div><div class="trend">Mayor uso</div></article></div><div class="section-head"><div><h2>Últimos pagos</h2><p>Movimiento temporal para demo.</p></div></div><article class="card table-wrap"><table><thead><tr><th>Cliente</th><th>Servicio</th><th>Método</th><th>Monto</th></tr></thead><tbody id="billingTable"></tbody></table></article></section>
+      <section class="view" id="view-facturacion"><div class="section-head"><div><h2>Facturación</h2><p>Ingresos, métodos de pago y movimientos.</p></div><button type="button" class="btn primary" style="width:auto">Registrar pago</button></div><div class="grid-4"><article class="card metric"><div class="label">Ventas del día</div><div class="value" id="billingToday">$0</div><div class="trend">Registradas</div></article><article class="card metric"><div class="label">Ticket promedio</div><div class="value" id="billingAvg">$0</div><div class="trend">Por atención</div></article><article class="card metric"><div class="label">Pagos pendientes</div><div class="value" id="billingPending">0</div><div class="trend" id="billingPendingTrend">Sin pagos pendientes</div></article><article class="card metric"><div class="label">Método principal</div><div class="value" id="billingMainMethod">—</div><div class="trend" id="billingMainMethodTrend">Sin movimientos</div></article></div><div class="section-head"><div><h2>Últimos pagos</h2><p>Los movimientos aparecerán cuando registres atenciones reales.</p></div></div><article class="card table-wrap"><table><thead><tr><th>Cliente</th><th>Servicio</th><th>Método</th><th>Monto</th></tr></thead><tbody id="billingTable"></tbody></table></article></section>
+      <section class="view" id="view-ayuda">
+        <div class="section-head"><div><h2>Centro de ayuda</h2><p>Tutoriales y contacto directo con el equipo Kauze.</p></div><button type="button" class="btn primary" id="restartPanelTour" style="width:auto">Recorrer el panel</button></div>
+        <div class="help-grid">
+          <article class="card help-card"><div class="help-icon">✉</div><h3>Escríbenos</h3><p>Cuéntanos qué necesitas y responderemos usando el correo asociado a tu negocio.</p><a class="btn" href="mailto:kauzeapp@gmail.com?subject=Ayuda%20con%20mi%20panel%20Kauze">Enviar correo a soporte</a></article>
+          <article class="card help-card"><div class="help-icon">?</div><h3>Guía por sección</h3><p>Abre una explicación breve del panel que estés mirando y conoce su objetivo principal.</p><button type="button" class="btn" id="openCurrentPanelGuide">Explicar esta sección</button></article>
+          <article class="card help-card"><div class="help-icon">◉</div><h3>Acompañamiento Kauze</h3><p>Durante el programa fundador te ayudaremos a configurar servicios, equipo y agenda.</p><a class="btn" href="mailto:kauzeapp@gmail.com?subject=Solicitar%20acompañamiento%20Kauze">Solicitar acompañamiento</a></article>
+        </div>
+        <div class="section-head"><div><h2>Preguntas frecuentes</h2><p>Respuestas rápidas para comenzar.</p></div></div>
+        <article class="card faq-list">
+          <details class="faq-item"><summary>¿Cómo creo mi primer servicio?</summary><p>Entra a Servicios, presiona “Nuevo servicio” y define nombre, duración y precio.</p></details>
+          <details class="faq-item"><summary>¿Los trabajadores necesitan una cuenta?</summary><p>No. El dueño crea sus perfiles, define horarios y asigna los servicios que presta cada uno.</p></details>
+          <details class="faq-item"><summary>¿Cuándo aparecerán clientes y citas?</summary><p>Se crearán con las reservas reales o cuando el negocio los registre manualmente.</p></details>
+          <details class="faq-item"><summary>¿Puedo volver a ver el tutorial?</summary><p>Sí. Siempre estará disponible desde “Cómo funciona” y desde este Centro de ayuda.</p></details>
+        </article>
+      </section>
       <section class="view" id="view-ajustes">
         <div class="section-head">
           <div>
             <h2>Ajustes</h2>
-            <p>Configuración conectada del negocio demo.</p>
+            <p>Personaliza la información y funcionamiento de tu negocio.</p>
           </div>
         </div>
         <div class="grid-2">
@@ -1252,7 +1334,7 @@
 
 
   <script>
-    const defaultBusiness = { name:'Kauze Demo Barbería', type:'barberia', logoUrl:'', ownerWhatsapp:'', ownerCalendarEmail:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, clientRatingMode:'none', publicRating:null, publicReviews:0, activeTheme:'Kauze Base', pageTitle:'Agenda tu próxima hora sin escribir por WhatsApp', pageSubtitle:'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.', pageCta:'Reservar ahora', bannerStyle:'soft', bannerImage:'', appointments:{}, professionals:{}, campaigns:{} };
+    const defaultBusiness = { name:'Mi negocio', type:'barberia', logoUrl:'', ownerWhatsapp:'', ownerCalendarEmail:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, clientRatingMode:'none', publicRating:null, publicReviews:0, activeTheme:'Kauze Base', pageTitle:'Agenda tu próxima hora sin escribir por WhatsApp', pageSubtitle:'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.', pageCta:'Reservar ahora', bannerStyle:'soft', bannerImage:'', publicBookingEnabled:false, appointments:{}, professionals:{}, clients:{}, services:{}, campaigns:{}, onboarding:{ welcomeDismissed:false, tourCompleted:false } };
     let pendingLogoData = null;
     let pendingUserProfileImage = null;
     let pendingProfessionalPhoto = null;
@@ -1670,7 +1752,7 @@
       const safeTextOnCard = contrastRatio(theme.text, theme.card) >= 4.5 ? theme.text : readableTextOn(theme.card, theme.text);
       const safeMutedOnCard = contrastRatio(theme.muted, theme.card) >= 4.5 ? theme.muted : safeTextOnCard;
 
-      const busName = document.getElementById('settingsBusiness') ? document.getElementById('settingsBusiness').value : (state.name || 'Kauze Demo');
+      const busName = document.getElementById('settingsBusiness') ? document.getElementById('settingsBusiness').value : (state.name || 'Mi negocio');
       if (previewName) previewName.textContent = busName;
 
       if (phoneMockup) {
@@ -2075,7 +2157,13 @@
       const normalized = {...defaultBusiness, ...candidate};
       if (!normalized.appointments) normalized.appointments = {};
       if (!normalized.professionals) normalized.professionals = {};
+      if (!normalized.clients) normalized.clients = {};
+      if (!normalized.services) normalized.services = {};
       if (!normalized.campaigns) normalized.campaigns = {};
+      normalized.onboarding = {
+        ...defaultBusiness.onboarding,
+        ...(candidate.onboarding || {})
+      };
       if (typeof normalized.ownerWhatsapp === 'undefined') normalized.ownerWhatsapp = '';
       if (typeof normalized.ownerCalendarEmail === 'undefined') normalized.ownerCalendarEmail = '';
       if (typeof normalized.logoUrl !== 'string') normalized.logoUrl = '';
@@ -2177,10 +2265,33 @@
     const mCitas = document.getElementById('mCitas');
     const mIngresos = document.getElementById('mIngresos');
     const mClientes = document.getElementById('mClientes');
+    const mCitasTrend = document.getElementById('mCitasTrend');
+    const mIngresosTrend = document.getElementById('mIngresosTrend');
+    const mClientesTrend = document.getElementById('mClientesTrend');
     const mBusinessRating = document.getElementById('mBusinessRating');
     const mBusinessReviews = document.getElementById('mBusinessReviews');
     const billingToday = document.getElementById('billingToday');
     const billingAvg = document.getElementById('billingAvg');
+    const billingPending = document.getElementById('billingPending');
+    const billingPendingTrend = document.getElementById('billingPendingTrend');
+    const billingMainMethod = document.getElementById('billingMainMethod');
+    const billingMainMethodTrend = document.getElementById('billingMainMethodTrend');
+    const panelHelpBtn = document.getElementById('panelHelpBtn');
+    const panelGuide = document.getElementById('panelGuide');
+    const panelGuideTitle = document.getElementById('panelGuideTitle');
+    const panelGuideText = document.getElementById('panelGuideText');
+    const panelGuidePrev = document.getElementById('panelGuidePrev');
+    const panelGuideNext = document.getElementById('panelGuideNext');
+    const panelGuideClose = document.getElementById('panelGuideClose');
+    const welcomeCard = document.getElementById('welcomeCard');
+    const welcomeTitle = document.getElementById('welcomeTitle');
+    const startPanelTour = document.getElementById('startPanelTour');
+    const hideWelcomeCard = document.getElementById('hideWelcomeCard');
+    const onboardingProgressLabel = document.getElementById('onboardingProgressLabel');
+    const onboardingProgressFill = document.getElementById('onboardingProgressFill');
+    const onboardingSteps = document.getElementById('onboardingSteps');
+    const restartPanelTour = document.getElementById('restartPanelTour');
+    const openCurrentPanelGuide = document.getElementById('openCurrentPanelGuide');
     const phoneCats = document.getElementById('phoneCats');
     const todayList = document.getElementById('todayList');
     const actionsList = document.getElementById('actionsList');
@@ -2323,8 +2434,7 @@
     function getAppointments(){
       if (!state.appointments) state.appointments = {};
       if (!state.appointments[state.type]) {
-        state.appointments[state.type] = currentProfile().agenda.map(normalizeAgendaItem);
-        saveState();
+        state.appointments[state.type] = [];
       }
       return state.appointments[state.type];
     }
@@ -2377,7 +2487,7 @@
           code: item.code || '123456',
           ownerWhatsapp: item.ownerWhatsapp || state.ownerWhatsapp || '',
           ownerCalendarEmail: item.ownerCalendarEmail || state.ownerCalendarEmail || '',
-          calendarStatus: item.calendarStatus || 'Evento Calendar demo creado',
+          calendarStatus: item.calendarStatus || 'Calendar pendiente de integración',
           notifications: item.notifications || []
         };
 
@@ -2481,8 +2591,7 @@
     function getProfessionals(){
       if (!state.professionals) state.professionals = {};
       if (!state.professionals[state.type]) {
-        state.professionals[state.type] = currentProfile().pros.map(normalizeProfessional);
-        saveState();
+        state.professionals[state.type] = [];
       }
       return state.professionals[state.type];
     }
@@ -2496,16 +2605,7 @@
     function getClients() {
       if (!state.clients) state.clients = {};
       if (!state.clients[state.type]) {
-        state.clients[state.type] = currentProfile().clients.map((c, i) => ({
-          id: 'cli-' + i,
-          name: c[0],
-          phone: '+56 9 ' + (87654321 - i * 11111),
-          lastService: c[1],
-          nextAction: c[2],
-          totalBilling: c[3],
-          internalRating: null
-        }));
-        saveState();
+        state.clients[state.type] = [];
       }
       state.clients[state.type] = state.clients[state.type].map(normalizeStoredClient);
       return state.clients[state.type];
@@ -2559,14 +2659,7 @@
     function getServices() {
       if (!state.services) state.services = {};
       if (!state.services[state.type]) {
-        state.services[state.type] = currentProfile().services.map((s, i) => ({
-          id: 'ser-' + i,
-          name: s[0],
-          duration: s[1],
-          price: s[2],
-          professional: 'Todos'
-        }));
-        saveState();
+        state.services[state.type] = [];
       }
       return state.services[state.type];
     }
@@ -2574,7 +2667,7 @@
     // Assign price helper from active services
     window.servicePrice = function(serviceName) {
       const s = getServices().find(x => x.name.toLowerCase() === serviceName.toLowerCase());
-      return s ? Number(s.price) : 12000;
+      return s ? Number(s.price) : 0;
     };
 
     function setServices(list) {
@@ -2594,8 +2687,7 @@
     function getCampaigns(){
       if (!state.campaigns) state.campaigns = {};
       if (!state.campaigns[state.type]) {
-        state.campaigns[state.type] = defaultCampaigns();
-        saveState();
+        state.campaigns[state.type] = [];
       }
       return state.campaigns[state.type];
     }
@@ -2617,6 +2709,40 @@
 
     function todayRevenue(){
       return activeAppointments().reduce((sum, a) => sum + servicePrice(a.service), 0);
+    }
+
+    function onboardingChecklist(){
+      const services = getServices();
+      const professionals = getProfessionals();
+      const hasSchedule = professionals.some(pro => Array.isArray(pro.shifts) && pro.shifts.length > 0);
+      return [
+        { label:'Personalizar el negocio y subir el logo', done:Boolean(state.logoUrl), view:'ajustes' },
+        { label:'Crear el primer servicio', done:services.length > 0, view:'servicios' },
+        { label:'Agregar al primer trabajador', done:professionals.length > 0, view:'profesionales' },
+        { label:'Definir días y horarios de atención', done:hasSchedule, view:'profesionales' },
+        { label:'Guardar los datos de contacto', done:Boolean(state.ownerWhatsapp || state.ownerCalendarEmail), view:'ajustes' }
+      ];
+    }
+
+    function renderOnboarding(){
+      if (!welcomeCard || !onboardingSteps) return;
+      if (!state.onboarding) state.onboarding = { welcomeDismissed:false, tourCompleted:false };
+      const firstName = String(currentAccount?.user?.name || '').trim().split(/\s+/)[0];
+      welcomeTitle.textContent = firstName ? `¡Bienvenido a Kauze, ${firstName}!` : '¡Bienvenido a Kauze!';
+      const steps = onboardingChecklist();
+      const completed = steps.filter(step => step.done).length;
+      welcomeCard.hidden = Boolean(state.onboarding.welcomeDismissed);
+      onboardingProgressLabel.textContent = `${completed} de ${steps.length}`;
+      onboardingProgressFill.style.width = `${Math.round((completed / steps.length) * 100)}%`;
+      onboardingSteps.innerHTML = steps.map((step, index) => `
+        <button type="button" class="onboarding-step ${step.done ? 'done' : ''}" data-onboarding-view="${step.view}">
+          <span class="onboarding-dot">${step.done ? '✓' : index + 1}</span>
+          <span>${step.label}</span>
+        </button>
+      `).join('');
+      onboardingSteps.querySelectorAll('[data-onboarding-view]').forEach(button => {
+        button.addEventListener('click', () => activateView(button.dataset.onboardingView));
+      });
     }
 
     function render(){
@@ -2670,22 +2796,39 @@
       mCitas.textContent=active.length;
       mIngresos.textContent=fmt(revenue);
       mClientes.textContent=uniqueClients;
+      if (mCitasTrend) mCitasTrend.textContent = active.length ? `${active.length} ${active.length === 1 ? 'reserva activa' : 'reservas activas'}` : 'Sin actividad todavía';
+      if (mIngresosTrend) mIngresosTrend.textContent = revenue > 0 ? 'Según servicios registrados' : 'Sin ventas registradas';
+      if (mClientesTrend) mClientesTrend.textContent = uniqueClients ? `${uniqueClients} ${uniqueClients === 1 ? 'cliente registrado' : 'clientes registrados'}` : 'Tu base comenzará aquí';
       if (mBusinessRating) mBusinessRating.textContent = state.publicRating ? `${Number(state.publicRating).toFixed(1)} ★` : '—';
       if (mBusinessReviews) mBusinessReviews.textContent = state.publicReviews
         ? `${state.publicReviews} ${state.publicReviews === 1 ? 'reseña pública' : 'reseñas públicas'}`
         : 'Sin reseñas públicas';
       billingToday.textContent=fmt(revenue);
       billingAvg.textContent=fmt(active.length ? Math.round(revenue/active.length) : 0);
-      phoneCats.innerHTML=p.cats.map(c=>`<div class="cat-card">${p.emoji}<br>${c}</div>`).join('');
+      const pendingPayments = active.filter(a => Number(a.remainingAmount || 0) > 0).length;
+      const paymentMethods = active.map(a => a.paymentMethod).filter(Boolean);
+      const paymentMethodCounts = paymentMethods.reduce((acc, method) => ({ ...acc, [method]:(acc[method] || 0) + 1 }), {});
+      const mainPaymentMethod = Object.entries(paymentMethodCounts).sort((a,b) => b[1] - a[1])[0]?.[0] || '';
+      if (billingPending) billingPending.textContent = pendingPayments;
+      if (billingPendingTrend) billingPendingTrend.textContent = pendingPayments ? `${pendingPayments} por completar` : 'Sin pagos pendientes';
+      if (billingMainMethod) billingMainMethod.textContent = mainPaymentMethod || '—';
+      if (billingMainMethodTrend) billingMainMethodTrend.textContent = mainPaymentMethod ? 'Según movimientos registrados' : 'Sin movimientos';
+      const services = getServices();
+      phoneCats.innerHTML = services.length
+        ? services.slice(0,4).map(service=>`<div class="cat-card">${p.emoji}<br>${service.name}</div>`).join('')
+        : `<div class="empty-state" style="grid-column:1/-1">Agrega tu primer servicio para verlo aquí.</div>`;
 
       todayList.innerHTML = appointments.length ? appointments.slice(0,5).map(a=>`<div class="item"><div><strong>${a.time} · ${a.client}</strong><small>${a.service} · ${a.professional}</small>${sourceLabel(a)}</div><span class="${statusClass(a.status)}">${a.status}</span></div>`).join('') : `<div class="empty-state">Aún no hay citas registradas. Crea la primera reserva para probar el flujo.</div>`;
 
-      actionsList.innerHTML=[
+      const setupActions = onboardingChecklist().filter(step => !step.done).slice(0,3).map(step => [
+        step.label,
+        'Completa este paso para dejar tu negocio listo para recibir reservas.'
+      ]);
+      const operatingActions = [
         ['Confirmar reservas pendientes', pendingCount ? `${pendingCount} cita(s) pendiente(s) por confirmar.` : 'No hay reservas pendientes por ahora.'],
-        ['Reservas desde portal cliente', portalCount ? `${portalCount} reserva(s) entraron desde /cliente/. Revísalas en Agenda.` : 'Aún no hay reservas creadas desde el portal cliente.'],
-        ['Pedir reseñas', 'Solicitar valoración a clientes atendidos esta semana.'],
-        ['Recuperar clientes', 'Campaña para clientes sin reserva hace 30 días.']
-      ].map(x=>`<div class="item"><div><strong>${x[0]}</strong><small>${x[1]}</small></div></div>`).join('');
+        ['Reservas desde el portal cliente', portalCount ? `${portalCount} reserva(s) entraron desde el portal cliente.` : 'Aún no hay reservas creadas desde el portal cliente.']
+      ];
+      actionsList.innerHTML=(setupActions.length ? setupActions : operatingActions).map(x=>`<div class="item"><div><strong>${x[0]}</strong><small>${x[1]}</small></div></div>`).join('');
 
       renderNotificationCenter(appointments);
 
@@ -2696,12 +2839,12 @@
         return `<tr><td>${a.date}<br><strong>${a.time}</strong></td><td>${a.client}${sourceLabel(a)}</td><td>${a.service}</td><td>${a.professional}</td><td><span class="${statusClass(a.status)}">${a.status}</span></td><td><div class="row-actions">${confirmBtn}<button class="mini-btn" data-edit-appt="${a.id}">Editar</button><button class="mini-btn danger" data-delete-appt="${a.id}">Eliminar</button></div></td></tr>`;
       }).join('') : `<tr><td colspan="6"><div class="empty-state">Agenda vacía. Usa “Crear cita” para agregar una reserva.</div></td></tr>`;
 
-      clientsTable.innerHTML = clientRows.map(c => {
+      clientsTable.innerHTML = clientRows.length ? clientRows.map(c => {
         const internalRating = getClientInternalRating(c);
         return `<tr><td><strong>${c.name}</strong>${internalRating ? ` · ${internalRating}` : ''}<br><span style="font-size: 11px; color: var(--muted); font-weight: normal;">${c.phone}</span></td><td>${c.lastService}</td><td>${c.nextAction}</td><td><strong>${fmt(c.totalBilling)}</strong></td></tr>`;
-      }).join('');
+      }).join('') : `<tr><td colspan="4"><div class="empty-state">Aún no hay clientes. Se agregarán con las reservas reales o de forma manual.</div></td></tr>`;
 
-      servicesGrid.innerHTML = getServices().map(s => `
+      servicesGrid.innerHTML = services.length ? services.map(s => `
         <article class="card service-card" style="position: relative;">
           <h3>${s.name}</h3>
           <p>Duración estimada: ${s.duration}</p>
@@ -2712,7 +2855,7 @@
             <button class="mini-btn danger" data-delete-service="${s.id}">Eliminar</button>
           </div>
         </article>
-      `).join('');
+      `).join('') : `<div class="empty-state">Aún no hay servicios. Crea el primero con su duración y precio.</div>`;
 
       professionalsTableBody.innerHTML = professionals.length ? professionals.map(x => {
         const comText = professionalCommissionLabel(x);
@@ -2752,11 +2895,12 @@
       }).join('') : `<tr><td colspan="6"><div class="empty-state">Aún no hay profesionales. Agrega el primero para poder asignarlo a la agenda.</div></td></tr>`;
       marketingGrid.innerHTML=campaigns.length ? campaigns.map(c=>`<article class="card ${c.type}"><h3>${c.title}</h3><p>${c.description}</p><div class="muted-small"><strong>Canal:</strong> ${c.channel} · <strong>Estado:</strong> ${c.status}</div><div class="row-actions" style="margin-top:14px"><button class="mini-btn" data-edit-campaign="${c.id}">Editar</button><button class="mini-btn danger" data-delete-campaign="${c.id}">Eliminar</button></div></article>`).join('') : `<div class="empty-state">Aún no hay campañas. Crea una promoción, fidelización o recuperación.</div>`;
       renderIntegrationAnalysis(pendingCount, campaigns);
-      billingTable.innerHTML=active.map((a,i)=>`<tr><td>${a.client}</td><td>${a.service}</td><td>${i%2?'Transferencia':'Débito'}</td><td><strong>${fmt(servicePrice(a.service))}</strong></td></tr>`).join('') || `<tr><td colspan="4"><div class="empty-state">Sin movimientos todavía.</div></td></tr>`;
+      billingTable.innerHTML=active.map(a=>`<tr><td>${a.client}</td><td>${a.service}</td><td>${a.paymentMethod || 'No informado'}</td><td><strong>${fmt(servicePrice(a.service))}</strong></td></tr>`).join('') || `<tr><td colspan="4"><div class="empty-state">Sin movimientos todavía.</div></td></tr>`;
       bindAppointmentRowActions();
       bindProfessionalActions();
       bindCampaignActions();
       bindServiceActions();
+      renderOnboarding();
     }
 
     
@@ -2781,8 +2925,8 @@
         const ownerPhone = a.ownerWhatsapp || state.ownerWhatsapp || 'Número dueño no configurado';
         const calendar = a.ownerCalendarEmail || state.ownerCalendarEmail || 'Calendario no configurado';
         const confirmed = a.confirmationStatus === 'Confirmada';
-        const whatsappStatus = confirmed ? 'Dueño notificado por WhatsApp demo' : 'WhatsApp cliente programado';
-        const calendarStatus = confirmed ? 'Calendar actualizado: Confirmada' : (a.calendarStatus || 'Evento Calendar demo creado');
+        const whatsappStatus = confirmed ? 'Aviso al dueño registrado' : 'Aviso de WhatsApp pendiente de integración';
+        const calendarStatus = confirmed ? 'Reserva confirmada en Kauze' : (a.calendarStatus || 'Calendar pendiente de integración');
 
         return `<div class="notification-item">
           <strong>${a.client} · ${a.service}</strong>
@@ -2876,8 +3020,8 @@
         </article>
         <article class="card integration-card">
           <h3 style="font-family:Sora,sans-serif;font-size:18px;color:var(--navy);margin-bottom:6px">Automatización Kauze</h3>
-          <span class="integration-status ready">Simulación activa</span>
-          <p style="color:var(--muted);line-height:1.65;font-size:14px">Con backend real, estas reglas gatillarán mensajes según reserva, asistencia, no-show y días de inactividad.</p>
+          <span class="integration-status">Preparación disponible</span>
+          <p style="color:var(--muted);line-height:1.65;font-size:14px">Estas reglas enviarán mensajes según reserva, asistencia, no-show y días de inactividad cuando las integraciones estén conectadas.</p>
           <div class="muted-small">Campañas activas: <strong>${activeCampaigns}</strong></div>
         </article>
       `;
@@ -2905,17 +3049,33 @@
 
     function openAppointmentModal(id=null){
       editingAppointmentId = id;
+      const services = getServices();
+      const professionals = getProfessionals();
+      if (!id && !services.length) {
+        activateView('servicios');
+        return;
+      }
+      if (!id && !professionals.length) {
+        activateView('profesionales');
+        return;
+      }
       fillAppointmentSelects();
       appointmentModalTitle.textContent = id ? 'Editar cita' : 'Crear cita';
       saveAppointmentBtn.textContent = id ? 'Guardar cambios' : 'Guardar cita';
       appointmentSavedMsg.style.display = 'none';
 
       const appointment = id ? getAppointments().find(a => a.id === id) : null;
+      if (appointment?.service && !services.some(service => service.name === appointment.service)) {
+        apptService.insertAdjacentHTML('beforeend', `<option value="${appointment.service}">${appointment.service}</option>`);
+      }
+      if (appointment?.professional && !professionals.some(pro => pro.name === appointment.professional)) {
+        apptProfessional.insertAdjacentHTML('beforeend', `<option value="${appointment.professional}">${appointment.professional}</option>`);
+      }
       apptDate.value = appointment?.date || todayISO();
       apptTime.value = appointment?.time || '10:00';
       apptClient.value = appointment?.client || '';
-      apptService.value = appointment?.service || currentProfile().services[0][0];
-      apptProfessional.value = appointment?.professional || (getProfessionals()[0]?.name || '');
+      apptService.value = appointment?.service || (services[0]?.name || '');
+      apptProfessional.value = appointment?.professional || (professionals[0]?.name || '');
       apptStatus.value = appointment?.status || 'Confirmada';
 
       appointmentModal.classList.add('open');
@@ -3735,9 +3895,17 @@
     const walkInDuration = document.getElementById('walkInDuration');
 
     function openWalkInModal() {
-      const p = currentProfile();
-      walkInService.innerHTML = p.services.map(s => `<option value="${s[0]}">${s[0]} (${s[1]} · ${fmt(s[2])})</option>`).join('');
+      const services = getServices();
       const pros = getProfessionals();
+      if (!services.length) {
+        activateView('servicios');
+        return;
+      }
+      if (!pros.length) {
+        activateView('profesionales');
+        return;
+      }
+      walkInService.innerHTML = services.map(service => `<option value="${service.name}">${service.name} (${service.duration} · ${fmt(service.price)})</option>`).join('');
       walkInProfessional.innerHTML = pros.map(pr => `<option value="${pr.name}">${pr.name}</option>`).join('');
       
       walkInModal.classList.add('open');
@@ -3922,23 +4090,103 @@
     campaignForm.addEventListener('submit', e => { e.preventDefault(); saveCampaignFromModal(); });
     saveCampaignBtn.addEventListener('click', saveCampaignFromModal);
 
-    const viewsMeta={inicio:['Inicio','Resumen general del negocio.'],agenda:['Agenda','Reservas, horarios y confirmaciones.'],clientes:['Clientes','Historial, preferencias y seguimiento.'],servicios:['Servicios','Catálogo, duración y precios.'],profesionales:['Profesionales','Equipo, horarios y desempeño.'],marketing:['Marketing','Promociones, campañas y fidelización.'],facturacion:['Facturación','Ingresos, pagos y movimientos.'],ajustes:['Ajustes','Configuración conectada del negocio demo.']};
-    document.querySelectorAll('#nav button').forEach(btn=>btn.addEventListener('click', async ()=>{
-      const v=btn.dataset.view;
-      const targetView = document.getElementById('view-'+v);
-      if (!targetView || !viewsMeta[v]) return;
-      document.querySelectorAll('#nav button').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
-      targetView.classList.add('active');
-      pageTitle.textContent=viewsMeta[v][0];
-      pageSubtitle.textContent=viewsMeta[v][1];
+    const viewsMeta={
+      inicio:{title:'Inicio',subtitle:'Resumen general del negocio.',guide:'Aquí verás únicamente información real: citas, ingresos, clientes, alertas y los pasos pendientes para terminar tu configuración.'},
+      agenda:{title:'Agenda',subtitle:'Reservas, horarios y confirmaciones.',guide:'Administra las reservas web y presenciales. Puedes crear, confirmar, editar o cancelar citas y revisar quién atenderá cada servicio.'},
+      clientes:{title:'Clientes',subtitle:'Historial, preferencias y seguimiento.',guide:'Los clientes se incorporan al reservar o cuando los agregas manualmente. Aquí consultarás su historial y próximos seguimientos.'},
+      servicios:{title:'Servicios',subtitle:'Catálogo, duración y precios.',guide:'Crea los servicios que ofrece tu negocio, define su duración, precio y el trabajador que puede realizarlos.'},
+      profesionales:{title:'Profesionales',subtitle:'Equipo, horarios y desempeño.',guide:'Agrega trabajadores dentro del negocio, sin crear cuentas independientes. Configura sus horarios, servicios y comisión.'},
+      marketing:{title:'Marketing',subtitle:'Promociones, campañas y fidelización.',guide:'Prepara campañas para atraer, fidelizar y recuperar clientes. Las automatizaciones externas se activarán cuando sus integraciones estén conectadas.'},
+      facturacion:{title:'Facturación',subtitle:'Ingresos, pagos y movimientos.',guide:'Consulta ventas y métodos de pago registrados. Un negocio nuevo comienza en cero y los datos aparecen con sus atenciones reales.'},
+      ayuda:{title:'Centro de ayuda',subtitle:'Tutoriales y contacto directo con Kauze.',guide:'Vuelve a recorrer el tutorial, revisa preguntas frecuentes o comunícate con Kauze si necesitas acompañamiento.'},
+      ajustes:{title:'Ajustes',subtitle:'Personalización y configuración del negocio.',guide:'Personaliza tu logo, datos de contacto, anticipo, apariencia y preferencias. Los cambios pertenecen solamente a este negocio.'}
+    };
+    const tourOrder=['inicio','agenda','clientes','servicios','profesionales','marketing','facturacion','ajustes'];
+    let activeView='inicio';
+    let tourActive=false;
+    let tourIndex=0;
+
+    async function activateView(view,{sync=true}={}){
+      const targetView=document.getElementById('view-'+view);
+      const meta=viewsMeta[view];
+      if(!targetView || !meta) return;
+      document.querySelectorAll('#nav button').forEach(button=>button.classList.toggle('active',button.dataset.view===view));
+      document.querySelectorAll('.view').forEach(section=>section.classList.toggle('active',section===targetView));
+      pageTitle.textContent=meta.title;
+      pageSubtitle.textContent=meta.subtitle;
+      activeView=view;
       sidebar.classList.remove('open');
-      
-      // Pull state online
-      await syncOnlineState(false);
-      render();
-    }));
+      if(sync){
+        await syncOnlineState(false);
+        render();
+      }
+      if(panelGuide?.classList.contains('open')) renderPanelGuide();
+    }
+
+    function renderPanelGuide(){
+      if(!panelGuide) return;
+      const view=tourActive ? tourOrder[tourIndex] : activeView;
+      const meta=viewsMeta[view];
+      if(!meta) return;
+      panelGuideTitle.textContent=tourActive ? `Paso ${tourIndex+1} de ${tourOrder.length} · ${meta.title}` : `Cómo funciona ${meta.title}`;
+      panelGuideText.textContent=meta.guide;
+      panelGuidePrev.hidden=!tourActive || tourIndex===0;
+      panelGuideNext.hidden=!tourActive;
+      panelGuideNext.textContent=tourActive && tourIndex===tourOrder.length-1 ? 'Finalizar' : 'Siguiente';
+    }
+
+    function openPanelGuide(){
+      tourActive=false;
+      panelGuide.classList.add('open');
+      renderPanelGuide();
+    }
+
+    async function startPanelTourFlow(){
+      tourActive=true;
+      tourIndex=0;
+      panelGuide.classList.add('open');
+      await activateView(tourOrder[tourIndex],{sync:false});
+      renderPanelGuide();
+      panelGuide.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+
+    document.querySelectorAll('#nav button').forEach(btn=>btn.addEventListener('click',()=>activateView(btn.dataset.view)));
+    panelHelpBtn?.addEventListener('click',openPanelGuide);
+    openCurrentPanelGuide?.addEventListener('click',openPanelGuide);
+    startPanelTour?.addEventListener('click',startPanelTourFlow);
+    restartPanelTour?.addEventListener('click',startPanelTourFlow);
+    panelGuideClose?.addEventListener('click',()=>{
+      tourActive=false;
+      panelGuide.classList.remove('open');
+    });
+    panelGuidePrev?.addEventListener('click',async()=>{
+      if(!tourActive || tourIndex===0) return;
+      tourIndex-=1;
+      await activateView(tourOrder[tourIndex],{sync:false});
+      renderPanelGuide();
+    });
+    panelGuideNext?.addEventListener('click',async()=>{
+      if(!tourActive) return;
+      if(tourIndex<tourOrder.length-1){
+        tourIndex+=1;
+        await activateView(tourOrder[tourIndex],{sync:false});
+        renderPanelGuide();
+        return;
+      }
+      if(!state.onboarding) state.onboarding={welcomeDismissed:false,tourCompleted:false};
+      state.onboarding.tourCompleted=true;
+      saveState();
+      tourActive=false;
+      panelGuide.classList.remove('open');
+      await activateView('inicio',{sync:false});
+      renderOnboarding();
+    });
+    hideWelcomeCard?.addEventListener('click',()=>{
+      if(!state.onboarding) state.onboarding={welcomeDismissed:false,tourCompleted:false};
+      state.onboarding.welcomeDismissed=true;
+      saveState();
+      renderOnboarding();
+    });
 
     window.addEventListener('focus', async () => {
       if(!currentAccount) return;
