@@ -18,6 +18,7 @@ from backend.auth import (
     reset_password,
     save_business_state,
     update_user_profile_image,
+    _smtp_is_configured,
 )
 from backend.db import DatabaseNotConfigured, is_configured
 from backend.public_booking import (
@@ -163,6 +164,7 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                 {
                     "status": "ok",
                     "databaseConfigured": is_configured(),
+                    "emailConfigured": _smtp_is_configured(),
                     "authMode": "postgresql",
                 },
             )
@@ -325,13 +327,29 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
         if path == "/api/subscriptions/register":
             try:
                 data = self._read_json()
-                from backend.subscriptions import register_subscription
-                result = register_subscription(data)
+                from backend.trials import TrialRegistrationError, register_trial
+                client_key = (
+                    self.headers.get("CF-Connecting-IP")
+                    or self.headers.get("X-Forwarded-For", "").split(",", 1)[0].strip()
+                    or self.client_address[0]
+                )
+                result = register_trial(data, client_key)
                 self._json_response(201, result)
-            except ValueError as e:
-                self._json_response(400, {"error": "invalid_request", "message": str(e)})
-            except Exception as e:
-                self._json_response(500, {"error": "internal_error", "message": str(e)})
+            except TrialRegistrationError as exc:
+                self._json_response(
+                    exc.status, {"error": exc.code, "message": str(exc)}
+                )
+            except DatabaseNotConfigured:
+                self._json_response(503, {"error": "database_not_configured"})
+            except Exception as exc:
+                print(f"No fue posible crear el trial: {type(exc).__name__}")
+                self._json_response(
+                    500,
+                    {
+                        "error": "trial_creation_failed",
+                        "message": "No fue posible crear la cuenta. No se guardaron cambios.",
+                    },
+                )
             return
 
         if path == "/api/admin/clientes/crear":

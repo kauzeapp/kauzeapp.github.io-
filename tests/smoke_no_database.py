@@ -51,6 +51,7 @@ def main():
             raise RuntimeError("El servidor no inició.")
 
         assert health["databaseConfigured"] is False
+        assert health["emailConfigured"] is False
         assert health["authMode"] == "postgresql"
         assert request("/api/auth/me")[0] == 401
         assert request(
