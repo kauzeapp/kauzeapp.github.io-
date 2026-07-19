@@ -8,7 +8,7 @@ from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
 from backend.auth import _sha256
-from backend.db import connection, is_configured
+from backend.db import connection, is_configured, is_configured
 from backend.email_delivery import email_delivery_configured, send_email
 from backend.onboarding import business_slug
 from backend.tenant import set_tenant_context
@@ -209,6 +209,73 @@ def register_trial(data, client_key="unknown"):
             "subdomain": subdomain,
             "simulated": True
         }
+
+    if not is_configured():
+        # Modo Pruebas Locales (Puente de Simulaciones)
+        from backend.simulations import log_simulation
+        from backend.subscriptions import read_local_db, write_local_db
+        import uuid
+        from datetime import datetime, timedelta, timezone
+        
+        # 1. Simular validación de email
+        log_simulation("Validación de Email", email, f"Comprobando disponibilidad para el correo '{email}'.")
+        
+        db = read_local_db()
+        exists = any(s.get("email") == email for s in db["subscriptions"])
+        if exists:
+            raise TrialRegistrationError(
+                "Este correo ya está registrado. Ingresa al panel o recupera tu contraseña.",
+                "email_registered",
+                409
+            )
+            
+        # 2. Generar slug único y token
+        from backend.subscriptions import clean_subdomain
+        base_slug = clean_subdomain(business_name)
+        slug = base_slug
+        counter = 1
+        while any(s.get("subdominio") == f"{slug}.kauze.cl" for s in db["subscriptions"]):
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+            
+        subdomain = f"{slug}.kauze.cl"
+        client_id = str(uuid.uuid4())
+        raw_token = secrets.token_urlsafe(48)
+        
+        # 3. Crear registro en base de datos local JSON
+        expiry = datetime.now(timezone.utc) + timedelta(days=TRIAL_DAYS)
+        new_sub = {
+            "id": client_id,
+            "name": owner_name,
+            "email": email,
+            "phone": phone,
+            "planTipo": "trial",
+            "estadoSuscripcion": "trial",
+            "fechaVencimiento": expiry.isoformat() + "Z",
+            "subdominio": subdomain,
+            "requiereAprobacion": False,
+            "businessName": business_name,
+            "categoriaSlug": category_slug,
+            "creadoEn": datetime.now(timezone.utc).isoformat() + "Z",
+            "tokenAccesoTemporal": raw_token
+        }
+        db["subscriptions"].append(new_sub)
+        write_local_db(db)
+        
+        # 4. Logear simulaciones en el puente de pruebas
+        log_simulation("Base de Datos Local (JSON)", email, f"Creado registro de prueba '{business_name}' en 'subscriptions_db.json'.")
+        log_simulation("Ruteo de Subdominio", subdomain, f"Subdominio simulado creado. Apunta a 'http://localhost:8000/app/index.html?negocio={slug}'.")
+        
+        # Simular envío de email de bienvenida
+        access_url = f"http://localhost:8000/app/index.html?token={raw_token}"
+        log_simulation("Envío de Correo (Bienvenida)", email, f"Simulación de envío SMTP/Resend exitosa. Enlace de acceso: {access_url}")
+        
+        return {
+            "status": "success",
+            "message": "Tu negocio fue creado. Revisa el Muro de Simulaciones en el Panel Admin para activar el acceso.",
+            "subdomain": subdomain,
+            "simulated": True
+        }
     if not email_delivery_configured():
         raise TrialRegistrationError(
             "El envío de correos aún no está disponible. Intenta más tarde.",
@@ -336,6 +403,12 @@ def register_trial(data, client_key="unknown"):
                 access_url,
                 f"trial-access/{owner['id']}",
             )
+            try:
+                from backend.simulations import log_simulation
+                log_simulation("Base de Datos (Producción)", email, f"Creado barbero y local '{business_name}' en PostgreSQL.")
+                log_simulation("Ruteo de Subdominio (Producción)", f"{slug}.kauze.cl", f"Subdominio registrado exitosamente.")
+            except Exception:
+                pass
             try:
                 from backend.simulations import log_simulation
                 log_simulation("Base de Datos (Producción)", email, f"Creado barbero y local '{business_name}' en PostgreSQL.")
