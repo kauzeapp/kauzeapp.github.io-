@@ -2,7 +2,12 @@ import unittest
 from unittest.mock import patch
 from pathlib import Path
 
-from backend.trials import TrialRegistrationError, _phone, register_trial
+from backend.trials import (
+    TrialRegistrationError,
+    _ensure_owner_contact_available,
+    _phone,
+    register_trial,
+)
 from backend.email_delivery import email_provider
 
 
@@ -14,6 +19,19 @@ TRIAL_SQL = (ROOT / "backend" / "database" / "014_trial_onboarding.sql").read_te
 
 
 class TrialRegistrationTests(unittest.TestCase):
+    class _LookupConnection:
+        def __init__(self, email_exists=False, phone_exists=False):
+            self.email_exists = email_exists
+            self.phone_exists = phone_exists
+            self._result = None
+
+        def execute(self, query, _params):
+            self._result = self.email_exists if "LOWER(email)" in query else self.phone_exists
+            return self
+
+        def fetchone(self):
+            return (1,) if self._result else None
+
     def test_paid_plans_are_rejected_by_backend(self):
         with self.assertRaises(TrialRegistrationError) as error:
             register_trial({"planTipo": "mensual"})
@@ -24,6 +42,29 @@ class TrialRegistrationTests(unittest.TestCase):
         self.assertEqual(_phone("+56 9 1234 5678"), "+56912345678")
         with self.assertRaises(TrialRegistrationError):
             _phone("912345678")
+
+    def test_registered_phone_returns_a_clear_conflict(self):
+        connection = self._LookupConnection(phone_exists=True)
+
+        with self.assertRaises(TrialRegistrationError) as error:
+            _ensure_owner_contact_available(
+                connection, "nuevo@kauze.cl", "+56900000001"
+            )
+
+        self.assertEqual(error.exception.code, "phone_registered")
+        self.assertEqual(error.exception.status, 409)
+        self.assertIn("teléfono ya está registrado", str(error.exception))
+
+    def test_registered_email_keeps_its_clear_conflict(self):
+        connection = self._LookupConnection(email_exists=True)
+
+        with self.assertRaises(TrialRegistrationError) as error:
+            _ensure_owner_contact_available(
+                connection, "registrado@kauze.cl", "+56900000001"
+            )
+
+        self.assertEqual(error.exception.code, "email_registered")
+        self.assertEqual(error.exception.status, 409)
 
     def test_landing_exposes_only_trial_as_selectable(self):
         self.assertGreaterEqual(LANDING.count('aria-disabled="true"'), 3)
