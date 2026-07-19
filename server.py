@@ -171,7 +171,7 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
         if path == "/api/test-db":
             if is_configured():
                 try:
-                    from backend.database.connection import connection
+                    from backend.db import connection
                     with connection() as conn:
                         rows = conn.execute("SELECT id, nombre_completo, email, plan_tipo, estado_suscripcion FROM usuarios").fetchall()
                         results = []
