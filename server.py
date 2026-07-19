@@ -20,6 +20,7 @@ from backend.auth import (
     update_user_profile_image,
 )
 from backend.db import DatabaseNotConfigured, is_configured
+from backend.email_delivery import email_delivery_configured, email_provider
 from backend.public_booking import (
     PublicBookingError,
     create_public_appointment,
@@ -163,10 +164,13 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                 {
                     "status": "ok",
                     "databaseConfigured": is_configured(),
+                    "emailConfigured": email_delivery_configured(),
+                    "emailProvider": email_provider(),
                     "authMode": "postgresql",
                 },
             )
             return
+
         if path == "/api/public/businesses":
             try:
                 self._json_response(200, {"businesses": list_public_businesses()})
@@ -233,13 +237,23 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         if path == "/api/admin/dashboard/stats":
-            # Nota: Bypass de autenticación para desarrollo/MVP y pruebas en admin.kauze.cl
+            account = self._require_session()
+            if not account:
+                return
+            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+                self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
+                return
             from backend.subscriptions import get_dashboard_stats
             self._json_response(200, get_dashboard_stats())
             return
 
         if path == "/api/admin/clientes":
-            # Nota: Bypass de autenticación para desarrollo/MVP y pruebas en admin.kauze.cl
+            account = self._require_session()
+            if not account:
+                return
+            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+                self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
+                return
             query = parse_qs(parsed_url.query)
             status_filter = (query.get("status") or [None])[0]
             search_query = (query.get("q") or [None])[0]
@@ -261,7 +275,12 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         if path.startswith("/api/admin/clientes/") and path.endswith("/confirmar"):
-            # Nota: Bypass de autenticación para desarrollo/MVP y pruebas en admin.kauze.cl
+            account = self._require_session()
+            if not account:
+                return
+            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+                self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
+                return
             try:
                 parts = path.strip("/").split("/")
                 if len(parts) != 5:
@@ -273,29 +292,6 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                 self._json_response(200, result)
             except ValueError as e:
                 self._json_response(400, {"error": "invalid_request", "message": str(e)})
-            except Exception as e:
-                self._json_response(500, {"error": "internal_error", "message": str(e)})
-            return
-
-        self._json_response(405, {"error": "method_not_allowed"})
-
-    def do_DELETE(self):
-        path = urlparse(self.path).path
-
-        if not self._origin_allowed():
-            self._json_response(403, {"error": "origin_not_allowed"})
-            return
-
-        if path.startswith("/api/admin/clientes/"):
-            try:
-                parts = path.strip("/").split("/")
-                if len(parts) != 4:
-                    self._json_response(404, {"error": "not_found"})
-                    return
-                client_id = parts[3]
-                from backend.subscriptions import delete_admin_client
-                result = delete_admin_client(client_id)
-                self._json_response(200, result)
             except Exception as e:
                 self._json_response(500, {"error": "internal_error", "message": str(e)})
             return
@@ -332,17 +328,38 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
         if path == "/api/subscriptions/register":
             try:
                 data = self._read_json()
-                from backend.subscriptions import register_subscription
-                result = register_subscription(data)
+                from backend.trials import TrialRegistrationError, register_trial
+                client_key = (
+                    self.headers.get("CF-Connecting-IP")
+                    or self.headers.get("X-Forwarded-For", "").split(",", 1)[0].strip()
+                    or self.client_address[0]
+                )
+                result = register_trial(data, client_key)
                 self._json_response(201, result)
-            except ValueError as e:
-                self._json_response(400, {"error": "invalid_request", "message": str(e)})
-            except Exception as e:
-                self._json_response(500, {"error": "internal_error", "message": str(e)})
+            except TrialRegistrationError as exc:
+                self._json_response(
+                    exc.status, {"error": exc.code, "message": str(exc)}
+                )
+            except DatabaseNotConfigured:
+                self._json_response(503, {"error": "database_not_configured"})
+            except Exception as exc:
+                print(f"No fue posible crear el trial: {type(exc).__name__}")
+                self._json_response(
+                    500,
+                    {
+                        "error": "trial_creation_failed",
+                        "message": "No fue posible crear la cuenta. No se guardaron cambios.",
+                    },
+                )
             return
 
         if path == "/api/admin/clientes/crear":
-            # Nota: Bypass de autenticación para desarrollo/MVP y pruebas en admin.kauze.cl
+            account = self._require_session()
+            if not account:
+                return
+            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+                self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
+                return
             try:
                 data = self._read_json()
                 from backend.subscriptions import create_admin_client
@@ -355,7 +372,12 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         if path.startswith("/api/admin/clientes/") and path.endswith("/reset-password"):
-            # Nota: Bypass de autenticación para desarrollo/MVP y pruebas en admin.kauze.cl
+            account = self._require_session()
+            if not account:
+                return
+            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+                self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
+                return
             try:
                 parts = path.strip("/").split("/")
                 if len(parts) != 5:
