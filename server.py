@@ -168,6 +168,27 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             )
             return
 
+        if path == "/api/test-db":
+            if is_configured():
+                try:
+                    from backend.database.connection import connection
+                    with connection() as conn:
+                        rows = conn.execute("SELECT id, nombre_completo, email, plan_tipo, estado_suscripcion FROM usuarios").fetchall()
+                        results = []
+                        for r in rows:
+                            results.append({
+                                "id": str(r[0]),
+                                "name": r[1],
+                                "email": r[2],
+                                "plan": r[3],
+                                "status": r[4]
+                            })
+                        self._json_response(200, {"count": len(results), "users": results})
+                except Exception as e:
+                    self._json_response(500, {"error": str(e)})
+            else:
+                self._json_response(503, {"error": "database_not_configured"})
+            return
         if path == "/api/public/businesses":
             try:
                 self._json_response(200, {"businesses": list_public_businesses()})
