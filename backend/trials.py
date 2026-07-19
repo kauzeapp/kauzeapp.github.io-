@@ -77,6 +77,26 @@ def _available_slug(conn, name):
     raise TrialRegistrationError("No fue posible crear el enlace del negocio.", "slug_unavailable", 409)
 
 
+def _ensure_owner_contact_available(conn, email, phone):
+    if conn.execute(
+        "SELECT 1 FROM usuarios WHERE LOWER(email) = %s", (email,)
+    ).fetchone():
+        raise TrialRegistrationError(
+            "Este correo ya está registrado. Ingresa al panel o recupera tu contraseña.",
+            "email_registered",
+            409,
+        )
+
+    if conn.execute(
+        "SELECT 1 FROM usuarios WHERE telefono_whatsapp = %s", (phone,)
+    ).fetchone():
+        raise TrialRegistrationError(
+            "Este teléfono ya está registrado. Ingresa al panel, recupera tu contraseña o utiliza otro número.",
+            "phone_registered",
+            409,
+        )
+
+
 def _send_initial_access_email(recipient, owner_name, business_name, access_url):
     if not email_delivery_configured():
         raise RuntimeError("El servicio de correo de Kauze todavía no está configurado.")
@@ -126,14 +146,7 @@ def register_trial(data, client_key="unknown"):
     with connection() as conn:
         with conn.transaction():
             conn.row_factory = dict_row
-            if conn.execute(
-                "SELECT 1 FROM usuarios WHERE LOWER(email) = %s", (email,)
-            ).fetchone():
-                raise TrialRegistrationError(
-                    "Este correo ya está registrado. Ingresa al panel o recupera tu contraseña.",
-                    "email_registered",
-                    409,
-                )
+            _ensure_owner_contact_available(conn, email, phone)
 
             category = conn.execute(
                 "SELECT id FROM categorias WHERE slug = %s AND activo = TRUE",
