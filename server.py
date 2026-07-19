@@ -36,7 +36,10 @@ MAX_JSON_BYTES = 1_500_000
 COOKIE_SECURE = os.environ.get(
     "KAUZE_COOKIE_SECURE", "1" if os.environ.get("RAILWAY_ENVIRONMENT") else "0"
 ) != "0"
-COOKIE_NAME = "__Host-kauze_session" if COOKIE_SECURE else "kauze_session"
+# Nota: NO usamos el prefijo __Host- porque necesitamos Domain=.kauze.cl
+# para compartir la sesión entre kauze.cl y admin.kauze.cl
+COOKIE_NAME = "kauze_session"
+COOKIE_DOMAIN = os.environ.get("KAUZE_COOKIE_DOMAIN", ".kauze.cl" if COOKIE_SECURE else "")
 
 
 class KauzeHandler(http.server.SimpleHTTPRequestHandler):
@@ -113,23 +116,45 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
         return account
 
     def _session_cookie(self, token, remember):
-        parts = [f"{COOKIE_NAME}={token}", "Path=/", "HttpOnly", "SameSite=Lax"]
         if COOKIE_SECURE:
-            parts.append("Secure")
+            # Producción: cross-subdomain (kauze.cl + admin.kauze.cl)
+            # SameSite=None requiere Secure, y permite cookies en peticiones cross-site
+            parts = [
+                f"{COOKIE_NAME}={token}",
+                "Path=/",
+                "HttpOnly",
+                "SameSite=None",
+                "Secure",
+            ]
+            if COOKIE_DOMAIN:
+                parts.append(f"Domain={COOKIE_DOMAIN}")
+        else:
+            # Desarrollo local: SameSite=Lax sin Secure
+            parts = [f"{COOKIE_NAME}={token}", "Path=/", "HttpOnly", "SameSite=Lax"]
         if remember:
             parts.append("Max-Age=2592000")
         return "; ".join(parts)
 
     def _clear_session_cookie(self):
-        parts = [
-            f"{COOKIE_NAME}=",
-            "Path=/",
-            "HttpOnly",
-            "SameSite=Lax",
-            "Max-Age=0",
-        ]
         if COOKIE_SECURE:
-            parts.append("Secure")
+            parts = [
+                f"{COOKIE_NAME}=",
+                "Path=/",
+                "HttpOnly",
+                "SameSite=None",
+                "Secure",
+                "Max-Age=0",
+            ]
+            if COOKIE_DOMAIN:
+                parts.append(f"Domain={COOKIE_DOMAIN}")
+        else:
+            parts = [
+                f"{COOKIE_NAME}=",
+                "Path=/",
+                "HttpOnly",
+                "SameSite=Lax",
+                "Max-Age=0",
+            ]
         return "; ".join(parts)
 
     def _origin_allowed(self):
