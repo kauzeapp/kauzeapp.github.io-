@@ -183,7 +183,6 @@ def register_subscription(data):
                     """,
                     (name, email, phone, plan_tipo, expiry, business_name, categoria_slug)
                 )
-                conn.commit()
     else:
         db = read_local_db()
         for sub in db["subscriptions"]:
@@ -497,7 +496,6 @@ def create_admin_client(data):
                         (user_id, role[0], local_id)
                     )
 
-                conn.commit()
     else:
         db = read_local_db()
         for sub in db["subscriptions"]:
@@ -623,7 +621,6 @@ def confirm_client_activation(client_id):
                         (client_id, role["id"], local_id)
                     )
 
-                conn.commit()
                 email = user["email"]
                 name = user["nombre_completo"]
     else:
@@ -684,7 +681,6 @@ def reset_client_password(client_id):
                     """,
                     (client_id, hasher.hash(temp_password))
                 )
-                conn.commit()
                 email = user["email"]
                 name = user["nombre_completo"]
     else:
