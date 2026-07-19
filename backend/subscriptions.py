@@ -246,7 +246,7 @@ def get_admin_clients(status_filter=None, search_query=None):
                        subdominio, requiere_aprobacion, nombre_barberia, creado_en,
                        categoria_slug
                 FROM usuarios
-                WHERE plan_tipo IS NOT NULL
+                WHERE 1=1
             """
             params = []
             if status_filter:
@@ -262,15 +262,15 @@ def get_admin_clients(status_filter=None, search_query=None):
             for r in rows:
                 clients.append({
                     "id": str(r["id"]),
-                    "name": r["nombre_completo"],
+                    "name": r["nombre_completo"] or "Usuario sin nombre",
                     "email": r["email"],
-                    "phone": r["telefono_whatsapp"],
-                    "planTipo": r["plan_tipo"],
-                    "estadoSuscripcion": r["estado_suscripcion"],
+                    "phone": r["telefono_whatsapp"] or "—",
+                    "planTipo": r["plan_tipo"] or "NINGUNO",
+                    "estadoSuscripcion": r["estado_suscripcion"] or "activo",
                     "fechaVencimiento": r["fecha_vencimiento"].isoformat() if r["fecha_vencimiento"] else None,
                     "subdominio": r["subdominio"],
-                    "requiereAprobacion": r["requiere_aprobacion"],
-                    "businessName": r["nombre_barberia"],
+                    "requiereAprobacion": r["requiere_aprobacion"] or False,
+                    "businessName": r["nombre_barberia"] or "Kauze Admin",
                     "categoriaSlug": r["categoria_slug"] or "barberia",
                     "creadoEn": r["creado_en"].isoformat() if r["creado_en"] else None
                 })
