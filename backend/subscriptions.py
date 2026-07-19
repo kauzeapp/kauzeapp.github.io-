@@ -164,25 +164,26 @@ def register_subscription(data):
 
     if is_configured():
         with connection() as conn:
-            # Check duplicate email
-            exists = conn.execute(
-                "SELECT 1 FROM usuarios WHERE LOWER(email) = %s", (email,)
-            ).fetchone()
-            if exists:
-                raise ValueError("El correo ya está registrado en la plataforma.")
+            with conn.transaction():
+                # Check duplicate email
+                exists = conn.execute(
+                    "SELECT 1 FROM usuarios WHERE LOWER(email) = %s", (email,)
+                ).fetchone()
+                if exists:
+                    raise ValueError("El correo ya está registrado en la plataforma.")
 
-            # Insert as user requesting approval
-            conn.execute(
-                """
-                INSERT INTO usuarios (
-                    nombre_completo, email, telefono_whatsapp, 
-                    plan_tipo, estado_suscripcion, fecha_vencimiento, 
-                    requiere_aprobacion, nombre_barberia, estado, categoria_slug
-                ) VALUES (%s, %s, %s, %s, 'trial', %s, TRUE, %s, 'activo', %s)
-                """,
-                (name, email, phone, plan_tipo, expiry, business_name, categoria_slug)
-            )
-            conn.commit()
+                # Insert as user requesting approval
+                conn.execute(
+                    """
+                    INSERT INTO usuarios (
+                        nombre_completo, email, telefono_whatsapp, 
+                        plan_tipo, estado_suscripcion, fecha_vencimiento, 
+                        requiere_aprobacion, nombre_barberia, estado, categoria_slug
+                    ) VALUES (%s, %s, %s, %s, 'trial', %s, TRUE, %s, 'activo', %s)
+                    """,
+                    (name, email, phone, plan_tipo, expiry, business_name, categoria_slug)
+                )
+                conn.commit()
     else:
         db = read_local_db()
         for sub in db["subscriptions"]:
@@ -446,56 +447,57 @@ def create_admin_client(data):
 
     if is_configured():
         with connection() as conn:
-            # Check duplicate email
-            exists = conn.execute(
-                "SELECT id FROM usuarios WHERE LOWER(email) = %s", (email,)
-            ).fetchone()
-            if exists:
-                raise ValueError("El correo ya está registrado.")
+            with conn.transaction():
+                # Check duplicate email
+                exists = conn.execute(
+                    "SELECT id FROM usuarios WHERE LOWER(email) = %s", (email,)
+                ).fetchone()
+                if exists:
+                    raise ValueError("El correo ya está registrado.")
 
-            # Create User
-            user_row = conn.execute(
-                """
-                INSERT INTO usuarios (
-                    nombre_completo, email, telefono_whatsapp, 
-                    plan_tipo, estado_suscripcion, fecha_vencimiento, 
-                    subdominio, requiere_aprobacion, nombre_barberia, estado,
-                    categoria_slug
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, FALSE, %s, 'activo', %s)
-                RETURNING id
-                """,
-                (name, email, phone, plan_tipo, estado_suscripcion, expiry, subdomain, business_name, categoria_slug)
-            ).fetchone()
-            user_id = user_row[0]
+                # Create User
+                user_row = conn.execute(
+                    """
+                    INSERT INTO usuarios (
+                        nombre_completo, email, telefono_whatsapp, 
+                        plan_tipo, estado_suscripcion, fecha_vencimiento, 
+                        subdominio, requiere_aprobacion, nombre_barberia, estado,
+                        categoria_slug
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, FALSE, %s, 'activo', %s)
+                    RETURNING id
+                    """,
+                    (name, email, phone, plan_tipo, estado_suscripcion, expiry, subdomain, business_name, categoria_slug)
+                ).fetchone()
+                user_id = user_row[0]
 
-            # Create Password Credentials
-            conn.execute(
-                "INSERT INTO credenciales_password (usuario_id, password_hash) VALUES (%s, %s)",
-                (user_id, hasher.hash(temp_password))
-            )
-
-            # Create Business Local
-            cat = conn.execute("SELECT id FROM categorias WHERE slug = %s", (categoria_slug,)).fetchone()
-            cat_id = cat[0] if cat else None
-            local_row = conn.execute(
-                """
-                INSERT INTO locales (categoria_id, nombre, slug, estado)
-                VALUES (%s, %s, %s, 'activo')
-                RETURNING id
-                """,
-                (cat_id, business_name, subdomain_slug)
-            ).fetchone()
-            local_id = local_row[0]
-
-            # Assign Owner Role
-            role = conn.execute("SELECT id FROM roles WHERE slug = 'dueno'").fetchone()
-            if role:
+                # Create Password Credentials
                 conn.execute(
-                    "INSERT INTO usuario_roles (usuario_id, rol_id, local_id) VALUES (%s, %s, %s)",
-                    (user_id, role[0], local_id)
+                    "INSERT INTO credenciales_password (usuario_id, password_hash) VALUES (%s, %s)",
+                    (user_id, hasher.hash(temp_password))
                 )
 
-            conn.commit()
+                # Create Business Local
+                cat = conn.execute("SELECT id FROM categorias WHERE slug = %s", (categoria_slug,)).fetchone()
+                cat_id = cat[0] if cat else None
+                local_row = conn.execute(
+                    """
+                    INSERT INTO locales (categoria_id, nombre, slug, estado)
+                    VALUES (%s, %s, %s, 'activo')
+                    RETURNING id
+                    """,
+                    (cat_id, business_name, subdomain_slug)
+                ).fetchone()
+                local_id = local_row[0]
+
+                # Assign Owner Role
+                role = conn.execute("SELECT id FROM roles WHERE slug = 'dueno'").fetchone()
+                if role:
+                    conn.execute(
+                        "INSERT INTO usuario_roles (usuario_id, rol_id, local_id) VALUES (%s, %s, %s)",
+                        (user_id, role[0], local_id)
+                    )
+
+                conn.commit()
     else:
         db = read_local_db()
         for sub in db["subscriptions"]:
@@ -537,92 +539,93 @@ def confirm_client_activation(client_id):
 
     if is_configured():
         with connection() as conn:
-            conn.row_factory = dict_row
-            user = conn.execute(
-                """
-                SELECT id, nombre_completo, email, plan_tipo, nombre_barberia,
-                       categoria_slug
-                FROM usuarios WHERE id = %s
-                """,
-                (client_id,)
-            ).fetchone()
-            if not user:
-                raise ValueError("Cliente no encontrado.")
+            with conn.transaction():
+                conn.row_factory = dict_row
+                user = conn.execute(
+                    """
+                    SELECT id, nombre_completo, email, plan_tipo, nombre_barberia,
+                           categoria_slug
+                    FROM usuarios WHERE id = %s
+                    """,
+                    (client_id,)
+                ).fetchone()
+                if not user:
+                    raise ValueError("Cliente no encontrado.")
 
-            plan_tipo = user["plan_tipo"] or "trial"
-            if plan_tipo == 'mensual':
-                days = 30
-            elif plan_tipo == 'trimestral':
-                days = 90
-            elif plan_tipo == 'anual':
-                days = 365
-            else:
-                days = 7
-            expiry = now + timedelta(days=days)
+                plan_tipo = user["plan_tipo"] or "trial"
+                if plan_tipo == 'mensual':
+                    days = 30
+                elif plan_tipo == 'trimestral':
+                    days = 90
+                elif plan_tipo == 'anual':
+                    days = 365
+                else:
+                    days = 7
+                expiry = now + timedelta(days=days)
 
-            subdomain_slug = clean_subdomain(user["nombre_barberia"]) + "-" + secrets.token_hex(2)
-            subdomain = f"{subdomain_slug}.kauze.cl"
+                subdomain_slug = clean_subdomain(user["nombre_barberia"]) + "-" + secrets.token_hex(2)
+                subdomain = f"{subdomain_slug}.kauze.cl"
 
-            # Update User
-            status = 'trial' if plan_tipo == 'trial' else 'activo'
-            conn.execute(
-                """
-                UPDATE usuarios 
-                SET estado_suscripcion = %s,
-                    fecha_vencimiento = %s,
-                    subdominio = %s,
-                    requiere_aprobacion = FALSE,
-                    estado = 'activo'
-                WHERE id = %s
-                """,
-                (status, expiry, subdomain, client_id)
-            )
-
-            # Insert/Update password
-            conn.execute(
-                """
-                INSERT INTO credenciales_password (usuario_id, password_hash)
-                VALUES (%s, %s)
-                ON CONFLICT (usuario_id) DO UPDATE
-                SET password_hash = EXCLUDED.password_hash,
-                    intentos_fallidos = 0,
-                    bloqueado_hasta = NULL,
-                    password_actualizada_en = NOW()
-                """,
-                (client_id, hasher.hash(temp_password))
-            )
-
-            # Create Local
-            cat_slug = user["categoria_slug"] or "barberia"
-            cat = conn.execute("SELECT id FROM categorias WHERE slug = %s", (cat_slug,)).fetchone()
-            cat_id = cat["id"] if cat else None
-            local_row = conn.execute(
-                """
-                INSERT INTO locales (categoria_id, nombre, slug, estado)
-                VALUES (%s, %s, %s, 'activo')
-                ON CONFLICT (slug) DO UPDATE SET estado = 'activo'
-                RETURNING id
-                """,
-                (cat_id, user["nombre_barberia"], subdomain_slug)
-            ).fetchone()
-            local_id = local_row["id"]
-
-            # Link Role
-            role = conn.execute("SELECT id FROM roles WHERE slug = 'dueno'").fetchone()
-            if role:
+                # Update User
+                status = 'trial' if plan_tipo == 'trial' else 'activo'
                 conn.execute(
                     """
-                    INSERT INTO usuario_roles (usuario_id, rol_id, local_id)
-                    VALUES (%s, %s, %s)
-                    ON CONFLICT (usuario_id, rol_id, local_id) WHERE local_id IS NOT NULL
-                    DO NOTHING
+                    UPDATE usuarios 
+                    SET estado_suscripcion = %s,
+                        fecha_vencimiento = %s,
+                        subdominio = %s,
+                        requiere_aprobacion = FALSE,
+                        estado = 'activo'
+                    WHERE id = %s
                     """,
-                    (client_id, role["id"], local_id)
+                    (status, expiry, subdomain, client_id)
                 )
 
-            conn.commit()
-            email = user["email"]
-            name = user["nombre_completo"]
+                # Insert/Update password
+                conn.execute(
+                    """
+                    INSERT INTO credenciales_password (usuario_id, password_hash)
+                    VALUES (%s, %s)
+                    ON CONFLICT (usuario_id) DO UPDATE
+                    SET password_hash = EXCLUDED.password_hash,
+                        intentos_fallidos = 0,
+                        bloqueado_hasta = NULL,
+                        password_actualizada_en = NOW()
+                    """,
+                    (client_id, hasher.hash(temp_password))
+                )
+
+                # Create Local
+                cat_slug = user["categoria_slug"] or "barberia"
+                cat = conn.execute("SELECT id FROM categorias WHERE slug = %s", (cat_slug,)).fetchone()
+                cat_id = cat["id"] if cat else None
+                local_row = conn.execute(
+                    """
+                    INSERT INTO locales (categoria_id, nombre, slug, estado)
+                    VALUES (%s, %s, %s, 'activo')
+                    ON CONFLICT (slug) DO UPDATE SET estado = 'activo'
+                    RETURNING id
+                    """,
+                    (cat_id, user["nombre_barberia"], subdomain_slug)
+                ).fetchone()
+                local_id = local_row["id"]
+
+                # Link Role
+                role = conn.execute("SELECT id FROM roles WHERE slug = 'dueno'").fetchone()
+                if role:
+                    conn.execute(
+                        """
+                        INSERT INTO usuario_roles (usuario_id, rol_id, local_id)
+                        VALUES (%s, %s, %s)
+                        ON CONFLICT (usuario_id, rol_id, local_id) WHERE local_id IS NOT NULL
+                        DO NOTHING
+                        """,
+                        (client_id, role["id"], local_id)
+                    )
+
+                conn.commit()
+                email = user["email"]
+                name = user["nombre_completo"]
     else:
         db = read_local_db()
         sub = next((item for item in db["subscriptions"] if item["id"] == client_id), None)
@@ -661,28 +664,29 @@ def reset_client_password(client_id):
 
     if is_configured():
         with connection() as conn:
-            conn.row_factory = dict_row
-            user = conn.execute(
-                "SELECT id, nombre_completo, email FROM usuarios WHERE id = %s", (client_id,)
-            ).fetchone()
-            if not user:
-                raise ValueError("Cliente no encontrado.")
+            with conn.transaction():
+                conn.row_factory = dict_row
+                user = conn.execute(
+                    "SELECT id, nombre_completo, email FROM usuarios WHERE id = %s", (client_id,)
+                ).fetchone()
+                if not user:
+                    raise ValueError("Cliente no encontrado.")
 
-            conn.execute(
-                """
-                INSERT INTO credenciales_password (usuario_id, password_hash)
-                VALUES (%s, %s)
-                ON CONFLICT (usuario_id) DO UPDATE
-                SET password_hash = EXCLUDED.password_hash,
-                    intentos_fallidos = 0,
-                    bloqueado_hasta = NULL,
-                    password_actualizada_en = NOW()
-                """,
-                (client_id, hasher.hash(temp_password))
-            )
-            conn.commit()
-            email = user["email"]
-            name = user["nombre_completo"]
+                conn.execute(
+                    """
+                    INSERT INTO credenciales_password (usuario_id, password_hash)
+                    VALUES (%s, %s)
+                    ON CONFLICT (usuario_id) DO UPDATE
+                    SET password_hash = EXCLUDED.password_hash,
+                        intentos_fallidos = 0,
+                        bloqueado_hasta = NULL,
+                        password_actualizada_en = NOW()
+                    """,
+                    (client_id, hasher.hash(temp_password))
+                )
+                conn.commit()
+                email = user["email"]
+                name = user["nombre_completo"]
     else:
         db = read_local_db()
         sub = next((item for item in db["subscriptions"] if item["id"] == client_id), None)
