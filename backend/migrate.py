@@ -36,6 +36,57 @@ def apply_migrations(conn):
         print(f"Migración aplicada: {path.name}")
 
 
+def verify_owner_business_model(conn):
+    required_relations = (
+        "clientes",
+        "reservas",
+        "suscripciones_saas",
+        "kauze_backups.pre_owner_model_usuarios",
+        "kauze_backups.pre_owner_model_locales",
+        "kauze_backups.pre_owner_model_profesionales",
+    )
+    missing = [
+        relation
+        for relation in required_relations
+        if conn.execute("SELECT to_regclass(%s)", (relation,)).fetchone()[0] is None
+    ]
+    if missing:
+        raise RuntimeError(
+            "La migración del modelo dueño/negocio quedó incompleta: "
+            + ", ".join(missing)
+        )
+
+    professional_user_nullable = conn.execute(
+        """
+        SELECT is_nullable = 'YES'
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'profesionales'
+          AND column_name = 'usuario_id'
+        """
+    ).fetchone()
+    if not professional_user_nullable or not professional_user_nullable[0]:
+        raise RuntimeError("Los profesionales todavía exigen una cuenta de usuario.")
+
+    rls_rows = conn.execute(
+        """
+        SELECT relname, relrowsecurity, relforcerowsecurity
+        FROM pg_class
+        WHERE relnamespace = 'public'::regnamespace
+          AND relname IN ('profesionales', 'servicios', 'clientes', 'reservas', 'suscripciones_saas')
+        """
+    ).fetchall()
+    invalid_rls = [
+        row[0]
+        for row in rls_rows
+        if not bool(row[1]) or not bool(row[2])
+    ]
+    if len(rls_rows) != 5 or invalid_rls:
+        raise RuntimeError("RLS no quedó forzado en todas las tablas multi-negocio.")
+
+    print("Modelo dueño/negocio verificado: backups, fichas internas y RLS activos.")
+
+
 def bootstrap_owner(conn):
     email = os.environ.get("KAUZE_BOOTSTRAP_EMAIL", "").strip().lower()
     password = os.environ.get("KAUZE_BOOTSTRAP_PASSWORD", "")
@@ -80,8 +131,14 @@ def bootstrap_owner(conn):
 
     user = conn.execute(
         """
-        INSERT INTO usuarios (nombre_completo, email, estado)
-        VALUES (%s, %s, 'activo')
+        INSERT INTO usuarios (
+          nombre_completo,
+          email,
+          estado,
+          proveedor_auth,
+          email_verificado
+        )
+        VALUES (%s, %s, 'activo', 'password', TRUE)
         ON CONFLICT (LOWER(email)) WHERE email IS NOT NULL DO UPDATE
         SET nombre_completo = EXCLUDED.nombre_completo,
             estado = 'activo',
@@ -164,6 +221,7 @@ def main():
 
     with psycopg.connect(url, autocommit=True) as conn:
         apply_migrations(conn)
+        verify_owner_business_model(conn)
         with conn.transaction():
             bootstrap_owner(conn)
             provision_demo_businesses(conn)

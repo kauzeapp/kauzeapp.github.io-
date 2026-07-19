@@ -12,6 +12,7 @@ from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
 from backend.db import connection
+from backend.tenant import tenant_connection
 
 
 SESSION_HOURS = 8
@@ -177,9 +178,8 @@ def login(email, password, remember=False, local_slug=None, user_agent=""):
             INNER JOIN locales l ON l.id = ur.local_id AND l.estado = 'activo'
             INNER JOIN categorias c ON c.id = l.categoria_id AND c.activo = TRUE
             WHERE u.id = %s
-              AND r.slug IN ('dueno', 'encargado', 'profesional')
+              AND r.slug = 'dueno'
             ORDER BY
-              CASE r.slug WHEN 'dueno' THEN 1 WHEN 'encargado' THEN 2 ELSE 3 END,
               l.nombre
             """,
             (credential["usuario_id"],),
@@ -301,6 +301,7 @@ def current_session(session_token):
             WHERE s.token_hash = %s
               AND s.revocada_en IS NULL
               AND s.expira_en > NOW()
+              AND r.slug = 'dueno'
             LIMIT 1
             """,
             (_sha256(session_token),),
@@ -326,7 +327,7 @@ def logout(session_token):
 
 
 def load_business_state(local_id):
-    with connection() as conn:
+    with tenant_connection(local_id) as conn:
         conn.row_factory = dict_row
         row = conn.execute(
             "SELECT estado, version, actualizado_en FROM estados_panel_local WHERE local_id = %s",
@@ -344,7 +345,7 @@ def load_business_state(local_id):
 def save_business_state(local_id, user_id, state):
     if not isinstance(state, dict):
         raise ValueError("El estado del panel debe ser un objeto.")
-    with connection() as conn:
+    with tenant_connection(local_id, user_id) as conn:
         conn.row_factory = dict_row
         row = conn.execute(
             """
