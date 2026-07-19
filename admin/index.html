@@ -2655,7 +2655,8 @@
             if (client.requiereAprobacion) {
                 actionsMarkup += `<button class="button small primary" onclick="confirmClient('${client.id}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle;">Confirmar Ingreso</button>`;
             }
-            actionsMarkup += `<button class="button small" onclick="resetClientPassword('${client.id}')" style="padding: 4px 8px; font-size: 11px; vertical-align: middle;">Restablecer Clave</button>`;
+            actionsMarkup += `<button class="button small" onclick="resetClientPassword('${client.id}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle;">Restablecer Clave</button>`;
+            actionsMarkup += `<button class="button small" onclick="deleteClient('${client.id}')" style="padding: 4px 8px; font-size: 11px; vertical-align: middle; background: rgba(239,68,68,0.1); color: #dc2626; border-color: rgba(239,68,68,0.2);">Eliminar</button>`;
             
             tr.innerHTML = `
                 <td style="padding: 14px 18px; font-size: 13.5px;">${subNameMarkup}</td>
@@ -2699,6 +2700,23 @@
             }
         } catch (e) {
             alert("Error de conexión.");
+        }
+    };
+
+    window.deleteClient = async function(id) {
+        if (!confirm("¿Estás seguro de eliminar permanentemente este cliente de la base de datos?")) return;
+        try {
+            const res = await fetch(`/api/admin/clientes/${id}`, { method: "DELETE" });
+            if (res.ok) {
+                alert("¡Cliente eliminado con éxito!");
+                await loadStats();
+                await loadClients();
+            } else {
+                const err = await res.json();
+                alert("Error al eliminar: " + (err.message || err.error));
+            }
+        } catch (e) {
+            alert("Error de conexión al eliminar.");
         }
     };
 
