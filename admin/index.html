@@ -993,7 +993,7 @@
     <div class="section-title" style="margin-top: 56px;">
       <div>
         <h2>Gestión de Suscripciones (MVP)</h2>
-        <p>Ciclo de vida de los barberos registrados en Kauze.</p>
+        <p>Ciclo de vida de los negocios registrados en Kauze.</p>
       </div>
       <button class="button primary" onclick="openCreateClientModal()">+ Crear Cliente Manual</button>
     </div>
@@ -1032,7 +1032,7 @@
         <button class="button small" onclick="filterClients('desactivado')" id="btnFilter_desactivado">Desactivados</button>
       </div>
       <div style="flex: 1; max-width: 350px;">
-        <input type="text" id="adminSearchInput" oninput="searchClients()" placeholder="Buscar por barbería, nombre o email..." style="width: 100%; height: 38px; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px;">
+        <input type="text" id="adminSearchInput" oninput="searchClients()" placeholder="Buscar por negocio, nombre o email..." style="width: 100%; height: 38px; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px;">
       </div>
     </div>
 
@@ -1059,6 +1059,43 @@
       </table>
     </div>
 
+    <!-- Puente de Pruebas y Simulaciones Locales -->
+    <div class="section-title" style="margin-top: 48px;">
+      <div>
+        <h2>🌉 Puente de Pruebas & Simulaciones</h2>
+        <p>Historial en tiempo real de operaciones de email, subdominios y base de datos simulados en local.</p>
+      </div>
+      <button class="button" onclick="loadSimulations()" style="font-weight: 700;">🔄 Actualizar Logs</button>
+    </div>
+
+    <div class="card" style="padding: 20px; margin-bottom: 40px; background: linear-gradient(135deg, rgba(37,99,235,0.02) 0%, rgba(139,92,246,0.02) 100%); border: 1px solid var(--border-color);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <span style="font-size: 13.5px; font-weight: 700; color: #059669; background: rgba(16,185,129,0.1); padding: 4px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px;">
+          <span style="width: 8px; height: 8px; background: #10b981; border-radius: 999px; display: inline-block;"></span>
+          Puente de Simulación Activo (Entorno Local)
+        </span>
+        <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Muestra las últimas 50 operaciones</span>
+      </div>
+      
+      <div style="max-height: 300px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; background: #fff;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+          <thead>
+            <tr style="background: #f8fafc; border-bottom: 1px solid var(--border-color);">
+              <th style="padding: 10px 14px; font-weight: 700; color: var(--text-muted); width: 140px;">Hora</th>
+              <th style="padding: 10px 14px; font-weight: 700; color: var(--text-muted); width: 220px;">Tipo de Acción</th>
+              <th style="padding: 10px 14px; font-weight: 700; color: var(--text-muted); width: 250px;">Objetivo</th>
+              <th style="padding: 10px 14px; font-weight: 700; color: var(--text-muted);">Detalles / Enlace Simulado</th>
+            </tr>
+          </thead>
+          <tbody id="simulationsTableBody">
+            <tr>
+              <td colspan="4" style="padding: 20px; text-align: center; color: var(--text-muted);">No hay acciones simuladas registradas todavía. Regístrate en la landing para ver los logs.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="section-title">
       <div>
         <h2>Acceso a Demostraciones</h2>
@@ -1073,7 +1110,7 @@
             <span>🏪</span> Demo App (Local / Estilista)
           </h3>
           <p style="color: var(--muted); font-size: 13.5px; line-height: 1.5; margin-bottom: 16px;">
-            Accede a la interfaz móvil del barbero, estilista y profesional de belleza. Gestiona la agenda y comisiones del día.
+            Accede a la interfaz móvil de la agenda y gestión operativa de locales de servicios y belleza.
           </p>
         </div>
         <a href="/app/" class="button primary" style="width: 100%; text-align: center; justify-content: center; min-height: 44px; font-weight: 700; border-radius: 12px; font-family: 'Inter', sans-serif; text-decoration: none;">
@@ -2503,6 +2540,14 @@
         await loadNotes();
         await loadStats();
         await loadClients();
+        await loadSimulations();
+        
+        // Auto-refrescar cada 15 segundos para detectar nuevas solicitudes de clientes
+        setInterval(async () => {
+            await loadStats();
+            await loadClients();
+            await loadSimulations();
+        }, 15000);
     })();
 
     // Lógica global del Dashboard de Suscripciones
@@ -2602,7 +2647,7 @@
         if (filtered.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="7" style="padding: 24px; text-align: center; color: var(--text-muted);">No se encontraron barberos con los filtros actuales.</td>
+                    <td colspan="7" style="padding: 24px; text-align: center; color: var(--text-muted);">No se encontraron negocios con los filtros actuales.</td>
                 </tr>
             `;
             return;
@@ -2654,8 +2699,12 @@
             let actionsMarkup = "";
             if (client.requiereAprobacion) {
                 actionsMarkup += `<button class="button small primary" onclick="confirmClient('${client.id}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle;">Confirmar Ingreso</button>`;
+            } else if (client.estadoSuscripcion !== "activo") {
+                actionsMarkup += `<button class="button small" onclick="confirmClient('${client.id}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle; background: #e0f2fe; color: #0369a1; border-color: #bae6fd;">Activar</button>`;
             }
-            actionsMarkup += `<button class="button small" onclick="resetClientPassword('${client.id}')" style="padding: 4px 8px; font-size: 11px; vertical-align: middle;">Restablecer Clave</button>`;
+            actionsMarkup += `<button class="button small" onclick="openEditClientModal('${client.id}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle; background: #fef3c7; color: #b45309; border-color: #fde68a;">Editar</button>`;
+            actionsMarkup += `<button class="button small" onclick="deleteClient('${client.id}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle; background: #fee2e2; color: #b91c1c; border-color: #fca5a5;">Eliminar</button>`;
+            actionsMarkup += `<button class="button small" onclick="resetClientPassword('${client.id}')" style="padding: 4px 8px; font-size: 11px; vertical-align: middle;">Clave</button>`;
             
             tr.innerHTML = `
                 <td style="padding: 14px 18px; font-size: 13.5px;">${subNameMarkup}</td>
@@ -2688,11 +2737,11 @@
     };
 
     window.resetClientPassword = async function(id) {
-        if (!confirm("¿Estás seguro de restablecer la contraseña de este barbero? Se enviará una nueva contraseña temporal a su correo.")) return;
+        if (!confirm("¿Estás seguro de restablecer la contraseña de este cliente? Se enviará una nueva contraseña temporal a su correo.")) return;
         try {
             const res = await fetch(`/api/admin/clientes/${id}/reset-password`, { method: "POST" });
             if (res.ok) {
-                alert("¡Nueva contraseña temporal generada y enviada al correo del barbero!");
+                alert("¡Nueva contraseña temporal generada y enviada al correo del cliente!");
             } else {
                 const err = await res.json();
                 alert("Error al restablecer contraseña: " + (err.message || err.error));
@@ -2702,49 +2751,273 @@
         }
     };
 
-    // Submisión del Formulario del Modal
-    document.getElementById("createClientForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const errorMsg = document.getElementById("modalErrorMsg");
-        errorMsg.style.display = "none";
-        
-        const payload = {
-            name: document.getElementById("mName").value.trim(),
-            email: document.getElementById("mEmail").value.trim(),
-            phone: document.getElementById("mPhone").value.trim(),
-            businessName: document.getElementById("mBusiness").value.trim(),
-            planTipo: document.getElementById("mPlan").value,
-            estadoSuscripcion: document.getElementById("mState").value,
-            categoriaSlug: document.getElementById("mCategory").value
-        };
-        
+    async function loadSimulations() {
         try {
-            const res = await fetch("/api/admin/clientes/crear", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-            const result = await res.json();
+            const res = await fetch("/api/admin/simulations");
             if (res.ok) {
-                closeCreateClientModal();
-                alert("¡Cliente creado exitosamente! Se le ha enviado un correo con sus credenciales de acceso.");
+                const data = await res.json();
+                const tbody = document.getElementById("simulationsTableBody");
+                if (!tbody) return;
+                tbody.innerHTML = "";
+                
+                if (data.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4" style="padding: 20px; text-align: center; color: var(--text-muted);">No hay acciones simuladas registradas todavía. Regístrate en la landing para ver los logs.</td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                const sorted = [...data].reverse();
+                sorted.forEach(ev => {
+                    const tr = document.createElement("tr");
+                    tr.style.borderBottom = "1px solid var(--border-color)";
+                    
+                    const time = new Date(ev.timestamp).toLocaleTimeString("es-CL", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit"
+                    });
+                    
+                    let typeBadge = `<span style="font-weight: 700; color: var(--navy);">${ev.type}</span>`;
+                    if (ev.type.includes("Correo")) typeBadge = `<span style="color: var(--blue); font-weight: 700; background: rgba(37,99,235,0.08); padding: 2px 6px; border-radius: 4px;">📧 ${ev.type}</span>`;
+                    else if (ev.type.includes("Subdominio")) typeBadge = `<span style="color: var(--purple); font-weight: 700; background: rgba(139,92,246,0.08); padding: 2px 6px; border-radius: 4px;">🌐 ${ev.type}</span>`;
+                    else if (ev.type.includes("Base")) typeBadge = `<span style="color: #059669; font-weight: 700; background: rgba(16,185,129,0.08); padding: 2px 6px; border-radius: 4px;">💾 ${ev.type}</span>`;
+                    
+                    let detailsHtml = ev.details;
+                    const urlRegex = /(https?:\/\/[^\s]+)/g;
+                    detailsHtml = detailsHtml.replace(urlRegex, url => `<a href="${url}" target="_blank" style="color: var(--blue); font-weight: 700; text-decoration: underline;">${url}</a>`);
+
+                    tr.innerHTML = `
+                        <td style="padding: 10px 14px; color: var(--text-muted);">${time}</td>
+                        <td style="padding: 10px 14px;">${typeBadge}</td>
+                        <td style="padding: 10px 14px; font-weight: 600; color: var(--navy);">${ev.target}</td>
+                        <td style="padding: 10px 14px; font-family: monospace; font-size: 12px; color: #475569; word-break: break-all;">${detailsHtml}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        } catch (e) {
+            console.error("Error al cargar logs del puente:", e);
+        }
+    }
+
+    window.confirmClient = async function(id) {
+        if (!confirm("¿Estás seguro de confirmar el ingreso de este cliente? Se generará su subdominio y se enviarán sus credenciales de acceso.")) return;
+        try {
+            const res = await fetch(`/api/admin/clientes/${id}/confirmar`, { method: "PUT" });
+            if (res.ok) {
+                alert("¡Cliente activado y correo con credenciales enviado!");
                 await loadStats();
                 await loadClients();
             } else {
-                errorMsg.textContent = result.message || result.error || "Error al crear el cliente.";
-                errorMsg.style.display = "block";
+                const err = await res.json();
+                alert(err.message || "Error al activar el cliente.");
             }
         } catch (err) {
-            errorMsg.textContent = "Error de conexión con el servidor.";
-            errorMsg.style.display = "block";
+            alert("Error de conexión al activar el cliente.");
         }
-    });
+    };
 
-    // Cargar estadísticas iniciales al cargar la página
+    window.openEditClientModal = function(id) {
+        const client = clientsData.find(c => c.id === id);
+        if (!client) return;
+        
+        document.getElementById("editClientId").value = client.id;
+        document.getElementById("editName").value = client.name || "";
+        document.getElementById("editEmail").value = client.email || "";
+        document.getElementById("editPhone").value = client.phone || "";
+        document.getElementById("editBusiness").value = client.businessName || "";
+        document.getElementById("editCategory").value = client.categoriaSlug || "barberia";
+        document.getElementById("editSubdomain").value = client.subdominio || "";
+        document.getElementById("editPlan").value = client.planTipo || "trial";
+        document.getElementById("editState").value = client.estadoSuscripcion || "trial";
+        document.getElementById("editVencimiento").value = client.fechaVencimiento || "";
+        
+        document.getElementById("editModalErrorMsg").style.display = "none";
+        document.getElementById("editClientModal").style.display = "flex";
+    };
+
+    window.closeEditClientModal = function() {
+        document.getElementById("editClientModal").style.display = "none";
+    };
+
+    window.deleteClient = async function(id) {
+        if (!confirm("¿Estás completamente seguro de ELIMINAR este cliente? Esta acción borrará todas sus configuraciones, locales y suscripciones de forma permanente.")) return;
+        try {
+            const res = await fetch(`/api/admin/clientes/${id}`, { method: "DELETE" });
+            if (res.ok) {
+                alert("Cliente eliminado exitosamente.");
+                await loadStats();
+                await loadClients();
+            } else {
+                const err = await res.json();
+                alert(err.message || "Error al eliminar el cliente.");
+            }
+        } catch (err) {
+            alert("Error de conexión al eliminar el cliente.");
+        }
+    };
+
+    // Submisión de Formularios & Carga Inicial
     document.addEventListener("DOMContentLoaded", () => {
         filterClients('todos');
+        
+        const createForm = document.getElementById("createClientForm");
+        if (createForm) {
+            createForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const errorMsg = document.getElementById("modalErrorMsg");
+                errorMsg.style.display = "none";
+                
+                const payload = {
+                    name: document.getElementById("mName").value.trim(),
+                    email: document.getElementById("mEmail").value.trim(),
+                    phone: document.getElementById("mPhone").value.trim(),
+                    businessName: document.getElementById("mBusiness").value.trim(),
+                    planTipo: document.getElementById("mPlan").value,
+                    estadoSuscripcion: document.getElementById("mState").value,
+                    categoriaSlug: document.getElementById("mCategory").value
+                };
+                
+                try {
+                    const res = await fetch("/api/admin/clientes/crear", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await res.json();
+                    if (res.ok) {
+                        closeCreateClientModal();
+                        alert("¡Cliente creado exitosamente! Se le ha enviado un correo con sus credenciales de acceso.");
+                        await loadStats();
+                        await loadClients();
+                    } else {
+                        errorMsg.textContent = result.message || result.error || "Error al crear el cliente.";
+                        errorMsg.style.display = "block";
+                    }
+                } catch (err) {
+                    errorMsg.textContent = "Error de conexión con el servidor.";
+                    errorMsg.style.display = "block";
+                }
+            });
+        }
+
+        const editForm = document.getElementById("editClientForm");
+        if (editForm) {
+            editForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const errorMsg = document.getElementById("editModalErrorMsg");
+                errorMsg.style.display = "none";
+                
+                const id = document.getElementById("editClientId").value;
+                const payload = {
+                    name: document.getElementById("editName").value.trim(),
+                    email: document.getElementById("editEmail").value.trim(),
+                    phone: document.getElementById("editPhone").value.trim(),
+                    businessName: document.getElementById("editBusiness").value.trim(),
+                    categoriaSlug: document.getElementById("editCategory").value,
+                    subdominio: document.getElementById("editSubdomain").value.trim(),
+                    planTipo: document.getElementById("editPlan").value,
+                    estadoSuscripcion: document.getElementById("editState").value,
+                    fechaVencimiento: document.getElementById("editVencimiento").value.trim() || null
+                };
+                
+                try {
+                    const res = await fetch(`/api/admin/clientes/${id}/editar`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await res.json();
+                    if (res.ok) {
+                        closeEditClientModal();
+                        alert("¡Cliente modificado exitosamente!");
+                        await loadStats();
+                        await loadClients();
+                    } else {
+                        errorMsg.textContent = result.message || result.error || "Error al modificar el cliente.";
+                        errorMsg.style.display = "block";
+                    }
+                } catch (err) {
+                    errorMsg.textContent = "Error de conexión con el servidor.";
+                    errorMsg.style.display = "block";
+                }
+            });
+        }
     });
   </script>
+
+  <!-- Modal de Edición de Cliente -->
+  <div class="modal-overlay" id="editClientModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="modal-content" style="background: #fff; padding: 24px; border-radius: 16px; width: 100%; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: left; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-title" style="font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 800; color: var(--navy); margin-bottom: 20px;">Modificar Cliente (Súper Admin)</div>
+      <form id="editClientForm">
+        <input type="hidden" id="editClientId">
+        <div class="form-group">
+          <label for="editName">Nombre Completo del Cliente / Dueño</label>
+          <input type="text" id="editName" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label for="editEmail">Correo Electrónico</label>
+          <input type="email" id="editEmail" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label for="editPhone">Teléfono / WhatsApp</label>
+          <input type="tel" id="editPhone" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label for="editBusiness">Nombre del Negocio / Establecimiento</label>
+          <input type="text" id="editBusiness" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label for="editCategory">Tipo de Servicio / Rubro</label>
+          <select id="editCategory" class="form-input" style="padding-top:4px;">
+            <option value="barberia">💈 Barbería</option>
+            <option value="manicure">💅 Manicure / Uñas</option>
+            <option value="pestanas">👁️ Pestañas / Lashistas</option>
+            <option value="estetica">💆 Estética / Cosmetología</option>
+            <option value="peluqueria">💇 Peluquería / Estilista</option>
+            <option value="tatuajes">🎨 Tatuajes / Estudio</option>
+            <option value="talleres">🚗 Talleres / Mecánica</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="editSubdomain">Subdominio</label>
+          <input type="text" id="editSubdomain" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label for="editPlan">Plan de Suscripción</label>
+          <select id="editPlan" class="form-input" style="padding-top:4px;">
+            <option value="trial">Trial (7 días gratis)</option>
+            <option value="mensual">Plan Mensual</option>
+            <option value="trimestral">Plan Trimestral</option>
+            <option value="anual">Plan Anual</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="editState">Estado de Suscripción</label>
+          <select id="editState" class="form-input" style="padding-top:4px;">
+            <option value="trial">Trial (Prueba)</option>
+            <option value="activo">Activo (Pago al día)</option>
+            <option value="en_mora">En Mora</option>
+            <option value="desactivado">Desactivado</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="editVencimiento">Fecha de Vencimiento (ISO format)</label>
+          <input type="text" id="editVencimiento" class="form-input" placeholder="AAAA-MM-DDTHH:MM:SSZ">
+        </div>
+        <p id="editModalErrorMsg" style="color: #ef4444; font-size: 12px; font-weight: 700; margin-top: 8px; display: none; text-align: left;"></p>
+        
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button type="button" class="button" onclick="closeEditClientModal()" style="border: 1px solid var(--border-color); background: #fff; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancelar</button>
+          <button type="submit" class="button primary" style="background: var(--blue); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- Modal de Creación de Cliente Manual -->
   <div class="modal-overlay" id="createClientModal">
@@ -2752,20 +3025,20 @@
       <div class="modal-title">Crear Cliente de Forma Manual</div>
       <form id="createClientForm">
         <div class="form-group">
-          <label for="mName">Nombre Completo del Barbero</label>
+          <label for="mName">Nombre Completo del Cliente / Dueño</label>
           <input type="text" id="mName" class="form-input" placeholder="Ej. Carlos Valenzuela" required>
         </div>
         <div class="form-group">
           <label for="mEmail">Correo Electrónico</label>
-          <input type="email" id="mEmail" class="form-input" placeholder="Ej. carlos@barberia.cl" required>
+          <input type="email" id="mEmail" class="form-input" placeholder="Ej. carlos@negocio.cl" required>
         </div>
         <div class="form-group">
           <label for="mPhone">Teléfono / WhatsApp</label>
           <input type="tel" id="mPhone" class="form-input" placeholder="Ej. +56998765432" required>
         </div>
         <div class="form-group">
-          <label for="mBusiness">Nombre de la Barbería / Negocio</label>
-          <input type="text" id="mBusiness" class="form-input" placeholder="Ej. Barbería Golden" required>
+          <label for="mBusiness">Nombre del Negocio / Establecimiento</label>
+          <input type="text" id="mBusiness" class="form-input" placeholder="Ej. Negocio Excelente" required>
         </div>
         <div class="form-group">
           <label for="mCategory">Tipo de Servicio / Rubro</label>
