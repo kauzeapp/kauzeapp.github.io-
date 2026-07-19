@@ -990,7 +990,7 @@
                         
                         const result = await res.json();
                         if (!res.ok) {
-                            throw new Error(result.error || result.message || "Error al registrar la suscripción.");
+                            throw new Error(result.message || result.error || "Error al registrar la suscripción.");
                         }
                         
                         // Configurar montos y concepto en base al plan
