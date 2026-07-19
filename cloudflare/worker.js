@@ -26,13 +26,12 @@ export default {
       return Response.redirect(destination.toString(), 302);
     }
 
-    // Rutas /api/* → proxy al servidor Railway (backend Python)
-    if (incomingUrl.pathname.startsWith("/api/")) {
+    // Rutas /api/* O cualquier ruta de admin.kauze.cl → proxy al servidor Railway (backend Python)
+    if (incomingUrl.pathname.startsWith("/api/") || hostname === "admin.kauze.cl") {
       const origin = request.headers.get("Origin");
 
-      // Verificar CORS: solo orígenes conocidos o peticiones sin origen
-      // (peticiones server-to-server, curl, etc. no envían Origin)
-      if (origin && !ALLOWED_ORIGINS.has(origin)) {
+      // Verificar CORS solo para las llamadas a la API
+      if (incomingUrl.pathname.startsWith("/api/") && origin && !ALLOWED_ORIGINS.has(origin)) {
         return Response.json({ error: "origin_not_allowed" }, { status: 403 });
       }
 
@@ -58,10 +57,14 @@ export default {
 
       const upstreamResponse = await fetch(new Request(upstreamUrl, init));
       const responseHeaders = new Headers(upstreamResponse.headers);
-      responseHeaders.set("Cache-Control", "no-store");
+      
+      // Solo desactivar caché para la API
+      if (incomingUrl.pathname.startsWith("/api/")) {
+        responseHeaders.set("Cache-Control", "no-store");
+      }
 
-      // Agregar cabeceras CORS para que el admin pueda leer la respuesta
-      if (origin && ALLOWED_ORIGINS.has(origin)) {
+      // Agregar cabeceras CORS para que el admin pueda leer la respuesta de la API
+      if (incomingUrl.pathname.startsWith("/api/") && origin && ALLOWED_ORIGINS.has(origin)) {
         responseHeaders.set("Access-Control-Allow-Origin", origin);
         responseHeaders.set("Access-Control-Allow-Credentials", "true");
         responseHeaders.set(
@@ -98,7 +101,7 @@ export default {
       }
     }
 
-    // Cualquier otra ruta que no sea /api/ → 404
+    // Cualquier otra ruta que no sea /api/ ni admin.kauze.cl → 404
     return new Response("Not found", { status: 404 });
   },
 };
