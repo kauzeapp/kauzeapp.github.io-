@@ -15,9 +15,9 @@ export default {
       ? hostParts[0]
       : "";
 
-    if (BUSINESS_SUBDOMAINS.has(businessSubdomain)) {
+    if (businessSubdomain && !["www", "admin"].includes(businessSubdomain)) {
       const destination = new URL("https://kauze.cl/cliente/");
-      destination.searchParams.set("negocio", BUSINESS_SUBDOMAINS.get(businessSubdomain));
+      destination.searchParams.set("negocio", businessSubdomain);
       return Response.redirect(destination.toString(), 302);
     }
 
