@@ -479,7 +479,7 @@ def reset_password(raw_token, new_password):
         conn.row_factory = dict_row
         token = conn.execute(
             """
-            SELECT id, usuario_id
+            SELECT id, usuario_id, proposito
             FROM tokens_restablecimiento_password
             WHERE token_hash = %s
               AND usado_en IS NULL
@@ -507,6 +507,17 @@ def reset_password(raw_token, new_password):
             "UPDATE tokens_restablecimiento_password SET usado_en = NOW() WHERE id = %s",
             (token["id"],),
         )
+        if token["proposito"] == "acceso_inicial":
+            conn.execute(
+                """
+                UPDATE usuarios
+                SET email_verificado = TRUE,
+                    estado = 'activo',
+                    actualizado_en = NOW()
+                WHERE id = %s
+                """,
+                (token["usuario_id"],),
+            )
         conn.execute(
             "UPDATE sesiones_auth SET revocada_en = NOW() WHERE usuario_id = %s AND revocada_en IS NULL",
             (token["usuario_id"],),
