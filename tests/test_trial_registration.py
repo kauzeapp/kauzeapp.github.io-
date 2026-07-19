@@ -1,6 +1,7 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 from pathlib import Path
+from urllib.error import URLError
 
 from backend.trials import (
     TrialRegistrationError,
@@ -8,7 +9,7 @@ from backend.trials import (
     _phone,
     register_trial,
 )
-from backend.email_delivery import email_provider
+from backend.email_delivery import _send_with_resend, email_provider
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -91,6 +92,87 @@ class TrialRegistrationTests(unittest.TestCase):
             clear=True,
         ):
             self.assertEqual(email_provider(), "resend")
+
+    def test_resend_confirms_acceptance_and_uses_idempotency_key(self):
+        response = Mock()
+        response.status = 200
+        response.read.return_value = b'{"id":"email-accepted-1"}'
+        response.__enter__ = Mock(return_value=response)
+        response.__exit__ = Mock(return_value=False)
+
+        with patch.dict(
+            "os.environ",
+            {
+                "RESEND_API_KEY": "test-key",
+                "KAUZE_EMAIL_FROM": "Kauze <acceso@kauze.cl>",
+            },
+            clear=True,
+        ), patch("backend.email_delivery.urlopen", return_value=response) as request:
+            receipt = _send_with_resend(
+                "persona@example.com",
+                "Bienvenida",
+                "Contenido",
+                "trial-access/user-1",
+            )
+
+        self.assertEqual(
+            receipt, {"provider": "resend", "id": "email-accepted-1"}
+        )
+        self.assertEqual(
+            request.call_args.args[0].get_header("Idempotency-key"),
+            "trial-access/user-1",
+        )
+
+    def test_resend_retries_temporary_failures_without_duplicates(self):
+        response = Mock()
+        response.status = 200
+        response.read.return_value = b'{"id":"email-after-retry"}'
+        response.__enter__ = Mock(return_value=response)
+        response.__exit__ = Mock(return_value=False)
+
+        with patch.dict(
+            "os.environ",
+            {
+                "RESEND_API_KEY": "test-key",
+                "KAUZE_EMAIL_FROM": "Kauze <acceso@kauze.cl>",
+            },
+            clear=True,
+        ), patch(
+            "backend.email_delivery.urlopen",
+            side_effect=[URLError("temporary"), response],
+        ) as request, patch("backend.email_delivery.time.sleep"):
+            receipt = _send_with_resend(
+                "persona@example.com",
+                "Bienvenida",
+                "Contenido",
+                "trial-access/user-2",
+            )
+
+        self.assertEqual(receipt["id"], "email-after-retry")
+        self.assertEqual(request.call_count, 2)
+
+    def test_resend_rejects_success_without_email_id(self):
+        response = Mock()
+        response.status = 200
+        response.read.return_value = b'{}'
+        response.__enter__ = Mock(return_value=response)
+        response.__exit__ = Mock(return_value=False)
+
+        with patch.dict(
+            "os.environ",
+            {
+                "RESEND_API_KEY": "test-key",
+                "KAUZE_EMAIL_FROM": "Kauze <acceso@kauze.cl>",
+            },
+            clear=True,
+        ), patch("backend.email_delivery.urlopen", return_value=response):
+            with self.assertRaisesRegex(RuntimeError, "no confirmo"):
+                _send_with_resend(
+                    "persona@example.com",
+                    "Bienvenida",
+                    "Contenido",
+                    "trial-access/user-3",
+                )
 
 
 if __name__ == "__main__":

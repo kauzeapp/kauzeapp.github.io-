@@ -246,7 +246,7 @@ def get_admin_clients(status_filter=None, search_query=None):
                        subdominio, requiere_aprobacion, nombre_barberia, creado_en,
                        categoria_slug
                 FROM usuarios
-                WHERE 1=1
+                WHERE plan_tipo IS NOT NULL
             """
             params = []
             if status_filter:
@@ -262,15 +262,15 @@ def get_admin_clients(status_filter=None, search_query=None):
             for r in rows:
                 clients.append({
                     "id": str(r["id"]),
-                    "name": r["nombre_completo"] or "Usuario sin nombre",
+                    "name": r["nombre_completo"],
                     "email": r["email"],
-                    "phone": r["telefono_whatsapp"] or "—",
-                    "planTipo": r["plan_tipo"] or "NINGUNO",
-                    "estadoSuscripcion": r["estado_suscripcion"] or "activo",
+                    "phone": r["telefono_whatsapp"],
+                    "planTipo": r["plan_tipo"],
+                    "estadoSuscripcion": r["estado_suscripcion"],
                     "fechaVencimiento": r["fecha_vencimiento"].isoformat() if r["fecha_vencimiento"] else None,
                     "subdominio": r["subdominio"],
-                    "requiereAprobacion": r["requiere_aprobacion"] or False,
-                    "businessName": r["nombre_barberia"] or "Kauze Admin",
+                    "requiereAprobacion": r["requiere_aprobacion"],
+                    "businessName": r["nombre_barberia"],
                     "categoriaSlug": r["categoria_slug"] or "barberia",
                     "creadoEn": r["creado_en"].isoformat() if r["creado_en"] else None
                 })
@@ -593,14 +593,3 @@ def reset_client_password(client_id):
 
     send_reset_password_email(email, name, temp_password)
     return {"status": "success", "message": "Contraseña restablecida correctamente."}
-
-def delete_admin_client(client_id):
-    if is_configured():
-        with connection() as conn:
-            conn.execute("DELETE FROM usuarios WHERE id = %s", (client_id,))
-            conn.commit()
-    else:
-        db = read_local_db()
-        db["subscriptions"] = [s for s in db["subscriptions"] if s["id"] != client_id]
-        write_local_db(db)
-    return {"status": "success", "message": "Cliente eliminado."}

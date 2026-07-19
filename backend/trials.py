@@ -97,7 +97,9 @@ def _ensure_owner_contact_available(conn, email, phone):
         )
 
 
-def _send_initial_access_email(recipient, owner_name, business_name, access_url):
+def _send_initial_access_email(
+    recipient, owner_name, business_name, access_url, idempotency_key
+):
     if not email_delivery_configured():
         raise RuntimeError("El servicio de correo de Kauze todavía no está configurado.")
 
@@ -111,7 +113,12 @@ def _send_initial_access_email(recipient, owner_name, business_name, access_url)
         "Si no solicitaste esta cuenta, puedes ignorar este mensaje.\n\n"
         "Equipo Kauze"
     )
-    send_email(recipient, "Activa tu prueba gratis de Kauze", content)
+    return send_email(
+        recipient,
+        "Activa tu prueba gratis de Kauze",
+        content,
+        idempotency_key=idempotency_key,
+    )
 
 
 def register_trial(data, client_key="unknown"):
@@ -255,7 +262,13 @@ def register_trial(data, client_key="unknown"):
 
             public_url = os.environ.get("KAUZE_PUBLIC_URL", "https://kauze.cl").rstrip("/")
             access_url = f"{public_url}/app/?reset_token={raw_token}&welcome=1"
-            _send_initial_access_email(email, owner_name, business_name, access_url)
+            delivery = _send_initial_access_email(
+                email,
+                owner_name,
+                business_name,
+                access_url,
+                f"trial-access/{owner['id']}",
+            )
 
     return {
         "status": "success",
@@ -263,4 +276,6 @@ def register_trial(data, client_key="unknown"):
         "businessName": business_name,
         "businessSlug": slug,
         "trialDays": TRIAL_DAYS,
+        "emailAccepted": True,
+        "emailProvider": delivery["provider"],
     }

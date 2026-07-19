@@ -1139,7 +1139,7 @@
 
     <div class="section-title">
       <div>
-        <h2>Tareas del Proyecto (125 pasos)</h2>
+        <h2>Tareas del Proyecto (132 pasos)</h2>
         <p>Control del roadmap estratégico de Kauze.</p>
       </div>
       <div class="sync-controls">
@@ -1282,11 +1282,11 @@
           },
           {
             "id": 2,
-            "text": "Establecer la tabla global de Usuarios implementando un control de acceso basado en roles (RBAC) para SuperAdmin (tú), Dueño de Local, Empleado/Barbero y Cliente Final."
+            "text": "Diseñar usuarios autenticados solo para SuperAdmin y Dueño de Local mediante Google; mantener trabajadores como fichas internas sin acceso y clientes como registros de reserva sin cuenta obligatoria."
           },
           {
             "id": 3,
-            "text": "Crear el modelo relacional para Agendas y Servicios, permitiendo parametrizar tiempos estimados de duración, precios en CLP y asignación de profesionales."
+            "text": "Crear el modelo relacional para Agendas, Servicios y Profesionales internos del negocio, sin exigir cuentas de usuario a los trabajadores."
           },
           {
             "id": 4,
@@ -1311,7 +1311,7 @@
           },
           {
             "id": 8,
-            "text": "Programar el motor lógico que crea automáticamente un perfil de usuario en segundo plano al capturar el Nombre, WhatsApp y Email en la primera reserva."
+            "text": "Crear automáticamente un registro operativo de cliente al reservar, sin cuenta obligatoria, vinculando su historial por teléfono o email y habilitando acceso opcional mediante OTP."
           },
           {
             "id": 9,
@@ -1465,7 +1465,7 @@
           },
           {
             "id": 34,
-            "text": "Crear el Dashboard \"Ya tengo cita\" donde el usuario visualiza sus tarjetas de reservas activas tras ingresar su código de acceso OTP."
+            "text": "Crear el historial opcional del cliente accesible mediante OTP por WhatsApp, mostrando reservas, servicios realizados y negocios que lo atendieron, sin exigir Google."
           },
           {
             "id": 35,
@@ -1842,7 +1842,7 @@
           },
           {
             "id": 105,
-            "text": "Habilitar el embudo automatizado de registro en la página web principal de Kauze para captar las solicitudes orgánicas."
+            "text": "Habilitar el onboarding del dueño desde la landing con Google: crear automáticamente su usuario, luego su negocio y guiar la personalización inicial."
           }
         ]
       },
@@ -2655,8 +2655,7 @@
             if (client.requiereAprobacion) {
                 actionsMarkup += `<button class="button small primary" onclick="confirmClient('${client.id}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle;">Confirmar Ingreso</button>`;
             }
-            actionsMarkup += `<button class="button small" onclick="resetClientPassword('${client.id}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle;">Restablecer Clave</button>`;
-            actionsMarkup += `<button class="button small" onclick="deleteClient('${client.id}')" style="padding: 4px 8px; font-size: 11px; vertical-align: middle; background: rgba(239,68,68,0.1); color: #dc2626; border-color: rgba(239,68,68,0.2);">Eliminar</button>`;
+            actionsMarkup += `<button class="button small" onclick="resetClientPassword('${client.id}')" style="padding: 4px 8px; font-size: 11px; vertical-align: middle;">Restablecer Clave</button>`;
             
             tr.innerHTML = `
                 <td style="padding: 14px 18px; font-size: 13.5px;">${subNameMarkup}</td>
@@ -2703,67 +2702,41 @@
         }
     };
 
-    window.deleteClient = async function(id) {
-        if (!confirm("¿Estás seguro de eliminar permanentemente este cliente de la base de datos?")) return;
+    // Submisión del Formulario del Modal
+    document.getElementById("createClientForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const errorMsg = document.getElementById("modalErrorMsg");
+        errorMsg.style.display = "none";
+        
+        const payload = {
+            name: document.getElementById("mName").value.trim(),
+            email: document.getElementById("mEmail").value.trim(),
+            phone: document.getElementById("mPhone").value.trim(),
+            businessName: document.getElementById("mBusiness").value.trim(),
+            planTipo: document.getElementById("mPlan").value,
+            estadoSuscripcion: document.getElementById("mState").value,
+            categoriaSlug: document.getElementById("mCategory").value
+        };
+        
         try {
-            const res = await fetch(`/api/admin/clientes/${id}`, { method: "DELETE" });
+            const res = await fetch("/api/admin/clientes/crear", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
             if (res.ok) {
-                alert("¡Cliente eliminado con éxito!");
+                closeCreateClientModal();
+                alert("¡Cliente creado exitosamente! Se le ha enviado un correo con sus credenciales de acceso.");
                 await loadStats();
                 await loadClients();
             } else {
-                const err = await res.json();
-                alert("Error al eliminar: " + (err.message || err.error));
+                errorMsg.textContent = result.message || result.error || "Error al crear el cliente.";
+                errorMsg.style.display = "block";
             }
-        } catch (e) {
-            alert("Error de conexión al eliminar.");
-        }
-    };
-
-    // Submisión del Formulario del Modal
-    document.addEventListener("DOMContentLoaded", () => {
-        const form = document.getElementById("createClientForm");
-        if (form) {
-            form.addEventListener("submit", async (e) => {
-                e.preventDefault();
-                const errorMsg = document.getElementById("modalErrorMsg");
-                if (errorMsg) errorMsg.style.display = "none";
-                
-                const payload = {
-                    name: document.getElementById("mName").value.trim(),
-                    email: document.getElementById("mEmail").value.trim(),
-                    phone: document.getElementById("mPhone").value.trim(),
-                    businessName: document.getElementById("mBusiness").value.trim(),
-                    planTipo: document.getElementById("mPlan").value,
-                    estadoSuscripcion: document.getElementById("mState").value,
-                    categoriaSlug: document.getElementById("mCategory").value
-                };
-                
-                try {
-                    const res = await fetch("/api/admin/clientes/crear", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
-                    });
-                    const result = await res.json();
-                    if (res.ok) {
-                        closeCreateClientModal();
-                        alert("¡Cliente creado exitosamente! Se le ha enviado un correo con sus credenciales de acceso.");
-                        await loadStats();
-                        await loadClients();
-                    } else {
-                        if (errorMsg) {
-                            errorMsg.textContent = result.message || result.error || "Error al crear el cliente.";
-                            errorMsg.style.display = "block";
-                        }
-                    }
-                } catch (err) {
-                    if (errorMsg) {
-                        errorMsg.textContent = "Error de conexión con el servidor.";
-                        errorMsg.style.display = "block";
-                    }
-                }
-            });
+        } catch (err) {
+            errorMsg.textContent = "Error de conexión con el servidor.";
+            errorMsg.style.display = "block";
         }
     });
 
