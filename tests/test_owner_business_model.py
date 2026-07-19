@@ -14,6 +14,13 @@ RLS_SQL = (ROOT / "backend" / "database" / "011_tenant_rls_foundation.sql").read
 )
 AUTH_SOURCE = (ROOT / "backend" / "auth.py").read_text(encoding="utf-8")
 MIGRATE_SOURCE = (ROOT / "backend" / "migrate.py").read_text(encoding="utf-8")
+TENANT_SOURCE = (ROOT / "backend" / "tenant.py").read_text(encoding="utf-8")
+RUNTIME_ROLE_SQL = (
+    ROOT / "backend" / "database" / "012_tenant_runtime_role.sql"
+).read_text(encoding="utf-8")
+BOOKING_INTEGRITY_SQL = (
+    ROOT / "backend" / "database" / "013_booking_integrity_audit.sql"
+).read_text(encoding="utf-8")
 
 
 class OwnerBusinessModelTests(unittest.TestCase):
@@ -69,6 +76,26 @@ class OwnerBusinessModelTests(unittest.TestCase):
         self.assertIn("el negocio B pudo leer", MIGRATE_SOURCE)
         self.assertIn("el negocio B pudo escribir", MIGRATE_SOURCE)
         self.assertIn("verify_tenant_row_isolation(conn)", MIGRATE_SOURCE)
+
+    def test_business_connections_drop_to_limited_role(self):
+        self.assertIn("SET LOCAL ROLE", TENANT_SOURCE)
+        self.assertIn("kauze_tenant_runtime", TENANT_SOURCE)
+        self.assertIn("NOLOGIN NOINHERIT NOBYPASSRLS", RUNTIME_ROLE_SQL)
+        self.assertIn(
+            "ALTER TABLE estados_panel_local FORCE ROW LEVEL SECURITY",
+            RUNTIME_ROLE_SQL,
+        )
+
+    def test_database_prevents_double_booking_and_duplicate_requests(self):
+        self.assertIn("reservas_profesional_sin_traslape", BOOKING_INTEGRITY_SQL)
+        self.assertIn("tstzrange(inicio_en, fin_en, '[)') WITH &&", BOOKING_INTEGRITY_SQL)
+        self.assertIn("reservas_solicitud_unica_idx", BOOKING_INTEGRITY_SQL)
+
+    def test_booking_history_is_tenant_protected_and_append_only(self):
+        self.assertIn("CREATE TABLE IF NOT EXISTS eventos_reserva", BOOKING_INTEGRITY_SQL)
+        self.assertIn("ALTER TABLE eventos_reserva FORCE ROW LEVEL SECURITY", BOOKING_INTEGRITY_SQL)
+        self.assertIn("GRANT SELECT, INSERT ON TABLE eventos_reserva", BOOKING_INTEGRITY_SQL)
+        self.assertNotIn("GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE eventos_reserva", BOOKING_INTEGRITY_SQL)
 
     def test_tenant_id_must_be_a_real_uuid(self):
         expected = "550e8400-e29b-41d4-a716-446655440000"

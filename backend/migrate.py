@@ -8,6 +8,7 @@ import psycopg
 from argon2 import PasswordHasher
 
 from backend.db import database_url
+from backend.tenant import TENANT_RUNTIME_ROLE
 
 
 DATABASE_DIR = Path(__file__).resolve().parent / "database"
@@ -74,7 +75,15 @@ def verify_owner_business_model(conn):
         SELECT relname, relrowsecurity, relforcerowsecurity
         FROM pg_class
         WHERE relnamespace = 'public'::regnamespace
-          AND relname IN ('profesionales', 'servicios', 'clientes', 'reservas', 'suscripciones_saas')
+          AND relname IN (
+            'profesionales',
+            'servicios',
+            'clientes',
+            'reservas',
+            'suscripciones_saas',
+            'estados_panel_local',
+            'eventos_reserva'
+          )
         """
     ).fetchall()
     invalid_rls = [
@@ -82,8 +91,15 @@ def verify_owner_business_model(conn):
         for row in rls_rows
         if not bool(row[1]) or not bool(row[2])
     ]
-    if len(rls_rows) != 5 or invalid_rls:
+    if len(rls_rows) != 7 or invalid_rls:
         raise RuntimeError("RLS no quedó forzado en todas las tablas multi-negocio.")
+
+    runtime_role = conn.execute(
+        "SELECT rolcanlogin, rolinherit, rolbypassrls FROM pg_roles WHERE rolname = %s",
+        (TENANT_RUNTIME_ROLE,),
+    ).fetchone()
+    if not runtime_role or any(bool(value) for value in runtime_role):
+        raise RuntimeError("El rol limitado de negocio no quedó configurado de forma segura.")
 
     print("Modelo dueño/negocio verificado: backups, fichas internas y RLS activos.")
 
@@ -115,6 +131,7 @@ def verify_tenant_row_isolation(conn):
             (category[0], "Prueba seguridad B", f"seguridad-b-{suffix}"),
         ).fetchone()[0]
 
+        conn.execute(f"SET LOCAL ROLE {TENANT_RUNTIME_ROLE}")
         conn.execute("SELECT set_config('app.local_id', %s, TRUE)", (str(local_a),))
         service_a = conn.execute(
             """
@@ -157,6 +174,8 @@ def verify_tenant_row_isolation(conn):
 
         conn.execute("SELECT set_config('app.local_id', %s, TRUE)", (str(local_a),))
         conn.execute("DELETE FROM servicios WHERE id = %s", (service_a,))
+
+        conn.execute("RESET ROLE")
         conn.execute("DELETE FROM locales WHERE id IN (%s, %s)", (local_a, local_b))
 
     print("Aislamiento RLS verificado: negocio B no puede leer ni escribir datos de A.")

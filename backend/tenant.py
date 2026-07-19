@@ -4,6 +4,9 @@ from contextlib import contextmanager
 from backend.db import connection
 
 
+TENANT_RUNTIME_ROLE = "kauze_tenant_runtime"
+
+
 def _uuid_text(value, field_name):
     try:
         return str(uuid.UUID(str(value)))
@@ -23,10 +26,16 @@ def set_tenant_context(conn, local_id, user_id=None):
     return normalized_local_id
 
 
+def assume_tenant_runtime_role(conn):
+    """Reduce privilegios hasta terminar la transacción actual."""
+    conn.execute(f"SET LOCAL ROLE {TENANT_RUNTIME_ROLE}")
+
+
 @contextmanager
 def tenant_connection(local_id, user_id=None):
     """Entrega una conexión con el tenant fijado y la revierte al terminar."""
     with connection() as conn:
         with conn.transaction():
+            assume_tenant_runtime_role(conn)
             set_tenant_context(conn, local_id, user_id)
             yield conn
