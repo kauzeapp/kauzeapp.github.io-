@@ -13,6 +13,7 @@ RLS_SQL = (ROOT / "backend" / "database" / "011_tenant_rls_foundation.sql").read
     encoding="utf-8"
 )
 AUTH_SOURCE = (ROOT / "backend" / "auth.py").read_text(encoding="utf-8")
+MIGRATE_SOURCE = (ROOT / "backend" / "migrate.py").read_text(encoding="utf-8")
 
 
 class OwnerBusinessModelTests(unittest.TestCase):
@@ -62,6 +63,12 @@ class OwnerBusinessModelTests(unittest.TestCase):
             "estados_panel_local",
         ):
             self.assertIn(f"pre_owner_model_{table}", MODEL_SQL)
+
+    def test_deploy_runs_a_negative_cross_tenant_test(self):
+        self.assertIn("def verify_tenant_row_isolation", MIGRATE_SOURCE)
+        self.assertIn("el negocio B pudo leer", MIGRATE_SOURCE)
+        self.assertIn("el negocio B pudo escribir", MIGRATE_SOURCE)
+        self.assertIn("verify_tenant_row_isolation(conn)", MIGRATE_SOURCE)
 
     def test_tenant_id_must_be_a_real_uuid(self):
         expected = "550e8400-e29b-41d4-a716-446655440000"

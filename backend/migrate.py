@@ -1,6 +1,7 @@
 import hashlib
 import os
 import re
+import uuid
 from pathlib import Path
 
 import psycopg
@@ -85,6 +86,80 @@ def verify_owner_business_model(conn):
         raise RuntimeError("RLS no quedó forzado en todas las tablas multi-negocio.")
 
     print("Modelo dueño/negocio verificado: backups, fichas internas y RLS activos.")
+
+
+def verify_tenant_row_isolation(conn):
+    """Prueba RLS con dos negocios temporales y revierte ante cualquier fallo."""
+    suffix = uuid.uuid4().hex[:12]
+    with conn.transaction():
+        category = conn.execute(
+            "SELECT id FROM categorias WHERE activo = TRUE ORDER BY slug LIMIT 1"
+        ).fetchone()
+        if not category:
+            raise RuntimeError("No existe una categoría activa para probar RLS.")
+
+        local_a = conn.execute(
+            """
+            INSERT INTO locales (categoria_id, nombre, slug, estado)
+            VALUES (%s, %s, %s, 'activo')
+            RETURNING id
+            """,
+            (category[0], "Prueba seguridad A", f"seguridad-a-{suffix}"),
+        ).fetchone()[0]
+        local_b = conn.execute(
+            """
+            INSERT INTO locales (categoria_id, nombre, slug, estado)
+            VALUES (%s, %s, %s, 'activo')
+            RETURNING id
+            """,
+            (category[0], "Prueba seguridad B", f"seguridad-b-{suffix}"),
+        ).fetchone()[0]
+
+        conn.execute("SELECT set_config('app.local_id', %s, TRUE)", (str(local_a),))
+        service_a = conn.execute(
+            """
+            INSERT INTO servicios (
+              local_id, nombre, slug, duracion_minutos, precio_clp, activo
+            ) VALUES (%s, 'Servicio aislado A', %s, 30, 10000, TRUE)
+            RETURNING id
+            """,
+            (local_a, f"servicio-aislado-{suffix}"),
+        ).fetchone()[0]
+
+        conn.execute("SELECT set_config('app.local_id', %s, TRUE)", (str(local_b),))
+        leaked = conn.execute(
+            "SELECT 1 FROM servicios WHERE id = %s",
+            (service_a,),
+        ).fetchone()
+        if leaked:
+            raise RuntimeError(
+                "Fallo crítico RLS: el negocio B pudo leer un servicio del negocio A."
+            )
+
+        cross_write_blocked = False
+        try:
+            with conn.transaction():
+                conn.execute(
+                    """
+                    INSERT INTO servicios (
+                      local_id, nombre, slug, duracion_minutos, precio_clp, activo
+                    ) VALUES (%s, 'Escritura cruzada', %s, 30, 10000, TRUE)
+                    """,
+                    (local_a, f"escritura-cruzada-{suffix}"),
+                )
+        except psycopg.errors.InsufficientPrivilege:
+            cross_write_blocked = True
+
+        if not cross_write_blocked:
+            raise RuntimeError(
+                "Fallo crítico RLS: el negocio B pudo escribir dentro del negocio A."
+            )
+
+        conn.execute("SELECT set_config('app.local_id', %s, TRUE)", (str(local_a),))
+        conn.execute("DELETE FROM servicios WHERE id = %s", (service_a,))
+        conn.execute("DELETE FROM locales WHERE id IN (%s, %s)", (local_a, local_b))
+
+    print("Aislamiento RLS verificado: negocio B no puede leer ni escribir datos de A.")
 
 
 def bootstrap_owner(conn):
@@ -222,6 +297,7 @@ def main():
     with psycopg.connect(url, autocommit=True) as conn:
         apply_migrations(conn)
         verify_owner_business_model(conn)
+        verify_tenant_row_isolation(conn)
         with conn.transaction():
             bootstrap_owner(conn)
             provision_demo_businesses(conn)
