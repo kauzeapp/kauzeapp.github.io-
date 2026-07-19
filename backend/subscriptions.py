@@ -37,6 +37,12 @@ def log_email_simulation(recipient, subject, content):
     with open(EMAIL_LOG_FILE, "a", encoding="utf-8") as f:
         f.write(log_entry)
     print(f"[EMAIL SIMULATION] Sent to {recipient} (Logged to {EMAIL_LOG_FILE})")
+    
+    try:
+        from backend.simulations import log_simulation
+        log_simulation("Envío de Correo (Notificación)", recipient, f"Asunto: {subject} | Detalle: {content[:200]}...")
+    except Exception as e:
+        print("Failed to log email simulation to bridge:", e)
 
 def send_credentials_email(recipient, fullname, temp_password, subdominio):
     subject = "¡Bienvenido a KAUZE! Tu cuenta ha sido activada"
@@ -199,11 +205,44 @@ def register_subscription(data):
 
 # ----------------- ADMIN DASHBOARD CONTROL -----------------
 
+def safe_parse_datetime(date_str):
+    if not date_str:
+        return None
+    s = date_str.strip()
+    if s.endswith("Z"):
+        s = s[:-1]
+        if "+" not in s and "-" not in s[10:]:
+            s += "+00:00"
+    elif not s.endswith("+00:00") and "+" not in s and "-" not in s[10:]:
+        s += "+00:00"
+    
+    if s.endswith("+00:00+00:00"):
+        s = s[:-6]
+        
+    try:
+        return datetime.fromisoformat(s)
+    except Exception:
+        return datetime.now(timezone.utc)
+
+def auto_update_expired_subscriptions(conn):
+    now = datetime.now(timezone.utc)
+    conn.execute(
+        """
+        UPDATE usuarios 
+        SET estado_suscripcion = 'en_mora'
+        WHERE plan_tipo IS NOT NULL 
+          AND estado_suscripcion IN ('trial', 'activo')
+          AND fecha_vencimiento < %s
+        """,
+        (now,)
+    )
+
 def get_dashboard_stats():
     stats = {"trial": 0, "activo": 0, "en_mora": 0, "desactivado": 0}
 
     if is_configured():
         with connection() as conn:
+            auto_update_expired_subscriptions(conn)
             rows = conn.execute(
                 """
                 SELECT estado_suscripcion, COUNT(*) as count 
@@ -219,16 +258,23 @@ def get_dashboard_stats():
     else:
         db = read_local_db()
         now = datetime.now(timezone.utc)
-        # Update trial/active to en_mora if expired
         modified = False
         for sub in db["subscriptions"]:
-            venc = datetime.fromisoformat(sub["fecha_vencimiento"].replace("Z", "+00:00"))
-            if sub["estado_suscripcion"] in ("trial", "activo") and venc < now:
-                sub["estado_suscripcion"] = "en_mora"
-                modified = True
-            k = sub["estado_suscripcion"]
-            if k in stats:
-                stats[k] += 1
+            venc_str = sub.get("fecha_vencimiento") or sub.get("fechaVencimiento")
+            status = sub.get("estado_suscripcion") or sub.get("estadoSuscripcion") or "trial"
+            
+            if venc_str:
+                venc = safe_parse_datetime(venc_str)
+                if status in ("trial", "activo") and venc < now:
+                    if "estado_suscripcion" in sub:
+                        sub["estado_suscripcion"] = "en_mora"
+                    else:
+                        sub["estadoSuscripcion"] = "en_mora"
+                    status = "en_mora"
+                    modified = True
+            
+            if status in stats:
+                stats[status] += 1
         if modified:
             write_local_db(db)
 
@@ -239,6 +285,7 @@ def get_admin_clients(status_filter=None, search_query=None):
 
     if is_configured():
         with connection() as conn:
+            auto_update_expired_subscriptions(conn)
             conn.row_factory = dict_row
             query = """
                 SELECT id, nombre_completo, email, telefono_whatsapp, 
@@ -249,15 +296,14 @@ def get_admin_clients(status_filter=None, search_query=None):
                 WHERE plan_tipo IS NOT NULL
             """
             params = []
-            if status_filter:
+            if status_filter and status_filter != 'todos':
                 query += " AND estado_suscripcion = %s"
                 params.append(status_filter)
             if search_query:
                 query += " AND (nombre_completo ILIKE %s OR email ILIKE %s OR nombre_barberia ILIKE %s)"
-                term = f"%{search_query}%"
-                params.extend([term, term, term])
-
-            query += " ORDER BY creado_en DESC"
+                q = f"%{search_query}%"
+                params.extend([q, q, q])
+            
             rows = conn.execute(query, params).fetchall()
             for r in rows:
                 clients.append({
@@ -279,41 +325,55 @@ def get_admin_clients(status_filter=None, search_query=None):
         now = datetime.now(timezone.utc)
         modified = False
         for sub in db["subscriptions"]:
-            # Auto-update status to en_mora if expired
-            venc = datetime.fromisoformat(sub["fecha_vencimiento"].replace("Z", "+00:00"))
-            if sub["estado_suscripcion"] in ("trial", "activo") and venc < now:
-                sub["estado_suscripcion"] = "en_mora"
-                modified = True
+            venc_str = sub.get("fecha_vencimiento") or sub.get("fechaVencimiento")
+            status = sub.get("estado_suscripcion") or sub.get("estadoSuscripcion") or "trial"
+            venc = safe_parse_datetime(venc_str)
+            
+            if venc_str and venc:
+                if status in ("trial", "activo") and venc < now:
+                    if "estado_suscripcion" in sub:
+                        sub["estado_suscripcion"] = "en_mora"
+                    else:
+                        sub["estadoSuscripcion"] = "en_mora"
+                    status = "en_mora"
+                    modified = True
 
             match = True
-            if status_filter and sub["estado_suscripcion"] != status_filter:
-                match = False
+            if status_filter and status_filter != 'todos':
+                if status != status_filter:
+                    match = False
+            
+            name = sub.get("nombre_completo") or sub.get("name") or ""
+            email = sub.get("email") or ""
+            business = sub.get("nombre_barberia") or sub.get("businessName") or ""
+            
             if search_query:
                 sq = search_query.lower()
-                if (sq not in sub["nombre_completo"].lower() and
-                    sq not in sub["email"].lower() and
-                    sq not in sub["nombre_barberia"].lower()):
+                if (sq not in name.lower() and
+                    sq not in email.lower() and
+                    sq not in business.lower()):
                     match = False
 
             if match:
+                creado_dt = safe_parse_datetime(sub.get("creado_en") or sub.get("creadoEn"))
                 clients.append({
-                    "id": sub["id"],
-                    "name": sub["nombre_completo"],
-                    "email": sub["email"],
-                    "phone": sub["telefono"],
-                    "planTipo": sub["plan_tipo"],
-                    "estadoSuscripcion": sub["estado_suscripcion"],
-                    "fechaVencimiento": sub["fecha_vencimiento"],
-                    "subdominio": sub["subdominio"],
-                    "requiereAprobacion": sub["requiere_aprobacion"],
-                    "businessName": sub["nombre_barberia"],
-                    "categoriaSlug": sub.get("categoria_slug", "barberia"),
-                    "creadoEn": sub.get("creado_en")
+                    "id": sub.get("id"),
+                    "name": name,
+                    "email": email,
+                    "phone": sub.get("telefono") or sub.get("phone") or "",
+                    "planTipo": sub.get("plan_tipo") or sub.get("planTipo") or "trial",
+                    "estadoSuscripcion": status,
+                    "fechaVencimiento": venc.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ") if venc else None,
+                    "subdominio": sub.get("subdominio"),
+                    "requiereAprobacion": sub.get("requiere_aprobacion") or sub.get("requiereAprobacion") or False,
+                    "businessName": business,
+                    "categoriaSlug": sub.get("categoria_slug") or sub.get("categoriaSlug") or "barberia",
+                    "creadoEn": creado_dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ") if creado_dt else None
                 })
         if modified:
             write_local_db(db)
 
-        clients.sort(key=lambda x: x["creadoEn"] or "", reverse=True)
+        clients.sort(key=lambda x: x.get("creadoEn") or "", reverse=True)
 
     return clients
 
@@ -466,17 +526,18 @@ def confirm_client_activation(client_id):
             subdomain = f"{subdomain_slug}.kauze.cl"
 
             # Update User
+            status = 'trial' if plan_tipo == 'trial' else 'activo'
             conn.execute(
                 """
                 UPDATE usuarios 
-                SET estado_suscripcion = 'activo',
+                SET estado_suscripcion = %s,
                     fecha_vencimiento = %s,
                     subdominio = %s,
                     requiere_aprobacion = FALSE,
                     estado = 'activo'
                 WHERE id = %s
                 """,
-                (expiry, subdomain, client_id)
+                (status, expiry, subdomain, client_id)
             )
 
             # Insert/Update password
@@ -544,7 +605,8 @@ def confirm_client_activation(client_id):
         subdomain_slug = clean_subdomain(sub["nombre_barberia"]) + "-" + secrets.token_hex(2)
         subdomain = f"{subdomain_slug}.kauze.cl"
 
-        sub["estado_suscripcion"] = "activo"
+        status = 'trial' if plan_tipo == 'trial' else 'activo'
+        sub["estado_suscripcion"] = status
         sub["fecha_vencimiento"] = expiry.isoformat()
         sub["subdominio"] = subdomain
         sub["requiere_aprobacion"] = False
@@ -593,3 +655,118 @@ def reset_client_password(client_id):
 
     send_reset_password_email(email, name, temp_password)
     return {"status": "success", "message": "Contraseña restablecida correctamente."}
+
+
+def update_client_details(client_id, data):
+    if is_configured():
+        with connection() as conn:
+            with conn.transaction():
+                # Format datetime safely
+                venc_dt = safe_parse_datetime(data.get("fechaVencimiento"))
+                conn.execute(
+                    """
+                    UPDATE usuarios
+                    SET nombre_completo = %s,
+                        email = %s,
+                        telefono_whatsapp = %s,
+                        plan_tipo = %s,
+                        estado_suscripcion = %s,
+                        fecha_vencimiento = %s,
+                        subdominio = %s,
+                        nombre_barberia = %s,
+                        categoria_slug = %s
+                    WHERE id = %s
+                    """,
+                    (
+                        data["name"],
+                        data["email"],
+                        data["phone"],
+                        data["planTipo"],
+                        data["estadoSuscripcion"],
+                        venc_dt,
+                        data["subdominio"],
+                        data["businessName"],
+                        data.get("categoriaSlug", "barberia"),
+                        client_id
+                    )
+                )
+                local_row = conn.execute(
+                    """
+                    SELECT local_id FROM usuario_roles ur
+                    JOIN roles r ON ur.rol_id = r.id
+                    WHERE ur.usuario_id = %s AND r.slug = 'dueno'
+                    """,
+                    (client_id,)
+                ).fetchone()
+                if local_row and local_row[0]:
+                    conn.execute(
+                        """
+                        UPDATE locales
+                        SET nombre = %s,
+                            categoria_id = (SELECT id FROM categorias WHERE slug = %s LIMIT 1)
+                        WHERE id = %s
+                        """,
+                        (data["businessName"], data.get("categoriaSlug", "barberia"), local_row[0])
+                    )
+        return {"status": "success", "message": "Cliente actualizado correctamente en PostgreSQL."}
+    else:
+        db = read_local_db()
+        for sub in db["subscriptions"]:
+            if sub["id"] == client_id:
+                name_key = "name" if "name" in sub else "nombre_completo"
+                sub[name_key] = data["name"]
+                sub["email"] = data["email"]
+                phone_key = "phone" if "phone" in sub else "telefono"
+                sub[phone_key] = data["phone"]
+                plan_key = "planTipo" if "planTipo" in sub else "plan_tipo"
+                sub[plan_key] = data["planTipo"]
+                status_key = "estadoSuscripcion" if "estadoSuscripcion" in sub else "estado_suscripcion"
+                sub[status_key] = data["estadoSuscripcion"]
+                venc_key = "fechaVencimiento" if "fechaVencimiento" in sub else "fecha_vencimiento"
+                sub[venc_key] = data["fechaVencimiento"]
+                sub["subdominio"] = data["subdominio"]
+                bus_key = "businessName" if "businessName" in sub else "nombre_barberia"
+                sub[bus_key] = data["businessName"]
+                cat_key = "categoriaSlug" if "categoriaSlug" in sub else "categoria_slug"
+                sub[cat_key] = data.get("categoriaSlug", "barberia")
+                
+                write_local_db(db)
+                from backend.simulations import log_simulation
+                log_simulation("Modificación de Cliente (JSON)", data["email"], f"Modificados datos del barbero '{data['name']}' / Negocio: '{data['businessName']}'.")
+                return {"status": "success", "message": "Cliente modificado en base de datos local."}
+        raise ValueError("Cliente no encontrado.")
+
+def delete_client(client_id):
+    if is_configured():
+        with connection() as conn:
+            with conn.transaction():
+                local_row = conn.execute(
+                    """
+                    SELECT local_id FROM usuario_roles ur
+                    JOIN roles r ON ur.rol_id = r.id
+                    WHERE ur.usuario_id = %s AND r.slug = 'dueno'
+                    """,
+                    (client_id,)
+                ).fetchone()
+                
+                if local_row and local_row[0]:
+                    local_id = local_row[0]
+                    conn.execute("DELETE FROM suscripciones_saas WHERE local_id = %s", (local_id,))
+                    conn.execute("DELETE FROM estados_panel_local WHERE local_id = %s", (local_id,))
+                    conn.execute("DELETE FROM usuario_roles WHERE local_id = %s", (local_id,))
+                    conn.execute("DELETE FROM locales WHERE id = %s", (local_id,))
+                
+                conn.execute("DELETE FROM usuario_roles WHERE usuario_id = %s", (client_id,))
+                conn.execute("DELETE FROM tokens_restablecimiento_password WHERE usuario_id = %s", (client_id,))
+                conn.execute("DELETE FROM usuarios WHERE id = %s", (client_id,))
+        return {"status": "success", "message": "Cliente eliminado completamente de PostgreSQL."}
+    else:
+        db = read_local_db()
+        orig_len = len(db["subscriptions"])
+        db["subscriptions"] = [s for s in db["subscriptions"] if s["id"] != client_id]
+        if len(db["subscriptions"]) == orig_len:
+            raise ValueError("Cliente no encontrado.")
+        write_local_db(db)
+        from backend.simulations import log_simulation
+        log_simulation("Eliminación de Cliente (JSON)", client_id, "Eliminado registro de barbero de 'subscriptions_db.json'.")
+        return {"status": "success", "message": "Cliente eliminado de la base de datos local."}
