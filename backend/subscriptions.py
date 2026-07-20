@@ -283,10 +283,10 @@ def get_dashboard_stats():
             auto_update_expired_subscriptions(conn)
             rows = conn.execute(
                 """
-                SELECT estado_suscripcion, COUNT(*) as count 
+                SELECT COALESCE(estado_suscripcion, 'activo') as estado, COUNT(*) as count 
                 FROM usuarios 
-                WHERE plan_tipo IS NOT NULL 
-                GROUP BY estado_suscripcion
+                WHERE email IS NOT NULL AND estado = 'activo'
+                GROUP BY COALESCE(estado_suscripcion, 'activo')
                 """
             ).fetchall()
             for r in rows:
@@ -318,6 +318,7 @@ def get_dashboard_stats():
 
     return stats
 
+
 def get_admin_clients(status_filter=None, search_query=None):
     clients = []
 
@@ -331,14 +332,14 @@ def get_admin_clients(status_filter=None, search_query=None):
                        subdominio, requiere_aprobacion, nombre_barberia, creado_en,
                        categoria_slug
                 FROM usuarios
-                WHERE plan_tipo IS NOT NULL
+                WHERE email IS NOT NULL AND estado = 'activo'
             """
             params = []
             if status_filter and status_filter != 'todos':
-                query += " AND estado_suscripcion = %s"
+                query += " AND COALESCE(estado_suscripcion, 'activo') = %s"
                 params.append(status_filter)
             if search_query:
-                query += " AND (nombre_completo ILIKE %s OR email ILIKE %s OR nombre_barberia ILIKE %s)"
+                query += " AND (nombre_completo ILIKE %s OR email ILIKE %s OR COALESCE(nombre_barberia, '') ILIKE %s)"
                 q = f"%{search_query}%"
                 params.extend([q, q, q])
             
@@ -348,13 +349,13 @@ def get_admin_clients(status_filter=None, search_query=None):
                     "id": str(r["id"]),
                     "name": r["nombre_completo"],
                     "email": r["email"],
-                    "phone": r["telefono_whatsapp"],
-                    "planTipo": r["plan_tipo"],
-                    "estadoSuscripcion": r["estado_suscripcion"],
+                    "phone": r["telefono_whatsapp"] or "",
+                    "planTipo": r["plan_tipo"] or "trial",
+                    "estadoSuscripcion": r["estado_suscripcion"] or "activo",
                     "fechaVencimiento": r["fecha_vencimiento"].isoformat() if r["fecha_vencimiento"] else None,
-                    "subdominio": r["subdominio"],
-                    "requiereAprobacion": r["requiere_aprobacion"],
-                    "businessName": r["nombre_barberia"],
+                    "subdominio": r["subdominio"] or r["email"].split("@")[0],
+                    "requiereAprobacion": bool(r["requiere_aprobacion"]),
+                    "businessName": r["nombre_barberia"] or r["nombre_completo"],
                     "categoriaSlug": r["categoria_slug"] or "barberia",
                     "creadoEn": r["creado_en"].isoformat() if r["creado_en"] else None
                 })
@@ -444,6 +445,19 @@ def create_admin_client(data):
 
     temp_password = secrets.token_urlsafe(10)
 
+    # Sanitize phone to satisfy check constraint ^\+[1-9][0-9]{7,14}$
+    digits = re.sub(r"[^\d]", "", phone)
+    if not digits:
+        digits = "56912345678"
+    if phone.startswith("+"):
+        clean_phone = "+" + digits
+    elif digits.startswith("56"):
+        clean_phone = "+" + digits
+    else:
+        clean_phone = "+56" + digits
+    if len(clean_phone) > 15:
+        clean_phone = clean_phone[:15]
+
     if is_configured():
         with connection() as conn:
             with conn.transaction():
@@ -465,7 +479,7 @@ def create_admin_client(data):
                     ) VALUES (%s, %s, %s, %s, %s, %s, %s, FALSE, %s, 'activo', %s)
                     RETURNING id
                     """,
-                    (name, email, phone, plan_tipo, estado_suscripcion, expiry, subdomain, business_name, categoria_slug)
+                    (name, email, clean_phone, plan_tipo, estado_suscripcion, expiry, subdomain, business_name, categoria_slug)
                 ).fetchone()
                 user_id = user_row[0]
 
@@ -477,7 +491,14 @@ def create_admin_client(data):
 
                 # Create Business Local
                 cat = conn.execute("SELECT id FROM categorias WHERE slug = %s", (categoria_slug,)).fetchone()
+                if not cat:
+                    cat = conn.execute("SELECT id FROM categorias WHERE activo = TRUE LIMIT 1").fetchone()
                 cat_id = cat[0] if cat else None
+                if not cat_id:
+                    cat_id = conn.execute(
+                        "INSERT INTO categorias (nombre, slug, descripcion) VALUES ('General', 'barberia', 'Categoría general') RETURNING id"
+                    ).fetchone()[0]
+
                 local_row = conn.execute(
                     """
                     INSERT INTO locales (categoria_id, nombre, slug, estado)
