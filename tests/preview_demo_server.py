@@ -19,6 +19,18 @@ from backend.seed_demo import DEMO_NAME, DEMO_SLUG, build_panel_state
 
 PORT = int(os.environ.get("PORT", "8891"))
 STATE = build_panel_state()
+if os.environ.get("PREVIEW_NEW_ACCOUNT") == "1":
+    STATE.update(
+        {
+            "name": "Mi negocio en Kauze",
+            "professionals": {"barberia": []},
+            "services": {"barberia": []},
+            "appointments": {"barberia": []},
+            "clients": {"barberia": []},
+            "publicBookingEnabled": False,
+            "onboarding": {"welcomeDismissed": False, "tourCompleted": False},
+        }
+    )
 MASTERPLAN_STATE = deepcopy(STATE)
 MASTERPLAN_STATE.update(
     {
@@ -91,6 +103,7 @@ def business_payload(slug=DEMO_SLUG):
     ]
     tomorrow = (date.today() + timedelta(days=1)).isoformat()
     is_masterplan = slug == "masterplan"
+    is_new_account_preview = os.environ.get("PREVIEW_NEW_ACCOUNT") == "1" and slug == DEMO_SLUG
     return {
         "id": slug,
         "slug": slug,
@@ -105,8 +118,8 @@ def business_payload(slug=DEMO_SLUG):
         "instagramUrl": state.get("instagramUrl", ""),
         "instagramHandle": state.get("instagramHandle", ""),
         "phone": "",
-        "rating": "5.0",
-        "reviews": 1 if is_masterplan else 24,
+        "rating": None if is_new_account_preview else "5.0",
+        "reviews": 0 if is_new_account_preview else (1 if is_masterplan else 24),
         "statusLabel": "Disponible",
         "statusTone": "good",
         "hero": state["pageTitle"],

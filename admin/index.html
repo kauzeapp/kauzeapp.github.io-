@@ -995,7 +995,10 @@
         <h2>Gestión de Suscripciones (MVP)</h2>
         <p>Ciclo de vida de los negocios registrados en Kauze.</p>
       </div>
-      <button class="button primary" onclick="openCreateClientModal()">+ Crear Cliente Manual</button>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+        <span id="adminSyncStatus" style="font-size:12px;font-weight:800;color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:999px;padding:7px 11px">Sincronizando...</span>
+        <button class="button primary" onclick="openCreateClientModal()">+ Crear Cliente Manual</button>
+      </div>
     </div>
 
     <!-- Contadores Visuales de Suscripción -->
@@ -2538,22 +2541,67 @@
         }
         await loadTasks();
         await loadNotes();
-        await loadStats();
-        await loadClients();
+        await refreshAdminDashboard();
         await loadSimulations();
-        
-        // Auto-refrescar cada 15 segundos para detectar nuevas solicitudes de clientes
-        setInterval(async () => {
-            await loadStats();
-            await loadClients();
-            await loadSimulations();
-        }, 15000);
+
+        // Una sola sincronizacion controlada evita peticiones superpuestas.
+        setInterval(refreshAdminDashboard, 5000);
     })();
 
     // Lógica global del Dashboard de Suscripciones
     let currentFilter = 'todos';
     let searchQuery = '';
     let clientsData = [];
+    let adminRefreshInFlight = false;
+
+    function escapeHTML(value) {
+        return String(value ?? "").replace(/[&<>'"]/g, character => ({
+            "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+        })[character]);
+    }
+
+    function setAdminSyncStatus(message, tone = 'ok') {
+        const status = document.getElementById('adminSyncStatus');
+        if (!status) return;
+        status.textContent = message;
+        status.style.color = tone === 'error' ? '#b91c1c' : tone === 'wait' ? '#92400e' : '#047857';
+        status.style.background = tone === 'error' ? '#fef2f2' : tone === 'wait' ? '#fffbeb' : '#ecfdf5';
+    }
+
+    function renderSubscriptionStats(stats) {
+        document.getElementById('statsTrial').textContent = Number(stats.trial || 0);
+        document.getElementById('statsActivo').textContent = Number(stats.activo || 0);
+        document.getElementById('statsMora').textContent = Number(stats.en_mora || 0);
+        document.getElementById('statsDesactivado').textContent = Number(stats.desactivado || 0);
+    }
+
+    function renderStatsFromClients() {
+        const stats = { trial: 0, activo: 0, en_mora: 0, desactivado: 0 };
+        clientsData.forEach(client => {
+            const state = String(client.estadoSuscripcion || 'trial').toLowerCase();
+            if (Object.prototype.hasOwnProperty.call(stats, state)) stats[state] += 1;
+        });
+        renderSubscriptionStats(stats);
+    }
+
+    async function refreshAdminDashboard() {
+        if (adminRefreshInFlight || document.hidden) return false;
+        adminRefreshInFlight = true;
+        setAdminSyncStatus('Sincronizando...', 'wait');
+        try {
+            const clientsLoaded = await loadClients();
+            if (!clientsLoaded) return false;
+            await loadStats();
+            setAdminSyncStatus(`Actualizado ${new Date().toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit', second:'2-digit'})}`);
+            return true;
+        } catch (err) {
+            console.error('No fue posible sincronizar el panel:', err);
+            setAdminSyncStatus('Error de sincronizacion', 'error');
+            return false;
+        } finally {
+            adminRefreshInFlight = false;
+        }
+    }
 
     window.openCreateClientModal = function() {
         document.getElementById("createClientModal").style.display = "flex";
@@ -2598,33 +2646,35 @@
 
     async function loadStats() {
         try {
-            const res = await fetch("/api/admin/dashboard/stats");
+            const res = await fetch("/api/admin/dashboard/stats", { credentials: "include", cache: "no-store" });
             if (res.status === 401 || res.status === 403) {
                 showAdminAuthModal();
-                return;
+                setAdminSyncStatus("Sesion requerida", "wait");
+                return false;
             }
-            if (res.ok) {
-                const stats = await res.json();
-                document.getElementById("statsTrial").textContent = stats.trial || 0;
-                document.getElementById("statsActivo").textContent = stats.activo || 0;
-                document.getElementById("statsMora").textContent = stats.en_mora || 0;
-                document.getElementById("statsDesactivado").textContent = stats.desactivado || 0;
-            }
+            if (!res.ok) return false;
+            renderSubscriptionStats(await res.json());
+            return true;
         } catch (err) {
             console.error("Error al cargar estadísticas de suscripción:", err);
+            return false;
         }
     }
-
     async function loadClients() {
         try {
-            const res = await fetch("/api/admin/clientes");
+            const res = await fetch("/api/admin/clientes", { credentials: "include", cache: "no-store" });
             if (res.status === 401 || res.status === 403) {
                 showAdminAuthModal();
-                return;
+                setAdminSyncStatus("Sesion requerida", "wait");
+                return false;
             }
-            if (res.ok) {
-                clientsData = await res.json();
-                
+            if (!res.ok) {
+                const failure = await res.json().catch(() => ({}));
+                throw new Error(failure.message || `Error ${res.status}`);
+            }
+            clientsData = await res.json();
+            renderStatsFromClients();
+
                 // Actualizar banner de notificaciones
                 const pendingCount = clientsData.filter(c => c.requiereAprobacion).length;
                 const banner = document.getElementById("adminNotificationBanner");
@@ -2638,10 +2688,12 @@
                     }
                 }
                 
-                renderClientsTable();
-            }
+            renderClientsTable();
+            return true;
         } catch (err) {
             console.error("Error al cargar clientes:", err);
+            setAdminSyncStatus("No se pudieron cargar los clientes", "error");
+            return false;
         }
     }
 
@@ -2674,9 +2726,19 @@
         filtered.forEach(client => {
             const tr = document.createElement("tr");
             tr.style.borderBottom = "1px solid var(--border-color)";
+
+            const safeId = escapeHTML(client.id);
+            const safeBusinessName = escapeHTML(client.businessName || "Negocio sin nombre");
+            const safeName = escapeHTML(client.name || "");
+            const safeEmail = escapeHTML(client.email || "");
+            const safePhone = escapeHTML(client.phone || "—");
+            const safeSubdomain = escapeHTML(client.subdominio || "");
+            const safePlan = escapeHTML(client.planTipo || "trial");
+            const safeState = escapeHTML(client.estadoSuscripcion || "trial");
             
             // Subdomain link
-            const url = client.subdominio ? `https://${client.subdominio}` : "#";
+            const validSubdomain = /^[a-z0-9-]+\.kauze\.cl$/i.test(client.subdominio || "");
+            const url = validSubdomain ? `https://${client.subdominio}` : "#";
             
             // Mapeo de categorías
             const categoryNames = {
@@ -2688,11 +2750,11 @@
                 tatuajes: "🎨 Tatuajes",
                 talleres: "🚗 Talleres"
             };
-            const categoryLabel = categoryNames[client.categoriaSlug] || client.categoriaSlug || "💈 Barbería";
+            const categoryLabel = escapeHTML(categoryNames[client.categoriaSlug] || client.categoriaSlug || "💈 Barbería");
 
-            const subNameMarkup = client.subdominio 
-                ? `<a href="${url}" target="_blank" style="color: var(--blue); font-weight: 700; text-decoration: none;">${client.businessName}</a> <span style="font-size:10.5px; font-weight:bold; color:var(--text-muted); margin-left:6px; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${categoryLabel}</span><div style="font-size: 11px; color: var(--text-muted);">${client.subdominio}</div>`
-                : `<span style="font-weight: 700; color: var(--navy);">${client.businessName}</span> <span style="font-size:10.5px; font-weight:bold; color:var(--text-muted); margin-left:6px; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${categoryLabel}</span><div style="font-size: 11px; color: #ef4444; font-weight: 700;">Pendiente activación</div>`;
+            const subNameMarkup = validSubdomain
+                ? `<a href="${url}" target="_blank" rel="noopener" style="color: var(--blue); font-weight: 700; text-decoration: none;">${safeBusinessName}</a> <span style="font-size:10.5px; font-weight:bold; color:var(--text-muted); margin-left:6px; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${categoryLabel}</span><div style="font-size: 11px; color: var(--text-muted);">${safeSubdomain}</div>`
+                : `<span style="font-weight: 700; color: var(--navy);">${safeBusinessName}</span> <span style="font-size:10.5px; font-weight:bold; color:var(--text-muted); margin-left:6px; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${categoryLabel}</span><div style="font-size: 11px; color: #ef4444; font-weight: 700;">Pendiente activación</div>`;
             
             // Status badge
             let badgeStyle = "background: #e2e8f0; color: #475569;";
@@ -2701,7 +2763,7 @@
             else if (client.estadoSuscripcion === "en_mora") badgeStyle = "background: rgba(245,158,11,0.1); color: #d97706;";
             else if (client.estadoSuscripcion === "desactivado") badgeStyle = "background: rgba(239,68,68,0.1); color: #dc2626;";
             
-            const badge = `<span style="padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; text-transform: uppercase; ${badgeStyle}">${client.estadoSuscripcion}</span>`;
+            const badge = `<span style="padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; text-transform: uppercase; ${badgeStyle}">${safeState}</span>`;
             
             // Vencimiento formatting
             let vencDate = "—";
@@ -2716,19 +2778,19 @@
             // Actions
             let actionsMarkup = "";
             if (client.requiereAprobacion) {
-                actionsMarkup += `<button class="button small primary" onclick="confirmClient('${client.id}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle;">Confirmar Ingreso</button>`;
-            } else if (client.estadoSuscripcion !== "activo") {
-                actionsMarkup += `<button class="button small" onclick="confirmClient('${client.id}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle; background: #e0f2fe; color: #0369a1; border-color: #bae6fd;">Activar</button>`;
+                actionsMarkup += `<button class="button small primary" onclick="confirmClient('${safeId}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle;">Confirmar Ingreso</button>`;
+            } else if (["en_mora", "desactivado"].includes(client.estadoSuscripcion)) {
+                actionsMarkup += `<button class="button small" onclick="reactivateClient('${safeId}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle; background: #e0f2fe; color: #0369a1; border-color: #bae6fd;">Reactivar</button>`;
             }
-            actionsMarkup += `<button class="button small" onclick="openEditClientModal('${client.id}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle; background: #fef3c7; color: #b45309; border-color: #fde68a;">Editar</button>`;
-            actionsMarkup += `<button class="button small" onclick="deleteClient('${client.id}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle; background: #fee2e2; color: #b91c1c; border-color: #fca5a5;">Eliminar</button>`;
-            actionsMarkup += `<button class="button small" onclick="resetClientPassword('${client.id}')" style="padding: 4px 8px; font-size: 11px; vertical-align: middle;">Clave</button>`;
+            actionsMarkup += `<button class="button small" onclick="openEditClientModal('${safeId}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle; background: #fef3c7; color: #b45309; border-color: #fde68a;">Editar</button>`;
+            actionsMarkup += `<button class="button small" onclick="deleteClient('${safeId}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle; background: #fee2e2; color: #b91c1c; border-color: #fca5a5;">Eliminar</button>`;
+            actionsMarkup += `<button class="button small" onclick="resetClientPassword('${safeId}')" style="padding: 4px 8px; font-size: 11px; vertical-align: middle;">Enviar acceso</button>`;
             
             tr.innerHTML = `
                 <td style="padding: 14px 18px; font-size: 13.5px;">${subNameMarkup}</td>
-                <td style="padding: 14px 18px; font-size: 13.5px; font-weight: 600; color: var(--navy);">${client.name}<div style="font-size: 11px; color: var(--text-muted); font-weight: 400;">${client.email}</div></td>
-                <td style="padding: 14px 18px; font-size: 13.5px; color: var(--text-muted);">${client.phone || "—"}</td>
-                <td style="padding: 14px 18px; font-size: 13px; font-weight: 700; color: var(--navy); text-transform: uppercase;">${client.planTipo}</td>
+                <td style="padding: 14px 18px; font-size: 13.5px; font-weight: 600; color: var(--navy);">${safeName}<div style="font-size: 11px; color: var(--text-muted); font-weight: 400;">${safeEmail}</div></td>
+                <td style="padding: 14px 18px; font-size: 13.5px; color: var(--text-muted);">${safePhone}</td>
+                <td style="padding: 14px 18px; font-size: 13px; font-weight: 700; color: var(--navy); text-transform: uppercase;">${safePlan}</td>
                 <td style="padding: 14px 18px; font-size: 13.5px;">${badge}</td>
                 <td style="padding: 14px 18px; font-size: 13.5px; font-weight: 600; color: var(--navy);">${vencDate}</td>
                 <td style="padding: 14px 18px; font-size: 13.5px; text-align: right;">${actionsMarkup}</td>
@@ -2740,7 +2802,7 @@
     window.confirmClient = async function(id) {
         if (!confirm("¿Estás seguro de confirmar el ingreso de este barbero? Se generará su subdominio y se enviarán sus credenciales de acceso.")) return;
         try {
-            const res = await fetch(`/api/admin/clientes/${id}/confirmar`, { method: "PUT" });
+            const res = await fetch(`/api/admin/clientes/${id}/confirmar`, { method: "PUT", credentials: "include" });
             if (res.ok) {
                 alert("¡Cliente activado y correo con credenciales enviado!");
                 await loadStats();
@@ -2755,11 +2817,11 @@
     };
 
     window.resetClientPassword = async function(id) {
-        if (!confirm("¿Estás seguro de restablecer la contraseña de este cliente? Se enviará una nueva contraseña temporal a su correo.")) return;
+        if (!confirm("¿Enviar un enlace seguro para que esta persona cree una nueva contraseña?")) return;
         try {
-            const res = await fetch(`/api/admin/clientes/${id}/reset-password`, { method: "POST" });
+            const res = await fetch(`/api/admin/clientes/${id}/reset-password`, { method: "POST", credentials: "include" });
             if (res.ok) {
-                alert("¡Nueva contraseña temporal generada y enviada al correo del cliente!");
+                alert("Enlace seguro enviado al correo del cliente.");
             } else {
                 const err = await res.json();
                 alert("Error al restablecer contraseña: " + (err.message || err.error));
@@ -2769,9 +2831,22 @@
         }
     };
 
+    window.reactivateClient = async function(id) {
+        if (!confirm("¿Reactivar esta cuenta y renovar su periodo desde hoy?")) return;
+        try {
+            const res = await fetch(`/api/admin/clientes/${id}/activar`, { method: "PUT", credentials: "include" });
+            const result = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(result.message || "No fue posible reactivar la cuenta.");
+            await refreshAdminDashboard();
+            alert("Cuenta reactivada correctamente.");
+        } catch (error) {
+            alert(error.message || "Error de conexión al reactivar la cuenta.");
+        }
+    };
+
     async function loadSimulations() {
         try {
-            const res = await fetch("/api/admin/simulations");
+            const res = await fetch("/api/admin/simulations", { credentials: "include", cache: "no-store" });
             if (res.ok) {
                 const data = await res.json();
                 const tbody = document.getElementById("simulationsTableBody");
@@ -2799,19 +2874,21 @@
                         second: "2-digit"
                     });
                     
-                    let typeBadge = `<span style="font-weight: 700; color: var(--navy);">${ev.type}</span>`;
-                    if (ev.type.includes("Correo")) typeBadge = `<span style="color: var(--blue); font-weight: 700; background: rgba(37,99,235,0.08); padding: 2px 6px; border-radius: 4px;">📧 ${ev.type}</span>`;
-                    else if (ev.type.includes("Subdominio")) typeBadge = `<span style="color: var(--purple); font-weight: 700; background: rgba(139,92,246,0.08); padding: 2px 6px; border-radius: 4px;">🌐 ${ev.type}</span>`;
-                    else if (ev.type.includes("Base")) typeBadge = `<span style="color: #059669; font-weight: 700; background: rgba(16,185,129,0.08); padding: 2px 6px; border-radius: 4px;">💾 ${ev.type}</span>`;
+                    const eventType = String(ev.type || "Evento");
+                    const safeEventType = escapeHTML(eventType);
+                    let typeBadge = `<span style="font-weight: 700; color: var(--navy);">${safeEventType}</span>`;
+                    if (eventType.includes("Correo")) typeBadge = `<span style="color: var(--blue); font-weight: 700; background: rgba(37,99,235,0.08); padding: 2px 6px; border-radius: 4px;">📧 ${safeEventType}</span>`;
+                    else if (eventType.includes("Subdominio")) typeBadge = `<span style="color: var(--purple); font-weight: 700; background: rgba(139,92,246,0.08); padding: 2px 6px; border-radius: 4px;">🌐 ${safeEventType}</span>`;
+                    else if (eventType.includes("Base")) typeBadge = `<span style="color: #059669; font-weight: 700; background: rgba(16,185,129,0.08); padding: 2px 6px; border-radius: 4px;">💾 ${safeEventType}</span>`;
                     
-                    let detailsHtml = ev.details;
+                    let detailsHtml = escapeHTML(ev.details || "");
                     const urlRegex = /(https?:\/\/[^\s]+)/g;
                     detailsHtml = detailsHtml.replace(urlRegex, url => `<a href="${url}" target="_blank" style="color: var(--blue); font-weight: 700; text-decoration: underline;">${url}</a>`);
 
                     tr.innerHTML = `
                         <td style="padding: 10px 14px; color: var(--text-muted);">${time}</td>
                         <td style="padding: 10px 14px;">${typeBadge}</td>
-                        <td style="padding: 10px 14px; font-weight: 600; color: var(--navy);">${ev.target}</td>
+                        <td style="padding: 10px 14px; font-weight: 600; color: var(--navy);">${escapeHTML(ev.target || "")}</td>
                         <td style="padding: 10px 14px; font-family: monospace; font-size: 12px; color: #475569; word-break: break-all;">${detailsHtml}</td>
                     `;
                     tbody.appendChild(tr);
@@ -2825,11 +2902,10 @@
     window.confirmClient = async function(id) {
         if (!confirm("¿Estás seguro de confirmar el ingreso de este cliente? Se generará su subdominio y se enviarán sus credenciales de acceso.")) return;
         try {
-            const res = await fetch(`/api/admin/clientes/${id}/confirmar`, { method: "PUT" });
+            const res = await fetch(`/api/admin/clientes/${id}/confirmar`, { method: "PUT", credentials: "include" });
             if (res.ok) {
                 alert("¡Cliente activado y correo con credenciales enviado!");
-                await loadStats();
-                await loadClients();
+                await refreshAdminDashboard();
             } else {
                 const err = await res.json();
                 alert(err.message || "Error al activar el cliente.");
@@ -2865,11 +2941,10 @@
     window.deleteClient = async function(id) {
         if (!confirm("¿Estás completamente seguro de ELIMINAR este cliente? Esta acción borrará todas sus configuraciones, locales y suscripciones de forma permanente.")) return;
         try {
-            const res = await fetch(`/api/admin/clientes/${id}`, { method: "DELETE" });
+            const res = await fetch(`/api/admin/clientes/${id}`, { method: "DELETE", credentials: "include" });
             if (res.ok) {
                 alert("Cliente eliminado exitosamente.");
-                await loadStats();
-                await loadClients();
+                await refreshAdminDashboard();
             } else {
                 const err = await res.json();
                 alert(err.message || "Error al eliminar el cliente.");
@@ -2899,27 +2974,32 @@
                     estadoSuscripcion: document.getElementById("mState").value,
                     categoriaSlug: document.getElementById("mCategory").value
                 };
-                
+                const submitButton = createForm.querySelector('button[type="submit"]');
+                submitButton.disabled = true;
+                submitButton.textContent = "Creando cuenta...";
+
                 try {
                     const res = await fetch("/api/admin/clientes/crear", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
+                        credentials: "include",
                         body: JSON.stringify(payload)
                     });
-                    const result = await res.json();
+                    const result = await res.json().catch(() => ({}));
                     if (res.ok) {
                         closeCreateClientModal();
-                        alert("¡Cliente creado exitosamente! Se le ha enviado un correo con sus credenciales de acceso.");
-                        await loadStats();
-                        await loadClients();
+                        await refreshAdminDashboard();
+                        alert("¡Cuenta creada! El correo de activacion fue aceptado y el panel ya esta actualizado.");
                     } else {
-                        const errMsg = (result.message || result.error || "Error al crear el cliente") + (result.traceback ? " Details: " + result.traceback : "");
-                        errorMsg.textContent = errMsg;
+                        errorMsg.textContent = result.message || result.error || `No fue posible crear la cuenta (error ${res.status}).`;
                         errorMsg.style.display = "block";
                     }
                 } catch (err) {
-                    errorMsg.textContent = "Error de conexión con el servidor.";
+                    errorMsg.textContent = "No hubo respuesta del servidor. No se confirmo la creacion de la cuenta.";
                     errorMsg.style.display = "block";
+                } finally {
+                    submitButton.disabled = false;
+                    submitButton.textContent = "Crear y Activar";
                 }
             });
         }
@@ -2948,14 +3028,14 @@
                     const res = await fetch(`/api/admin/clientes/${id}/editar`, {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
+                        credentials: "include",
                         body: JSON.stringify(payload)
                     });
                     const result = await res.json();
                     if (res.ok) {
                         closeEditClientModal();
                         alert("¡Cliente modificado exitosamente!");
-                        await loadStats();
-                        await loadClients();
+                        await refreshAdminDashboard();
                     } else {
                         errorMsg.textContent = result.message || result.error || "Error al modificar el cliente.";
                         errorMsg.style.display = "block";
@@ -3146,8 +3226,7 @@
             const data = await res.json().catch(() => ({}));
             if (res.ok) {
                 hideAdminAuthModal();
-                if (typeof loadStats === "function") await loadStats();
-                if (typeof loadClients === "function") await loadClients();
+                if (typeof refreshAdminDashboard === "function") await refreshAdminDashboard();
                 if (typeof loadSimulations === "function") await loadSimulations();
             } else {
                 errorMsg.textContent = data.message || "Credenciales incorrectas.";

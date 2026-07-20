@@ -91,6 +91,7 @@ def _account_payload(row):
             "name": row["rol_nombre"],
             "slug": row["rol_slug"],
         },
+        "isSuperAdmin": bool(row.get("is_superadmin")),
     }
 
 
@@ -170,7 +171,17 @@ def login(email, password, remember=False, local_slug=None, user_agent=""):
               c.slug AS categoria_slug,
               r.id AS rol_id,
               r.nombre AS rol_nombre,
-              r.slug AS rol_slug
+              r.slug AS rol_slug,
+              EXISTS (
+                SELECT 1
+                FROM usuario_roles ur_admin
+                INNER JOIN roles r_admin
+                  ON r_admin.id = ur_admin.rol_id
+                 AND r_admin.slug = 'superadmin'
+                 AND r_admin.activo = TRUE
+                WHERE ur_admin.usuario_id = u.id
+                  AND ur_admin.local_id IS NULL
+              ) AS is_superadmin
             FROM usuarios u
             INNER JOIN usuario_roles ur ON ur.usuario_id = u.id
             INNER JOIN roles r ON r.id = ur.rol_id AND r.activo = TRUE
@@ -287,7 +298,17 @@ def current_session(session_token):
               r.id AS rol_id,
               r.nombre AS rol_nombre,
               r.slug AS rol_slug,
-              s.expira_en
+              s.expira_en,
+              EXISTS (
+                SELECT 1
+                FROM usuario_roles ur_admin
+                INNER JOIN roles r_admin
+                  ON r_admin.id = ur_admin.rol_id
+                 AND r_admin.slug = 'superadmin'
+                 AND r_admin.activo = TRUE
+                WHERE ur_admin.usuario_id = u.id
+                  AND ur_admin.local_id IS NULL
+              ) AS is_superadmin
             FROM sesiones_auth s
             INNER JOIN usuarios u ON u.id = s.usuario_id AND u.estado = 'activo'
             INNER JOIN locales l ON l.id = s.local_id AND l.estado = 'activo'

@@ -115,11 +115,6 @@ def _send_with_smtp(recipient, subject, content):
 
 def send_email(recipient, subject, content, idempotency_key=None):
     provider = email_provider()
-    try:
-        from backend.simulations import log_simulation
-        log_simulation(f"Envío de Correo ({provider.upper()})", recipient, f"Asunto: {subject} | Detalle: {content[:200]}...")
-    except Exception as e:
-        print("Failed to log email to simulations:", e)
     if provider == "resend":
         return _send_with_resend(recipient, subject, content, idempotency_key)
     if provider == "smtp":

@@ -118,8 +118,10 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
     def _is_admin(self, account):
         if not account:
             return False
+        if bool(account.get("isSuperAdmin")):
+            return True
         role_slug = (account.get("role") or {}).get("slug")
-        if role_slug in ("superadmin", "admin", "dueno"):
+        if role_slug in ("superadmin", "admin"):
             return True
         bootstrap_email = os.environ.get("KAUZE_BOOTSTRAP_EMAIL", "").strip().lower()
         if bootstrap_email and (account.get("email") or "").strip().lower() == bootstrap_email:
@@ -281,49 +283,20 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             if not self._is_admin(account):
                 self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
                 return
-            from backend.subscriptions import get_dashboard_stats
-            self._json_response(200, get_dashboard_stats())
-            return
-
-        if path == "/api/admin/debug-db":
             try:
-                import os, traceback
-                db_url = os.environ.get("DATABASE_URL", "NOT_FOUND_IN_ENV")
-                cookie_header = self.headers.get("Cookie", "NO_COOKIE_HEADER")
-                token = ""
-                account = None
-                if cookie_header != "NO_COOKIE_HEADER" and "kauze_session=" in cookie_header:
-                    token = cookie_header.split("kauze_session=")[1].split(";")[0]
-                    account = current_session(token)
-
-                db_counts = []
-                sample_users = []
-                db_err = None
-
-                from backend.db import connection
-                if is_configured():
-                    try:
-                        with connection() as conn:
-                            rows = conn.execute("SELECT estado_suscripcion, count(*) FROM usuarios GROUP BY estado_suscripcion").fetchall()
-                            db_counts = [{"estado": r[0], "count": r[1]} for r in rows]
-                            u_rows = conn.execute("SELECT id, nombre_completo, email, estado_suscripcion, plan_tipo FROM usuarios LIMIT 10").fetchall()
-                            sample_users = [{"id": str(u[0]), "name": u[1], "email": u[2], "estado_suscripcion": u[3], "plan_tipo": u[4]} for u in u_rows]
-                    except Exception as e:
-                        db_err = f"{type(e).__name__}: {e}\n{traceback.format_exc()}"
-
-                self._json_response(200, {
-                    "DATABASE_URL": "present" if "postgresql://" in db_url else db_url,
-                    "cookie_header": cookie_header,
-                    "extracted_token": token,
-                    "account_found": account is not None,
-                    "allowed_origins": os.environ.get("KAUZE_ALLOWED_ORIGINS", ""),
-                    "db_counts": db_counts,
-                    "sample_users": sample_users,
-                    "db_error": db_err
-                })
-            except Exception as e:
-                import traceback
-                self._json_response(500, {"error": str(e), "traceback": traceback.format_exc()})
+                from backend.admin_accounts import get_dashboard_stats
+                self._json_response(200, get_dashboard_stats())
+            except DatabaseNotConfigured:
+                self._json_response(503, {"error": "database_not_configured"})
+            except Exception as exc:
+                print(f"No fue posible cargar estadisticas admin: {type(exc).__name__}")
+                self._json_response(
+                    500,
+                    {
+                        "error": "admin_stats_unavailable",
+                        "message": "No fue posible actualizar las estadisticas.",
+                    },
+                )
             return
 
         if path == "/api/admin/clientes":
@@ -336,11 +309,29 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             query = parse_qs(parsed_url.query)
             status_filter = (query.get("status") or [None])[0]
             search_query = (query.get("q") or [None])[0]
-            from backend.subscriptions import get_admin_clients
-            self._json_response(200, get_admin_clients(status_filter, search_query))
+            try:
+                from backend.admin_accounts import get_admin_clients
+                self._json_response(200, get_admin_clients(status_filter, search_query))
+            except DatabaseNotConfigured:
+                self._json_response(503, {"error": "database_not_configured"})
+            except Exception as exc:
+                print(f"No fue posible cargar clientes admin: {type(exc).__name__}")
+                self._json_response(
+                    500,
+                    {
+                        "error": "admin_clients_unavailable",
+                        "message": "No fue posible actualizar los clientes.",
+                    },
+                )
             return
 
         if path == "/api/admin/simulations":
+            account = self._require_session()
+            if not account:
+                return
+            if not self._is_admin(account):
+                self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
+                return
             from backend.simulations import get_simulations
             self._json_response(200, get_simulations())
             return
@@ -353,38 +344,6 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_DELETE(self):
         path = urlparse(self.path).path
-
-        if not self._origin_allowed():
-            self._json_response(403, {"error": "origin_not_allowed"})
-            return
-
-        if path.startswith("/api/admin/clientes/"):
-            account = self._require_session()
-            if not account:
-                return
-            if not self._is_admin(account):
-                self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
-                return
-            try:
-                parts = path.strip("/").split("/")
-                if len(parts) != 4:
-                    self._json_response(404, {"error": "not_found"})
-                    return
-                client_id = parts[3]
-                from backend.subscriptions import delete_client
-                result = delete_client(client_id)
-                self._json_response(200, result)
-            except ValueError as e:
-                self._json_response(400, {"error": "invalid_request", "message": str(e)})
-            except Exception as e:
-                self._json_response(500, {"error": "internal_error", "message": str(e)})
-            return
-
-        self._json_response(405, {"error": "method_not_allowed"})
-
-    def do_DELETE(self):
-        path = urlparse(self.path).path
-
         if not self._origin_allowed():
             self._json_response(403, {"error": "origin_not_allowed"})
             return
@@ -415,9 +374,29 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_PUT(self):
         path = urlparse(self.path).path
-
         if not self._origin_allowed():
             self._json_response(403, {"error": "origin_not_allowed"})
+            return
+
+        if path.startswith("/api/admin/clientes/") and path.endswith("/activar"):
+            account = self._require_session()
+            if not account:
+                return
+            if not self._is_admin(account):
+                self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
+                return
+            try:
+                parts = path.strip("/").split("/")
+                if len(parts) != 5:
+                    self._json_response(404, {"error": "not_found"})
+                    return
+                from backend.admin_accounts import activate_admin_client
+                self._json_response(200, activate_admin_client(parts[3]))
+            except ValueError as exc:
+                self._json_response(400, {"error": "invalid_request", "message": str(exc)})
+            except Exception as exc:
+                print(f"No fue posible activar el cliente: {type(exc).__name__}")
+                self._json_response(500, {"error": "activation_failed", "message": "No fue posible activar la cuenta."})
             return
 
         if path.startswith("/api/admin/clientes/") and path.endswith("/confirmar"):
@@ -456,31 +435,8 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                     return
                 client_id = parts[3]
                 data = self._read_json()
-                from backend.subscriptions import update_client_details
-                result = update_client_details(client_id, data)
-                self._json_response(200, result)
-            except ValueError as e:
-                self._json_response(400, {"error": "invalid_request", "message": str(e)})
-            except Exception as e:
-                self._json_response(500, {"error": "internal_error", "message": str(e)})
-            return
-
-        if path.startswith("/api/admin/clientes/") and path.endswith("/editar"):
-            account = self._require_session()
-            if not account:
-                return
-            if not self._is_admin(account):
-                self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
-                return
-            try:
-                parts = path.strip("/").split("/")
-                if len(parts) != 5:
-                    self._json_response(404, {"error": "not_found"})
-                    return
-                client_id = parts[3]
-                data = self._read_json()
-                from backend.subscriptions import update_client_details
-                result = update_client_details(client_id, data)
+                from backend.admin_accounts import update_admin_client
+                result = update_admin_client(client_id, data)
                 self._json_response(200, result)
             except ValueError as e:
                 self._json_response(400, {"error": "invalid_request", "message": str(e)})
@@ -554,15 +510,25 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                 return
             try:
                 data = self._read_json()
-                from backend.subscriptions import create_admin_client
+                from backend.admin_accounts import create_admin_client
                 result = create_admin_client(data)
-                self._json_response(200, result)
-            except ValueError as e:
-                import traceback
-                self._json_response(400, {"error": "validation_error", "message": str(e), "traceback": traceback.format_exc()})
-            except Exception as e:
-                import traceback
-                self._json_response(500, {"error": "server_error", "message": str(e), "traceback": traceback.format_exc()})
+                self._json_response(201, result)
+            except ValueError as exc:
+                self._json_response(
+                    400,
+                    {"error": "validation_error", "message": str(exc)},
+                )
+            except DatabaseNotConfigured:
+                self._json_response(503, {"error": "database_not_configured"})
+            except Exception as exc:
+                print(f"No fue posible crear el cliente admin: {type(exc).__name__}")
+                self._json_response(
+                    500,
+                    {
+                        "error": "admin_client_creation_failed",
+                        "message": "No fue posible crear la cuenta. No se guardaron cambios.",
+                    },
+                )
             return
 
         if path.startswith("/api/admin/clientes/") and path.endswith("/reset-password"):
@@ -578,8 +544,8 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                     self._json_response(404, {"error": "not_found"})
                     return
                 client_id = parts[3]
-                from backend.subscriptions import reset_client_password
-                result = reset_client_password(client_id)
+                from backend.admin_accounts import reset_admin_client_access
+                result = reset_admin_client_access(client_id)
                 self._json_response(200, result)
             except ValueError as e:
                 self._json_response(400, {"error": "invalid_request", "message": str(e)})
@@ -717,6 +683,12 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         if path == "/api/admin/simulations":
+            account = self._require_session()
+            if not account:
+                return
+            if not self._is_admin(account):
+                self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
+                return
             try:
                 data = self._read_json()
                 from backend.simulations import log_simulation
