@@ -1,12 +1,12 @@
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 SIMULATIONS_FILE = "simulated_actions_log.json"
 
 def log_simulation(action_type, target, details):
     event = {
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "type": action_type,
         "target": target,
         "details": details
