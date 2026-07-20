@@ -115,6 +115,17 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             return None
         return account
 
+    def _is_admin(self, account):
+        if not account:
+            return False
+        role_slug = (account.get("role") or {}).get("slug")
+        if role_slug in ("superadmin", "admin", "dueno"):
+            return True
+        bootstrap_email = os.environ.get("KAUZE_BOOTSTRAP_EMAIL", "").strip().lower()
+        if bootstrap_email and (account.get("email") or "").strip().lower() == bootstrap_email:
+            return True
+        return False
+
     def _session_cookie(self, token, remember):
         if COOKIE_SECURE:
             # Producción: cross-subdomain (kauze.cl + admin.kauze.cl)
@@ -267,7 +278,7 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             account = self._require_session()
             if not account:
                 return
-            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+            if not self._is_admin(account):
                 self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
                 return
             from backend.subscriptions import get_dashboard_stats
@@ -301,7 +312,7 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             account = self._require_session()
             if not account:
                 return
-            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+            if not self._is_admin(account):
                 self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
                 return
             query = parse_qs(parsed_url.query)
@@ -333,7 +344,7 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             account = self._require_session()
             if not account:
                 return
-            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+            if not self._is_admin(account):
                 self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
                 return
             try:
@@ -364,7 +375,7 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             account = self._require_session()
             if not account:
                 return
-            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+            if not self._is_admin(account):
                 self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
                 return
             try:
@@ -395,7 +406,7 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             account = self._require_session()
             if not account:
                 return
-            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+            if not self._is_admin(account):
                 self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
                 return
             try:
@@ -417,7 +428,7 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             account = self._require_session()
             if not account:
                 return
-            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+            if not self._is_admin(account):
                 self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
                 return
             try:
@@ -440,7 +451,7 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             account = self._require_session()
             if not account:
                 return
-            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+            if not self._is_admin(account):
                 self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
                 return
             try:
@@ -520,7 +531,7 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             account = self._require_session()
             if not account:
                 return
-            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+            if not self._is_admin(account):
                 self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
                 return
             try:
@@ -538,7 +549,7 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             account = self._require_session()
             if not account:
                 return
-            if not (account.get("role", {}).get("slug") in ("superadmin", "admin")):
+            if not self._is_admin(account):
                 self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
                 return
             try:
@@ -762,3 +773,4 @@ def run():
 
 if __name__ == "__main__":
     run()
+
