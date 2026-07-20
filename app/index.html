@@ -1441,12 +1441,12 @@
           const res = await fetch(`${BACKEND_URL}/api/app-state`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'same-origin',
+            credentials: 'include',
             body: JSON.stringify(snapshot || state)
           });
           if (!res.ok) throw new Error(`No se pudo guardar el estado (${res.status}).`);
         } else {
-          const res = await fetch(`${BACKEND_URL}/api/app-state`, { credentials: 'same-origin' });
+          const res = await fetch(`${BACKEND_URL}/api/app-state`, { credentials: 'include' });
           if (res.ok) {
             const data = await res.json();
             if (data && data.type) {
@@ -3598,7 +3598,7 @@
         const res=await fetch(`${BACKEND_URL}/api/auth/forgot-password`,{
           method:'POST',
           headers:{'Content-Type':'application/json'},
-          credentials:'same-origin',
+          credentials:'include',
           body:JSON.stringify({email})
         });
         const data=await res.json().catch(()=>({}));
@@ -3621,7 +3621,7 @@
         const res=await fetch(`${BACKEND_URL}/api/auth/login`,{
           method:'POST',
           headers:{'Content-Type':'application/json'},
-          credentials:'same-origin',
+          credentials:'include',
           body:JSON.stringify({
             email,
             password:pass,
@@ -3672,7 +3672,7 @@
         const res=await fetch(`${BACKEND_URL}/api/auth/reset-password`,{
           method:'POST',
           headers:{'Content-Type':'application/json'},
-          credentials:'same-origin',
+          credentials:'include',
           body:JSON.stringify({token,password})
         });
         const data=await res.json().catch(()=>({}));
@@ -3693,7 +3693,7 @@
 
     logoutBtn.addEventListener('click',async()=>{
       try{
-        await fetch(`${BACKEND_URL}/api/auth/logout`,{method:'POST',credentials:'same-origin'});
+        await fetch(`${BACKEND_URL}/api/auth/logout`,{method:'POST',credentials:'include'});
       }finally{
         currentAccount=null;
         location.reload();
@@ -3756,7 +3756,7 @@
           const response = await fetch(`${BACKEND_URL}/api/account/profile-image`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            credentials: 'same-origin',
+            credentials: 'include',
             body: JSON.stringify({profileImage: selectedImage})
           });
           const data = await response.json().catch(() => ({}));
@@ -4209,7 +4209,7 @@
     async function restoreExistingSession(){
       loginFeedback.textContent='Comprobando sesión segura...';
       try{
-        const res=await fetch(`${BACKEND_URL}/api/auth/me`,{credentials:'same-origin'});
+        const res=await fetch(`${BACKEND_URL}/api/auth/me`,{credentials:'include'});
         if(res.ok){
           const data=await res.json();
           await showApp(data.account);
