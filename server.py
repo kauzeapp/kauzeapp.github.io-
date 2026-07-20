@@ -290,7 +290,8 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                     "DATABASE_URL": "present" if "postgresql://" in db_url else db_url,
                     "cookie_header": cookie_header,
                     "extracted_token": token,
-                    "account_found": account is not None
+                    "account_found": account is not None,
+                    "allowed_origins": os.environ.get("KAUZE_ALLOWED_ORIGINS", "")
                 })
             except Exception as e:
                 self._json_response(500, {"error": str(e)})
