@@ -294,14 +294,13 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                 account = None
                 if cookie_header != "NO_COOKIE_HEADER" and "kauze_session=" in cookie_header:
                     token = cookie_header.split("kauze_session=")[1].split(";")[0]
-                    from backend.auth import current_session
                     account = current_session(token)
 
                 db_counts = []
                 sample_users = []
                 db_err = None
 
-                from backend.db import is_configured, connection
+                from backend.db import connection
                 if is_configured():
                     try:
                         with connection() as conn:
