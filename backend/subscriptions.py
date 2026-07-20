@@ -25,12 +25,11 @@ hasher = PasswordHasher(
 )
 
 def clean_subdomain(name):
-    nfkd_form = unicodedata.normalize('NFKD', name)
+    nfkd_form = unicodedata.normalize('NFKD', str(name or ""))
     only_ascii = nfkd_form.encode('ASCII', 'ignore').decode('utf-8')
     cleaned = only_ascii.lower().strip()
-    cleaned = re.sub(r'\s+', '', cleaned) # remove all spaces
-    cleaned = re.sub(r'[^a-z0-9]', '', cleaned) # only alphanumeric
-    return cleaned
+    cleaned = re.sub(r'[^a-z0-9]+', '-', cleaned).strip('-')
+    return cleaned if cleaned else "negocio"
 
 def log_email_simulation(recipient, subject, content):
     log_entry = f"=== EMAIL TO: {recipient} ===\nSubject: {subject}\nDate: {datetime.now().isoformat()}\n\n{content}\n=====================================\n\n"
@@ -459,63 +458,68 @@ def create_admin_client(data):
         clean_phone = clean_phone[:15]
 
     if is_configured():
-        with connection() as conn:
-            with conn.transaction():
-                # Check duplicate email
-                exists = conn.execute(
-                    "SELECT id FROM usuarios WHERE LOWER(email) = %s", (email,)
-                ).fetchone()
-                if exists:
-                    raise ValueError("El correo ya está registrado.")
+        try:
+            with connection() as conn:
+                with conn.transaction():
+                    # Check duplicate email
+                    exists = conn.execute(
+                        "SELECT id FROM usuarios WHERE LOWER(email) = %s", (email,)
+                    ).fetchone()
+                    if exists:
+                        raise ValueError("El correo ya está registrado.")
 
-                # Create User
-                user_row = conn.execute(
-                    """
-                    INSERT INTO usuarios (
-                        nombre_completo, email, telefono_whatsapp, 
-                        plan_tipo, estado_suscripcion, fecha_vencimiento, 
-                        subdominio, requiere_aprobacion, nombre_barberia, estado,
-                        categoria_slug
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, FALSE, %s, 'activo', %s)
-                    RETURNING id
-                    """,
-                    (name, email, clean_phone, plan_tipo, estado_suscripcion, expiry, subdomain, business_name, categoria_slug)
-                ).fetchone()
-                user_id = user_row[0]
+                    # Create User
+                    user_row = conn.execute(
+                        """
+                        INSERT INTO usuarios (
+                            nombre_completo, email, telefono_whatsapp, 
+                            plan_tipo, estado_suscripcion, fecha_vencimiento, 
+                            subdominio, requiere_aprobacion, nombre_barberia, estado,
+                            categoria_slug
+                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, FALSE, %s, 'activo', %s)
+                        RETURNING id
+                        """,
+                        (name, email, clean_phone, plan_tipo, estado_suscripcion, expiry, subdomain, business_name, categoria_slug)
+                    ).fetchone()
+                    user_id = user_row[0]
 
-                # Create Password Credentials
-                conn.execute(
-                    "INSERT INTO credenciales_password (usuario_id, password_hash) VALUES (%s, %s)",
-                    (user_id, hasher.hash(temp_password))
-                )
-
-                # Create Business Local
-                cat = conn.execute("SELECT id FROM categorias WHERE slug = %s", (categoria_slug,)).fetchone()
-                if not cat:
-                    cat = conn.execute("SELECT id FROM categorias WHERE activo = TRUE LIMIT 1").fetchone()
-                cat_id = cat[0] if cat else None
-                if not cat_id:
-                    cat_id = conn.execute(
-                        "INSERT INTO categorias (nombre, slug, descripcion) VALUES ('General', 'barberia', 'Categoría general') RETURNING id"
-                    ).fetchone()[0]
-
-                local_row = conn.execute(
-                    """
-                    INSERT INTO locales (categoria_id, nombre, slug, estado)
-                    VALUES (%s, %s, %s, 'activo')
-                    RETURNING id
-                    """,
-                    (cat_id, business_name, subdomain_slug)
-                ).fetchone()
-                local_id = local_row[0]
-
-                # Assign Owner Role
-                role = conn.execute("SELECT id FROM roles WHERE slug = 'dueno'").fetchone()
-                if role:
+                    # Create Password Credentials
                     conn.execute(
-                        "INSERT INTO usuario_roles (usuario_id, rol_id, local_id) VALUES (%s, %s, %s)",
-                        (user_id, role[0], local_id)
+                        "INSERT INTO credenciales_password (usuario_id, password_hash) VALUES (%s, %s)",
+                        (user_id, hasher.hash(temp_password))
                     )
+
+                    # Create Business Local
+                    cat = conn.execute("SELECT id FROM categorias WHERE slug = %s", (categoria_slug,)).fetchone()
+                    if not cat:
+                        cat = conn.execute("SELECT id FROM categorias WHERE activo = TRUE LIMIT 1").fetchone()
+                    cat_id = cat[0] if cat else None
+                    if not cat_id:
+                        cat_id = conn.execute(
+                            "INSERT INTO categorias (nombre, slug, descripcion) VALUES ('General', 'barberia', 'Categoría general') RETURNING id"
+                        ).fetchone()[0]
+
+                    local_row = conn.execute(
+                        """
+                        INSERT INTO locales (categoria_id, nombre, slug, estado)
+                        VALUES (%s, %s, %s, 'activo')
+                        RETURNING id
+                        """,
+                        (cat_id, business_name, subdomain_slug)
+                    ).fetchone()
+                    local_id = local_row[0]
+
+                    # Assign Owner Role
+                    role = conn.execute("SELECT id FROM roles WHERE slug = 'dueno'").fetchone()
+                    if role:
+                        conn.execute(
+                            "INSERT INTO usuario_roles (usuario_id, rol_id, local_id) VALUES (%s, %s, %s)",
+                            (user_id, role[0], local_id)
+                        )
+        except ValueError:
+            raise
+        except Exception as e:
+            raise ValueError(f"Error al guardar en base de datos: {e}")
 
     else:
         db = read_local_db()
