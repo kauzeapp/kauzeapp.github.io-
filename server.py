@@ -278,13 +278,19 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
             try:
                 import os
                 db_url = os.environ.get("DATABASE_URL", "NOT_FOUND_IN_ENV")
+                cookie_header = self.headers.get("Cookie", "NO_COOKIE_HEADER")
+                token = ""
+                account = None
+                if cookie_header != "NO_COOKIE_HEADER" and "kauze_session=" in cookie_header:
+                    token = cookie_header.split("kauze_session=")[1].split(";")[0]
+                    from backend.auth import current_session
+                    account = current_session(token)
+
                 self._json_response(200, {
-                    "DATABASE_URL": db_url,
-                    "RAILWAY_SERVICE_WEB_URL": os.environ.get("RAILWAY_SERVICE_WEB_URL"),
-                    "RAILWAY_PUBLIC_DOMAIN": os.environ.get("RAILWAY_PUBLIC_DOMAIN"),
-                    "RAILWAY_PROJECT_NAME": os.environ.get("RAILWAY_PROJECT_NAME"),
-                    "RAILWAY_ENVIRONMENT_NAME": os.environ.get("RAILWAY_ENVIRONMENT_NAME"),
-                    "env_keys": list(os.environ.keys())
+                    "DATABASE_URL": "present" if "postgresql://" in db_url else db_url,
+                    "cookie_header": cookie_header,
+                    "extracted_token": token,
+                    "account_found": account is not None
                 })
             except Exception as e:
                 self._json_response(500, {"error": str(e)})
