@@ -2586,9 +2586,23 @@
         renderClientsTable();
     };
 
+    function showAdminAuthModal() {
+        const modal = document.getElementById("adminLoginModal");
+        if (modal) modal.style.display = "flex";
+    }
+
+    function hideAdminAuthModal() {
+        const modal = document.getElementById("adminLoginModal");
+        if (modal) modal.style.display = "none";
+    }
+
     async function loadStats() {
         try {
             const res = await fetch("/api/admin/dashboard/stats");
+            if (res.status === 401 || res.status === 403) {
+                showAdminAuthModal();
+                return;
+            }
             if (res.ok) {
                 const stats = await res.json();
                 document.getElementById("statsTrial").textContent = stats.trial || 0;
@@ -2604,6 +2618,10 @@
     async function loadClients() {
         try {
             const res = await fetch("/api/admin/clientes");
+            if (res.status === 401 || res.status === 403) {
+                showAdminAuthModal();
+                return;
+            }
             if (res.ok) {
                 clientsData = await res.json();
                 
@@ -3079,5 +3097,68 @@
       </form>
     </div>
   </div>
+
+  <!-- Modal de Autenticación de Administrador (Nativo) -->
+  <div class="modal-overlay" id="adminLoginModal" style="display:none; backdrop-filter: blur(14px); background: rgba(15,23,42,0.85); z-index: 99999; align-items: center; justify-content: center;">
+    <div class="modal-content" style="max-width: 420px; border-radius: 24px; padding: 32px; background: #ffffff; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35); text-align: left;">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="font-size: 42px; margin-bottom: 10px;">🔐</div>
+        <div style="font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 800; color: var(--dark);">Acceso Administrador</div>
+        <p style="font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.5;">Ingresa con tu cuenta KAUZE para activar el panel y la base de datos.</p>
+      </div>
+      <form id="adminLoginForm">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label for="adminEmail" style="display: block; font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 6px;">Correo de Administrador</label>
+          <input type="email" id="adminEmail" class="form-input" placeholder="tu@correo.com" required style="width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); font-size: 14px;">
+        </div>
+        <div class="form-group" style="margin-bottom: 18px;">
+          <label for="adminPassword" style="display: block; font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 6px;">Contraseña</label>
+          <input type="password" id="adminPassword" class="form-input" placeholder="••••••••••••" required style="width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); font-size: 14px;">
+        </div>
+        <p id="adminLoginErrorMsg" style="color: #dc2626; font-size: 13px; font-weight: 700; margin-bottom: 16px; display: none; text-align: center; background: #fef2f2; padding: 10px; border-radius: 10px; border: 1px solid #fecaca;"></p>
+        
+        <button type="submit" id="adminLoginSubmitBtn" class="button primary" style="width: 100%; min-height: 46px; border-radius: 12px; font-weight: 700; font-size: 15px; background: var(--blue); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 100%;">Iniciar Sesión en KAUZE</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("adminLoginForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("adminEmail").value.trim();
+        const password = document.getElementById("adminPassword").value;
+        const errorMsg = document.getElementById("adminLoginErrorMsg");
+        const submitBtn = document.getElementById("adminLoginSubmitBtn");
+        
+        errorMsg.style.display = "none";
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Verificando...";
+
+        try {
+            const res = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ email, password, remember: true })
+            });
+            const data = await res.json().catch(() => ({}));
+            if (res.ok) {
+                hideAdminAuthModal();
+                if (typeof loadStats === "function") await loadStats();
+                if (typeof loadClients === "function") await loadClients();
+                if (typeof loadSimulations === "function") await loadSimulations();
+            } else {
+                errorMsg.textContent = data.message || "Credenciales incorrectas.";
+                errorMsg.style.display = "block";
+            }
+        } catch (err) {
+            errorMsg.textContent = "Error de conexión. Inténtalo de nuevo.";
+            errorMsg.style.display = "block";
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Iniciar Sesión en KAUZE";
+        }
+    });
+  </script>
 </body>
 </html>
