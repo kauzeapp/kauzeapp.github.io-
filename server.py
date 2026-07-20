@@ -276,16 +276,13 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
 
         if path == "/api/admin/debug-db":
             try:
-                from backend.db import connection
-                from psycopg.rows import dict_row
-                with connection() as conn:
-                    conn.row_factory = dict_row
-                    rows = conn.execute("SELECT * FROM usuarios").fetchall()
-                    for r in rows:
-                        for k, v in r.items():
-                            if hasattr(v, 'isoformat'):
-                                r[k] = v.isoformat()
-                    self._json_response(200, {"users": rows})
+                import os
+                env_keys = list(os.environ.keys())
+                db_url = os.environ.get("DATABASE_URL", "NOT_FOUND_IN_ENV")
+                self._json_response(200, {
+                    "DATABASE_URL": db_url,
+                    "env_keys": env_keys
+                })
             except Exception as e:
                 self._json_response(500, {"error": str(e)})
             return
