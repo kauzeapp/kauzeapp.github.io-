@@ -2,6 +2,7 @@ import hashlib
 import os
 import re
 import secrets
+import uuid
 from datetime import datetime, timedelta, timezone
 
 from psycopg.rows import dict_row
@@ -165,6 +166,117 @@ def get_dashboard_stats():
     stats["total"] = sum(stats.values())
     stats["updatedAt"] = datetime.now(timezone.utc).isoformat()
     return stats
+
+
+def delete_admin_client(client_id):
+    """Elimina una cuenta de negocio y todos sus datos en una sola transaccion."""
+    raw_client_id = str(client_id or "").strip()
+    if not raw_client_id:
+        raise ValueError("Cliente no encontrado.")
+
+    if not is_configured():
+        db = read_local_db()
+        subscriptions = db.get("subscriptions", [])
+        target = next(
+            (item for item in subscriptions if str(item.get("id")) == raw_client_id),
+            None,
+        )
+        if not target:
+            raise ValueError("Cliente no encontrado.")
+        bootstrap_email = os.environ.get("KAUZE_BOOTSTRAP_EMAIL", "").strip().lower()
+        if bootstrap_email and str(target.get("email") or "").strip().lower() == bootstrap_email:
+            raise ValueError("La cuenta administradora principal no se puede eliminar.")
+        db["subscriptions"] = [
+            item for item in subscriptions if str(item.get("id")) != raw_client_id
+        ]
+        write_local_db(db)
+        return {
+            "status": "success",
+            "message": "Cuenta y negocio eliminados correctamente.",
+            "deletedClientId": raw_client_id,
+            "deletedBusinesses": 1,
+        }
+
+    try:
+        normalized_client_id = str(uuid.UUID(raw_client_id))
+    except (ValueError, TypeError, AttributeError) as exc:
+        raise ValueError("Cliente no encontrado.") from exc
+
+    with connection() as conn:
+        with conn.transaction():
+            conn.row_factory = dict_row
+            target = conn.execute(
+                """
+                SELECT
+                  u.id,
+                  u.email,
+                  EXISTS (
+                    SELECT 1
+                    FROM usuario_roles ur_admin
+                    INNER JOIN roles r_admin
+                      ON r_admin.id = ur_admin.rol_id
+                     AND r_admin.slug = 'superadmin'
+                    WHERE ur_admin.usuario_id = u.id
+                      AND ur_admin.local_id IS NULL
+                  ) AS is_superadmin
+                FROM usuarios u
+                WHERE u.id = %s
+                """,
+                (normalized_client_id,),
+            ).fetchone()
+            if not target:
+                raise ValueError("Cliente no encontrado.")
+
+            bootstrap_email = os.environ.get("KAUZE_BOOTSTRAP_EMAIL", "").strip().lower()
+            if target["is_superadmin"] or (
+                bootstrap_email
+                and str(target["email"] or "").strip().lower() == bootstrap_email
+            ):
+                raise ValueError("La cuenta administradora principal no se puede eliminar.")
+
+            owned_businesses = conn.execute(
+                """
+                SELECT DISTINCT l.id
+                FROM usuario_roles ur
+                INNER JOIN roles r ON r.id = ur.rol_id AND r.slug = 'dueno'
+                INNER JOIN locales l ON l.id = ur.local_id
+                WHERE ur.usuario_id = %s
+                """,
+                (normalized_client_id,),
+            ).fetchall()
+
+            for business in owned_businesses:
+                local_id = business["id"]
+                set_tenant_context(conn, local_id, normalized_client_id)
+
+                # El orden evita restricciones cruzadas entre reservas, clientes,
+                # servicios y profesionales. Todo ocurre dentro de la transaccion.
+                conn.execute("DELETE FROM reservas WHERE local_id = %s", (local_id,))
+                conn.execute("DELETE FROM bloqueos_agenda WHERE local_id = %s", (local_id,))
+                conn.execute("DELETE FROM disponibilidad_semanal WHERE local_id = %s", (local_id,))
+                conn.execute("DELETE FROM profesional_servicios WHERE local_id = %s", (local_id,))
+                conn.execute("DELETE FROM clientes WHERE local_id = %s", (local_id,))
+                conn.execute("DELETE FROM servicios WHERE local_id = %s", (local_id,))
+                conn.execute("DELETE FROM profesionales WHERE local_id = %s", (local_id,))
+                conn.execute("DELETE FROM estados_panel_local WHERE local_id = %s", (local_id,))
+                conn.execute("DELETE FROM suscripciones_saas WHERE local_id = %s", (local_id,))
+                conn.execute("DELETE FROM sesiones_auth WHERE local_id = %s", (local_id,))
+                conn.execute("DELETE FROM usuario_roles WHERE local_id = %s", (local_id,))
+                conn.execute("DELETE FROM locales WHERE id = %s", (local_id,))
+
+            deleted = conn.execute(
+                "DELETE FROM usuarios WHERE id = %s RETURNING id",
+                (normalized_client_id,),
+            ).fetchone()
+            if not deleted:
+                raise ValueError("Cliente no encontrado.")
+
+    return {
+        "status": "success",
+        "message": "Cuenta, negocios y datos asociados eliminados correctamente.",
+        "deletedClientId": normalized_client_id,
+        "deletedBusinesses": len(owned_businesses),
+    }
 
 
 def _send_access_email(recipient, owner_name, business_name, access_url, key):

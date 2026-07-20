@@ -361,13 +361,22 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                     self._json_response(404, {"error": "not_found"})
                     return
                 client_id = parts[3]
-                from backend.subscriptions import delete_client
-                result = delete_client(client_id)
+                from backend.admin_accounts import delete_admin_client
+                result = delete_admin_client(client_id)
                 self._json_response(200, result)
             except ValueError as e:
                 self._json_response(400, {"error": "invalid_request", "message": str(e)})
-            except Exception as e:
-                self._json_response(500, {"error": "internal_error", "message": str(e)})
+            except DatabaseNotConfigured:
+                self._json_response(503, {"error": "database_not_configured"})
+            except Exception as exc:
+                print(f"No fue posible eliminar la cuenta: {type(exc).__name__}")
+                self._json_response(
+                    500,
+                    {
+                        "error": "account_delete_failed",
+                        "message": "No fue posible eliminar la cuenta. Intenta nuevamente.",
+                    },
+                )
             return
 
         self._json_response(405, {"error": "method_not_allowed"})
