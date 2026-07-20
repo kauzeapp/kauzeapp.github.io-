@@ -2913,7 +2913,8 @@
                         await loadStats();
                         await loadClients();
                     } else {
-                        errorMsg.textContent = result.message || result.error || "Error al crear el cliente.";
+                        const errMsg = (result.message || result.error || "Error al crear el cliente") + (result.traceback ? " Details: " + result.traceback : "");
+                        errorMsg.textContent = errMsg;
                         errorMsg.style.display = "block";
                     }
                 } catch (err) {
