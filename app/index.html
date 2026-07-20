@@ -141,6 +141,10 @@
     .welcome-card p{color:var(--muted);font-size:14px;line-height:1.65;max-width:640px}
     .welcome-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
     .welcome-actions .btn.primary{width:auto}
+    .welcome-main{display:grid;grid-template-columns:minmax(0,1fr) 145px;gap:14px;align-items:center;min-width:0}
+    .welcome-mascot{align-self:end;text-align:center;position:relative;z-index:1}
+    .welcome-mascot img{display:block;width:132px;height:178px;object-fit:contain;margin:0 auto -4px;filter:drop-shadow(0 18px 18px rgba(37,99,235,.16))}
+    .welcome-mascot span{display:block;background:#fff;border:1px solid rgba(37,99,235,.18);border-radius:13px;padding:7px 9px;color:var(--navy);font-size:10px;font-weight:900;line-height:1.35;box-shadow:var(--shadow-soft)}
     .onboarding-summary{position:relative;z-index:1;background:rgba(255,255,255,.78);border:1px solid rgba(37,99,235,.16);border-radius:20px;padding:16px}
     .onboarding-summary-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px}
     .onboarding-summary-head strong{color:var(--navy);font-size:14px}
@@ -156,7 +160,8 @@
     .panel-guide{display:none;align-items:center;justify-content:space-between;gap:16px;margin:-6px 0 18px;padding:15px 17px;border:1px solid rgba(37,99,235,.20);border-radius:20px;background:linear-gradient(135deg,rgba(37,99,235,.08),rgba(99,102,241,.04),#fff);box-shadow:var(--shadow-soft)}
     .panel-guide.open{display:flex}
     .panel-guide-copy{display:flex;align-items:flex-start;gap:12px;min-width:0}
-    .panel-guide-icon{width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;flex:0 0 auto;font-weight:900}
+    .panel-guide-icon{width:58px;height:58px;border-radius:17px;display:grid;place-items:center;background:linear-gradient(145deg,#fff,var(--soft-blue));border:1px solid rgba(37,99,235,.16);flex:0 0 auto;overflow:hidden}
+    .panel-guide-icon img{width:52px;height:66px;object-fit:contain;object-position:center 4px;filter:drop-shadow(0 7px 8px rgba(37,99,235,.14))}
     .panel-guide strong{display:block;color:var(--navy);font-size:14px;margin-bottom:3px}
     .panel-guide p{color:var(--muted);font-size:12px;line-height:1.5}
     .panel-guide-actions{display:flex;gap:8px;flex-wrap:wrap;flex:0 0 auto}
@@ -194,6 +199,7 @@
     @media(max-width:1120px){.grid-4{grid-template-columns:1fr 1fr}.grid-3{grid-template-columns:1fr 1fr}.dashboard-layout{grid-template-columns:1fr}.welcome-card{grid-template-columns:1fr}.help-grid{grid-template-columns:1fr 1fr}.login-wrap{grid-template-columns:1fr}.brand-side{min-height:560px}}
     @media(max-width:880px){.app{grid-template-columns:1fr}.sidebar{position:fixed;inset:0 auto 0 0;width:280px;z-index:40;transform:translateX(-110%);transition:.22s}.sidebar.open{transform:translateX(0)}.mobile-menu{display:inline-flex}.main{padding:18px}}
     @media(max-width:650px){.brand-side{padding:28px;min-height:560px}.official-logo{width:92%}.login-side{padding:20px}.login-card{padding:24px}.topbar{align-items:flex-start;flex-direction:column}.top-right,.type-switch,.user-chip{width:100%}.grid-4,.grid-3,.grid-2,.help-grid{grid-template-columns:1fr}.section-head{align-items:flex-start;flex-direction:column}.item{align-items:flex-start;flex-direction:column}.panel-guide{align-items:flex-start;flex-direction:column}.panel-guide-actions{width:100%}.panel-guide-actions .btn{flex:1}.welcome-actions .btn{width:100%}table{min-width:720px}}
+    @media(max-width:650px){.welcome-main{grid-template-columns:1fr}.welcome-mascot{display:grid;grid-template-columns:92px 1fr;align-items:center;text-align:left}.welcome-mascot img{width:86px;height:108px;margin:0}.welcome-mascot span{font-size:11px}.panel-guide-copy{align-items:center}}
 
 
     /* MODALES Y EDICIÓN LOCAL */
@@ -629,7 +635,7 @@
 
       <aside class="panel-guide" id="panelGuide" aria-live="polite">
         <div class="panel-guide-copy">
-          <div class="panel-guide-icon">?</div>
+          <div class="panel-guide-icon"><img src="/app/assets/kauzi-otter-guide-v1.png" alt="Kauzi, la nutria asistente de Kauze"></div>
           <div><strong id="panelGuideTitle">Inicio</strong><p id="panelGuideText">Aquí verás el resumen real de tu negocio.</p></div>
         </div>
         <div class="panel-guide-actions">
@@ -641,13 +647,19 @@
 
       <section class="view active" id="view-inicio">
         <article class="card welcome-card" id="welcomeCard">
-          <div>
-            <span class="welcome-badge">⚡ Primeros pasos</span>
-            <h2 id="welcomeTitle">¡Bienvenido a Kauze!</h2>
-            <p>Tu negocio ya está creado. Ahora te acompañaremos para configurar lo esencial y comenzar a recibir reservas con información real.</p>
-            <div class="welcome-actions">
-              <button type="button" class="btn primary" id="startPanelTour">Iniciar tutorial del panel</button>
-              <button type="button" class="btn" id="hideWelcomeCard">Ocultar bienvenida</button>
+          <div class="welcome-main">
+            <div>
+              <span class="welcome-badge">⚡ Primeros pasos</span>
+              <h2 id="welcomeTitle">¡Bienvenido a Kauze!</h2>
+              <p>Tu negocio ya está creado. Ahora te acompañaremos para configurar lo esencial y comenzar a recibir reservas con información real.</p>
+              <div class="welcome-actions">
+                <button type="button" class="btn primary" id="startPanelTour">Comenzar con Kauzi</button>
+                <button type="button" class="btn" id="hideWelcomeCard">Ocultar bienvenida</button>
+              </div>
+            </div>
+            <div class="welcome-mascot">
+              <img src="/app/assets/kauzi-otter-guide-v1.png" alt="Kauzi, la nutria asistente de Kauze">
+              <span>Hola, soy Kauzi. Te mostraré el panel paso a paso.</span>
             </div>
           </div>
           <div class="onboarding-summary">
@@ -4128,7 +4140,7 @@
       const view=tourActive ? tourOrder[tourIndex] : activeView;
       const meta=viewsMeta[view];
       if(!meta) return;
-      panelGuideTitle.textContent=tourActive ? `Paso ${tourIndex+1} de ${tourOrder.length} · ${meta.title}` : `Cómo funciona ${meta.title}`;
+      panelGuideTitle.textContent=tourActive ? `Kauzi · Paso ${tourIndex+1} de ${tourOrder.length} · ${meta.title}` : `Kauzi explica ${meta.title}`;
       panelGuideText.textContent=meta.guide;
       panelGuidePrev.hidden=!tourActive || tourIndex===0;
       panelGuideNext.hidden=!tourActive;

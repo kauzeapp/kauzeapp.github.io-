@@ -1,0 +1,6 @@
+.deps/
+__pycache__/
+*.py[cod]
+subscriptions_db.json
+email_delivery_db.json
+preview-*.log
