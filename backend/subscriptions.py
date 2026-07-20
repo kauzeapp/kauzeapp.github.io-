@@ -289,16 +289,16 @@ def get_dashboard_stats():
                 """
             ).fetchall()
             for r in rows:
-                k = r[0]
+                k = str(r[0] or "trial").strip().lower()
                 if k in stats:
-                    stats[k] = r[1]
+                    stats[k] = int(r[1] or 0)
     else:
         db = read_local_db()
         now = datetime.now(timezone.utc)
         modified = False
         for sub in db["subscriptions"]:
             venc_str = sub.get("fecha_vencimiento") or sub.get("fechaVencimiento")
-            status = sub.get("estado_suscripcion") or sub.get("estadoSuscripcion") or "trial"
+            status = str(sub.get("estado_suscripcion") or sub.get("estadoSuscripcion") or "trial").strip().lower()
             
             if venc_str:
                 venc = safe_parse_datetime(venc_str)
@@ -490,14 +490,19 @@ def create_admin_client(data):
                     )
 
                     # Create Business Local
-                    cat = conn.execute("SELECT id FROM categorias WHERE slug = %s", (categoria_slug,)).fetchone()
+                    cat = conn.execute("SELECT id FROM categorias WHERE slug = %s AND activo = TRUE", (categoria_slug,)).fetchone()
                     if not cat:
                         cat = conn.execute("SELECT id FROM categorias WHERE activo = TRUE LIMIT 1").fetchone()
-                    cat_id = cat[0] if cat else None
-                    if not cat_id:
-                        cat_id = conn.execute(
-                            "INSERT INTO categorias (nombre, slug, descripcion) VALUES ('General', 'barberia', 'Categoría general') RETURNING id"
-                        ).fetchone()[0]
+                    if not cat:
+                        cat = conn.execute(
+                            """
+                            INSERT INTO categorias (nombre, slug, descripcion)
+                            VALUES ('General', 'general', 'Categoría general')
+                            ON CONFLICT (slug) DO UPDATE SET activo = TRUE
+                            RETURNING id
+                            """
+                        ).fetchone()
+                    cat_id = cat[0]
 
                     local_row = conn.execute(
                         """
