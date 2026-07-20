@@ -538,11 +538,11 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                 data = self._read_json()
                 from backend.subscriptions import create_admin_client
                 result = create_admin_client(data)
-                self._json_response(201, result)
+                self._json_response(200, result)
             except ValueError as e:
-                self._json_response(400, {"error": "invalid_request", "message": str(e)})
+                self._json_response(400, {"error": "validation_error", "message": str(e)})
             except Exception as e:
-                self._json_response(500, {"error": "internal_error", "message": str(e)})
+                self._json_response(500, {"error": "server_error", "message": str(e)})
             return
 
         if path.startswith("/api/admin/clientes/") and path.endswith("/reset-password"):
