@@ -2793,6 +2793,7 @@
                     tr.style.borderBottom = "1px solid var(--border-color)";
                     
                     const time = new Date(ev.timestamp).toLocaleTimeString("es-CL", {
+                        timeZone: "America/Santiago",
                         hour: "2-digit",
                         minute: "2-digit",
                         second: "2-digit"
