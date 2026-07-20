@@ -284,6 +284,10 @@ def bootstrap_owner(conn):
     owner_role = conn.execute(
         "SELECT id FROM roles WHERE slug = 'dueno' AND activo = TRUE"
     ).fetchone()
+    superadmin_role = conn.execute(
+        "SELECT id FROM roles WHERE slug = 'superadmin' AND activo = TRUE"
+    ).fetchone()
+
     conn.execute(
         """
         INSERT INTO usuario_roles (usuario_id, rol_id, local_id)
@@ -293,6 +297,16 @@ def bootstrap_owner(conn):
         """,
         (user[0], owner_role[0], local[0]),
     )
+    if superadmin_role:
+        conn.execute(
+            """
+            INSERT INTO usuario_roles (usuario_id, rol_id, local_id)
+            VALUES (%s, %s, NULL)
+            ON CONFLICT (usuario_id, rol_id) WHERE local_id IS NULL
+            DO NOTHING
+            """,
+            (user[0], superadmin_role[0]),
+        )
     print(f"Cuenta inicial lista para el negocio: {local_slug}")
 
 
