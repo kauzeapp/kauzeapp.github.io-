@@ -912,11 +912,36 @@
       gap: 12px;
       margin-top: 24px;
     }
+    .admin-toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 12000;
+      max-width: 390px;
+      padding: 15px 18px;
+      border-radius: 16px;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #047857;
+      box-shadow: 0 18px 48px rgba(15, 23, 42, .18);
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.45;
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: .2s ease;
+    }
+    .admin-toast.show { opacity: 1; transform: translateY(0); }
+    .admin-toast.error { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+    @media (max-width: 650px) { .admin-toast { left: 16px; right: 16px; bottom: 16px; max-width: none; } }
   </style>
 
 </head>
 
 <body>
+
+  <div class="admin-toast" id="adminToast" role="status" aria-live="polite"></div>
 
   <main class="shell" id="mainContent">
     <header class="topbar">
@@ -2568,6 +2593,17 @@
         status.style.background = tone === 'error' ? '#fef2f2' : tone === 'wait' ? '#fffbeb' : '#ecfdf5';
     }
 
+    let adminToastTimer = null;
+    function showAdminToast(message, tone = 'ok') {
+        const toast = document.getElementById('adminToast');
+        if (!toast) return;
+        clearTimeout(adminToastTimer);
+        toast.textContent = message;
+        toast.classList.toggle('error', tone === 'error');
+        toast.classList.add('show');
+        adminToastTimer = setTimeout(() => toast.classList.remove('show'), 4200);
+    }
+
     function renderSubscriptionStats(stats) {
         document.getElementById('statsTrial').textContent = Number(stats.trial || 0);
         document.getElementById('statsActivo').textContent = Number(stats.activo || 0);
@@ -2783,7 +2819,7 @@
                 actionsMarkup += `<button class="button small" onclick="reactivateClient('${safeId}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle; background: #e0f2fe; color: #0369a1; border-color: #bae6fd;">Reactivar</button>`;
             }
             actionsMarkup += `<button class="button small" onclick="openEditClientModal('${safeId}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle; background: #fef3c7; color: #b45309; border-color: #fde68a;">Editar</button>`;
-            actionsMarkup += `<button class="button small" onclick="deleteClient('${safeId}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle; background: #fee2e2; color: #b91c1c; border-color: #fca5a5;">Eliminar</button>`;
+            actionsMarkup += `<button class="button small" data-delete-client="${safeId}" onclick="deleteClient('${safeId}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle; background: #fee2e2; color: #b91c1c; border-color: #fca5a5;">Eliminar</button>`;
             actionsMarkup += `<button class="button small" onclick="resetClientPassword('${safeId}')" style="padding: 4px 8px; font-size: 11px; vertical-align: middle;">Enviar acceso</button>`;
             
             tr.innerHTML = `
@@ -2939,18 +2975,36 @@
     };
 
     window.deleteClient = async function(id) {
-        if (!confirm("¿Estás completamente seguro de ELIMINAR este cliente? Esta acción borrará todas sus configuraciones, locales y suscripciones de forma permanente.")) return;
+        const client = clientsData.find(item => String(item.id) === String(id));
+        const businessName = client?.businessName || client?.name || "este negocio";
+        if (!confirm(`¿Eliminar definitivamente “${businessName}”?\n\nSe borrarán la cuenta, agenda, clientes, servicios, trabajadores, suscripción y configuraciones asociadas. Esta acción no se puede deshacer.`)) return;
+        const button = document.querySelector(`[data-delete-client="${CSS.escape(String(id))}"]`);
+        const originalLabel = button?.textContent || "Eliminar";
         try {
-            const res = await fetch(`/api/admin/clientes/${id}`, { method: "DELETE", credentials: "include" });
-            if (res.ok) {
-                alert("Cliente eliminado exitosamente.");
-                await refreshAdminDashboard();
-            } else {
-                const err = await res.json();
-                alert(err.message || "Error al eliminar el cliente.");
+            if (button) {
+                button.disabled = true;
+                button.textContent = "Eliminando…";
             }
-        } catch (err) {
-            alert("Error de conexión al eliminar el cliente.");
+            const res = await fetch(`/api/admin/clientes/${encodeURIComponent(id)}`, {
+                method: "DELETE",
+                credentials: "include",
+                headers: { "Accept": "application/json" }
+            });
+            const payload = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(payload.message || "No fue posible eliminar la cuenta.");
+
+            clientsData = clientsData.filter(item => String(item.id) !== String(id));
+            renderStatsFromClients();
+            renderClientsTable();
+            showAdminToast(payload.message || "Cuenta eliminada correctamente.");
+            await refreshAdminDashboard();
+        } catch (error) {
+            showAdminToast(error.message || "No fue posible eliminar la cuenta.", "error");
+        } finally {
+            if (button?.isConnected) {
+                button.disabled = false;
+                button.textContent = originalLabel;
+            }
         }
     };
 
