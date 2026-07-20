@@ -287,7 +287,7 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
 
         if path == "/api/admin/debug-db":
             try:
-                import os
+                import os, traceback
                 db_url = os.environ.get("DATABASE_URL", "NOT_FOUND_IN_ENV")
                 cookie_header = self.headers.get("Cookie", "NO_COOKIE_HEADER")
                 token = ""
@@ -297,15 +297,34 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                     from backend.auth import current_session
                     account = current_session(token)
 
+                db_counts = []
+                sample_users = []
+                db_err = None
+
+                from backend.db import is_configured, connection
+                if is_configured():
+                    try:
+                        with connection() as conn:
+                            rows = conn.execute("SELECT estado_suscripcion, count(*) FROM usuarios GROUP BY estado_suscripcion").fetchall()
+                            db_counts = [{"estado": r[0], "count": r[1]} for r in rows]
+                            u_rows = conn.execute("SELECT id, nombre_completo, email, estado_suscripcion, plan_tipo FROM usuarios LIMIT 10").fetchall()
+                            sample_users = [{"id": str(u[0]), "name": u[1], "email": u[2], "estado_suscripcion": u[3], "plan_tipo": u[4]} for u in u_rows]
+                    except Exception as e:
+                        db_err = f"{type(e).__name__}: {e}\n{traceback.format_exc()}"
+
                 self._json_response(200, {
                     "DATABASE_URL": "present" if "postgresql://" in db_url else db_url,
                     "cookie_header": cookie_header,
                     "extracted_token": token,
                     "account_found": account is not None,
-                    "allowed_origins": os.environ.get("KAUZE_ALLOWED_ORIGINS", "")
+                    "allowed_origins": os.environ.get("KAUZE_ALLOWED_ORIGINS", ""),
+                    "db_counts": db_counts,
+                    "sample_users": sample_users,
+                    "db_error": db_err
                 })
             except Exception as e:
-                self._json_response(500, {"error": str(e)})
+                import traceback
+                self._json_response(500, {"error": str(e), "traceback": traceback.format_exc()})
             return
 
         if path == "/api/admin/clientes":
@@ -540,9 +559,11 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                 result = create_admin_client(data)
                 self._json_response(200, result)
             except ValueError as e:
-                self._json_response(400, {"error": "validation_error", "message": str(e)})
+                import traceback
+                self._json_response(400, {"error": "validation_error", "message": str(e), "traceback": traceback.format_exc()})
             except Exception as e:
-                self._json_response(500, {"error": "server_error", "message": str(e)})
+                import traceback
+                self._json_response(500, {"error": "server_error", "message": str(e), "traceback": traceback.format_exc()})
             return
 
         if path.startswith("/api/admin/clientes/") and path.endswith("/reset-password"):
