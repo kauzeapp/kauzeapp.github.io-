@@ -3,15 +3,14 @@ import re
 import json
 import uuid
 import secrets
-import smtplib
 import unicodedata
 from datetime import datetime, timedelta, timezone
-from email.message import EmailMessage
 from argon2 import PasswordHasher
 from psycopg.rows import dict_row
 
 from backend.db import connection, is_configured
-from backend.auth import _sha256, _smtp_is_configured
+from backend.auth import _sha256
+from backend.email_delivery import email_delivery_configured, kauze_email_html, send_email
 
 DB_FILE = "subscriptions_db.json"
 EMAIL_LOG_FILE = "sent_emails_log.txt"
@@ -64,29 +63,25 @@ def send_credentials_email(recipient, fullname, temp_password, subdominio):
         f"El equipo de KAUZE.cl"
     )
 
-    if _smtp_is_configured():
-        try:
-            message = EmailMessage()
-            message["Subject"] = subject
-            message["From"] = os.environ["SMTP_FROM"]
-            message["To"] = recipient
-            message.set_content(content)
-
-            host = os.environ["SMTP_HOST"]
-            port = int(os.environ.get("SMTP_PORT", "587"))
-            use_ssl = os.environ.get("SMTP_SSL", "0") == "1"
-            smtp_class = smtplib.SMTP_SSL if use_ssl else smtplib.SMTP
-            with smtp_class(host, port, timeout=15) as smtp:
-                if not use_ssl and os.environ.get("SMTP_STARTTLS", "1") == "1":
-                    smtp.starttls()
-                smtp.login(os.environ["SMTP_USER"], os.environ["SMTP_PASSWORD"])
-                smtp.send_message(message)
-            print(f"[SMTP] Email sent to {recipient}")
-        except Exception as e:
-            print(f"[SMTP ERROR] Failed to send email: {e}")
-            log_email_simulation(recipient, subject, content)
-    else:
+    if not email_delivery_configured():
         log_email_simulation(recipient, subject, content)
+        return {"provider": "simulation", "id": None}
+    html = kauze_email_html(
+        "Tu acceso KAUZE está listo",
+        f"Hola {fullname}",
+        [
+            "Ya puedes ingresar al panel privado y comenzar a configurar tu negocio.",
+            "Por seguridad, cambia la contraseña temporal después del primer ingreso.",
+        ],
+        "https://kauze.cl/app/",
+        "Entrar al panel",
+        [
+            ("Usuario", recipient),
+            ("Contraseña temporal", temp_password),
+            ("Página pública", url),
+        ],
+    )
+    return send_email(recipient, subject, content, html=html)
 
 def send_reset_password_email(recipient, fullname, temp_password):
     subject = "Restablecimiento de contraseña KAUZE"
@@ -101,29 +96,18 @@ def send_reset_password_email(recipient, fullname, temp_password):
         f"El equipo de KAUZE.cl"
     )
 
-    if _smtp_is_configured():
-        try:
-            message = EmailMessage()
-            message["Subject"] = subject
-            message["From"] = os.environ["SMTP_FROM"]
-            message["To"] = recipient
-            message.set_content(content)
-
-            host = os.environ["SMTP_HOST"]
-            port = int(os.environ.get("SMTP_PORT", "587"))
-            use_ssl = os.environ.get("SMTP_SSL", "0") == "1"
-            smtp_class = smtplib.SMTP_SSL if use_ssl else smtplib.SMTP
-            with smtp_class(host, port, timeout=15) as smtp:
-                if not use_ssl and os.environ.get("SMTP_STARTTLS", "1") == "1":
-                    smtp.starttls()
-                smtp.login(os.environ["SMTP_USER"], os.environ["SMTP_PASSWORD"])
-                smtp.send_message(message)
-            print(f"[SMTP] Reset email sent to {recipient}")
-        except Exception as e:
-            print(f"[SMTP ERROR] Failed to send email: {e}")
-            log_email_simulation(recipient, subject, content)
-    else:
+    if not email_delivery_configured():
         log_email_simulation(recipient, subject, content)
+        return {"provider": "simulation", "id": None}
+    html = kauze_email_html(
+        "Tu contraseña fue renovada",
+        f"Hola {fullname}",
+        ["El administrador generó una nueva contraseña temporal para tu cuenta."],
+        "https://kauze.cl/app/",
+        "Ingresar a KAUZE",
+        [("Usuario", recipient), ("Contraseña temporal", temp_password)],
+    )
+    return send_email(recipient, subject, content, html=html)
 
 # ----------------- LOCAL JSON STORAGE FALLBACK -----------------
 

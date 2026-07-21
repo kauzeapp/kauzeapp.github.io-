@@ -260,6 +260,15 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                 self._json_response(200, result["state"])
             except DatabaseNotConfigured:
                 self._json_response(503, {"error": "database_not_configured"})
+            except Exception as exc:
+                print(f"No fue posible cargar el panel: {type(exc).__name__}")
+                self._json_response(
+                    500,
+                    {
+                        "error": "state_load_failed",
+                        "message": "No fue posible cargar la configuración del negocio.",
+                    },
+                )
             return
 
         if path == "/api/tasks":
@@ -650,13 +659,26 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                     return
                 data = self._read_json()
                 result = save_business_state(
-                    account["business"]["id"], account["user"]["id"], data
+                    account["business"]["id"],
+                    account["user"]["id"],
+                    data,
+                    account["business"].get("type"),
+                    account["business"].get("name"),
                 )
                 self._json_response(200, {"status": "success", **result})
             except DatabaseNotConfigured:
                 self._json_response(503, {"error": "database_not_configured"})
             except ValueError as exc:
                 self._json_response(400, {"error": "invalid_state", "message": str(exc)})
+            except Exception as exc:
+                print(f"No fue posible guardar el panel: {type(exc).__name__}")
+                self._json_response(
+                    500,
+                    {
+                        "error": "state_save_failed",
+                        "message": "No fue posible guardar la configuración del negocio.",
+                    },
+                )
             return
 
         if path == "/api/account/profile-image":

@@ -14,6 +14,7 @@ if PROJECT_DIR not in sys.path:
     sys.path.insert(0, PROJECT_DIR)
 
 from backend.public_booking import _available_slots, _professional_payload, _service_payload
+from backend.email_delivery import kauze_email_html
 from backend.seed_demo import DEMO_NAME, DEMO_SLUG, build_panel_state
 
 
@@ -28,6 +29,8 @@ if os.environ.get("PREVIEW_NEW_ACCOUNT") == "1":
             "appointments": {"barberia": []},
             "clients": {"barberia": []},
             "publicBookingEnabled": False,
+            "businessStatus": "CERRADO",
+            "operatingDay": {"date": "", "openedAt": ""},
             "onboarding": {"welcomeDismissed": False, "tourCompleted": False},
         }
     )
@@ -39,6 +42,7 @@ MASTERPLAN_STATE.update(
         "pageSubtitle": "Elige servicio, profesional y horario. Para ver trabajos y ejemplos, visita su Instagram.",
         "instagramUrl": "https://www.instagram.com/masterplan.soluciones?igsh=MXVsNnF3NXI5M2hkMA==",
         "instagramHandle": "@masterplan.soluciones",
+        "publicPhone": "+56 9 8765 4321",
         "logoUrl": "/cliente/assets/masterplan-logo.jpg",
         "publicSubdomain": "masterplan",
         "professionals": {
@@ -117,7 +121,7 @@ def business_payload(slug=DEMO_SLUG):
         "logoUrl": state.get("logoUrl", ""),
         "instagramUrl": state.get("instagramUrl", ""),
         "instagramHandle": state.get("instagramHandle", ""),
-        "phone": "",
+        "phone": state.get("publicPhone", ""),
         "rating": None if is_new_account_preview else "5.0",
         "reviews": 0 if is_new_account_preview else (1 if is_masterplan else 24),
         "statusLabel": "Disponible",
@@ -152,6 +156,25 @@ class PreviewHandler(SimpleHTTPRequestHandler):
         path = parsed.path
         if path == "/api/health":
             return self.json_response(200, {"status": "ok", "preview": True})
+        if path == "/email-preview/":
+            body = kauze_email_html(
+                "Activa tu prueba gratis",
+                "Hola Sergio",
+                [
+                    "Tu negocio Barbería Demo ya fue preparado en KAUZE.",
+                    "Crea tu contraseña y entra a configurar el logo, los servicios, los trabajadores y la agenda.",
+                    "Tu prueba gratuita dura 7 días.",
+                ],
+                "http://127.0.0.1:8896/app/",
+                "Crear mi contraseña",
+                [("Negocio", "Barbería Demo"), ("Plan", "Trial · 7 días")],
+            ).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if path == "/api/auth/me":
             return self.json_response(200, {"account": ACCOUNT})
         if path == "/api/app-state":

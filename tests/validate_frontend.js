@@ -28,6 +28,17 @@ for (const required of [
   "proCommissionCustomType",
   "commissionFixedAmount",
   "professionalCommissionLabel",
+  "startDayBtn",
+  "businessStatus:'CERRADO'",
+  "Küyen te acompaña",
+  "id=\"businessTypeSwitch\" disabled",
+  "id=\"settingsType\" disabled",
+  "view-integraciones",
+  "directBookingLink",
+  "integrationInstagramUrl",
+  "integrationPublicWhatsapp",
+  "searchPreviewLogo",
+  "businessPublicUrl",
 ]) {
   if (!source.includes(required)) throw new Error(`Falta personalización de perfil: ${required}`);
 }
