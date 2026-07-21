@@ -59,6 +59,7 @@
     .field:focus{border-color:rgba(37,99,235,.55);box-shadow:0 0 0 4px rgba(37,99,235,.09)}
     .btn{border:1px solid var(--border);background:#fff;color:var(--navy);min-height:44px;padding:10px 15px;border-radius:999px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.18s}
     .btn:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(15,23,42,.08)}
+    .btn:disabled,.btn[aria-disabled="true"]{opacity:.55;cursor:not-allowed;pointer-events:none;box-shadow:none;transform:none}
     .btn.primary{background:linear-gradient(135deg,var(--blue),var(--purple));border-color:transparent;color:#fff;width:100%}
     .btn.small{min-height:38px;padding:8px 12px;font-size:13px}
     .login-error{display:none;color:#B91C1C;background:#FEF2F2;border:1px solid #FECACA;padding:12px;border-radius:14px;font-size:13px;font-weight:800;margin-top:12px}
@@ -782,7 +783,7 @@
             <div class="integration-link-box">
               <span class="welcome-badge">🔗 Enlace oficial del negocio</span>
               <h2 style="font-family:Sora,sans-serif;font-size:22px;margin:12px 0 6px;color:var(--navy)">Tus clientes llegan directo a reservar</h2>
-              <p style="color:var(--muted);font-size:13px;line-height:1.6">Este enlace identifica solamente a tu negocio. Úsalo en la biografía de Instagram, WhatsApp, Google Maps o un código QR.</p>
+              <p style="color:var(--muted);font-size:13px;line-height:1.6">Este enlace identifica solamente a tu negocio y funciona sin depender del DNS del subdominio. Úsalo en Instagram, WhatsApp, Google Maps o un código QR.</p>
               <div class="integration-link-row"><input class="field" id="directBookingLink" type="text" readonly aria-label="Enlace directo de reservas"></div>
               <div class="integration-link-actions">
                 <button type="button" class="btn primary" id="copyBookingLink">Copiar enlace</button>
@@ -796,7 +797,7 @@
             <h3 style="font-family:Sora,sans-serif;color:var(--navy);font-size:18px">Estado de canales</h3>
             <p style="color:var(--muted);font-size:12px;line-height:1.55;margin-top:5px">El enlace público ya funciona. Las automatizaciones avanzadas de Meta se activarán en una etapa posterior.</p>
             <div class="integration-status-list">
-              <div class="integration-status"><strong>Enlace KAUZE</strong><span class="ready">Activo</span></div>
+              <div class="integration-status"><strong>Enlace KAUZE</strong><span id="kauzeLinkStatus">Pendiente de ubicación</span></div>
               <div class="integration-status"><strong>Instagram</strong><span id="instagramIntegrationStatus">Pendiente</span></div>
               <div class="integration-status"><strong>WhatsApp público</strong><span id="whatsappIntegrationStatus">Pendiente</span></div>
             </div>
@@ -872,6 +873,28 @@
               <label>Tipo de negocio</label>
               <select class="field" id="settingsType" disabled></select>
               <div class="theme-helper">El rubro quedó asociado al crear la cuenta y no puede modificarse desde este panel. Solo el equipo administrador de KAUZE puede corregirlo internamente.</div>
+            </div>
+            <div class="personalization-box">
+              <h3>Ubicación pública del negocio</h3>
+              <p>Esta información permite que Kauze muestre tu negocio a clientes cercanos. La dirección, comuna y ciudad aparecerán en tu tarjeta pública.</p>
+              <div class="field-group">
+                <label for="settingsAddress">Dirección</label>
+                <input class="field" id="settingsAddress" type="text" maxlength="180" autocomplete="street-address" placeholder="Ej: Av. Providencia 1234, Local 5">
+              </div>
+              <div class="form-grid">
+                <div class="field-group">
+                  <label for="settingsCommune">Comuna</label>
+                  <input class="field" id="settingsCommune" type="text" maxlength="100" autocomplete="address-level2" placeholder="Ej: Providencia">
+                </div>
+                <div class="field-group">
+                  <label for="settingsCity">Ciudad</label>
+                  <input class="field" id="settingsCity" type="text" maxlength="100" autocomplete="address-level1" placeholder="Ej: Santiago">
+                </div>
+              </div>
+              <div class="logo-settings-actions">
+                <button class="btn" id="useBusinessLocation" type="button" style="width:auto">◎ Usar ubicación actual</button>
+              </div>
+              <div class="logo-feedback" id="businessLocationStatus">Completa los tres campos. La ubicación precisa es opcional y mejora el orden por cercanía.</div>
             </div>
             <div class="field-group">
               <label>Tema visual permitido por tipo de negocio</label>
@@ -1455,8 +1478,10 @@
 
 
   <script>
-    const defaultBusiness = { name:'Mi negocio', type:'barberia', logoUrl:'', ownerWhatsapp:'', ownerCalendarEmail:'', publicPhone:'', instagramUrl:'', instagramHandle:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, clientRatingMode:'none', publicRating:null, publicReviews:0, activeTheme:'Kauze Base', pageTitle:'Agenda tu próxima hora sin escribir por WhatsApp', pageSubtitle:'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.', pageCta:'Reservar ahora', bannerStyle:'soft', bannerImage:'', publicBookingEnabled:false, businessStatus:'CERRADO', operatingDay:{date:'',openedAt:''}, appointments:{}, professionals:{}, clients:{}, services:{}, campaigns:{}, onboarding:{ welcomeDismissed:false, tourCompleted:false } };
+    const defaultBusiness = { name:'Mi negocio', type:'barberia', logoUrl:'', address:'', commune:'', city:'', latitude:null, longitude:null, ownerWhatsapp:'', ownerCalendarEmail:'', publicPhone:'', instagramUrl:'', instagramHandle:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, clientRatingMode:'none', publicRating:null, publicReviews:0, activeTheme:'Kauze Base', pageTitle:'Agenda tu próxima hora sin escribir por WhatsApp', pageSubtitle:'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.', pageCta:'Reservar ahora', bannerStyle:'soft', bannerImage:'', publicBookingEnabled:false, businessStatus:'CERRADO', operatingDay:{date:'',openedAt:''}, appointments:{}, professionals:{}, clients:{}, services:{}, campaigns:{}, onboarding:{ welcomeDismissed:false, tourCompleted:false } };
     let pendingLogoData = null;
+    let logoDirty = false;
+    let settingsDirty = false;
     let pendingUserProfileImage = null;
     let pendingProfessionalPhoto = null;
     const CLIENT_PORTAL_APPOINTMENTS_KEY = 'kauzeSharedAppointmentsV1';
@@ -1565,28 +1590,26 @@
             credentials: 'include',
             body: JSON.stringify(snapshot || state)
           });
-          if (!res.ok) throw new Error(`No se pudo guardar el estado (${res.status}).`);
+          const result = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(result.message || `No se pudo guardar el estado (${res.status}).`);
         } else {
           const res = await fetch(`${BACKEND_URL}/api/app-state`, { credentials: 'include' });
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.type) {
-              const previousPublicRating = state.publicRating;
-              const previousPublicReviews = state.publicReviews;
-              state = normalizeBusinessState(data);
-              if (!state.publicRating && previousPublicRating) state.publicRating = previousPublicRating;
-              if (!state.publicReviews && previousPublicReviews) state.publicReviews = previousPublicReviews;
-              if (currentAccount?.business) {
-                state.type = currentAccount.business.type || state.type;
-                if (state.name) currentAccount.business.name = state.name;
-              }
-              const key = businessStateStorageKey();
-              if (key) localStorage.setItem(key, JSON.stringify(state));
-              if (state.activeTheme) {
-                applyTheme(state.activeTheme);
-              }
-              updateBusinessStatus(state.businessStatus || 'CERRADO', false);
+          if (!res.ok) return false;
+          const data = await res.json();
+          if (data && data.type) {
+            const previousPublicRating = state.publicRating;
+            const previousPublicReviews = state.publicReviews;
+            state = normalizeBusinessState(data);
+            if (!state.publicRating && previousPublicRating) state.publicRating = previousPublicRating;
+            if (!state.publicReviews && previousPublicReviews) state.publicReviews = previousPublicReviews;
+            if (currentAccount?.business) {
+              state.type = currentAccount.business.type || state.type;
+              if (state.name) currentAccount.business.name = state.name;
             }
+            const key = businessStateStorageKey();
+            if (key) localStorage.setItem(key, JSON.stringify(state));
+            if (state.activeTheme) applyTheme(state.activeTheme);
+            updateBusinessStatus(state.businessStatus || 'CERRADO', false);
           }
         }
         return true;
@@ -1720,14 +1743,19 @@
 
     function businessPublicUrl() {
       const slug = String(currentAccount?.business?.slug || '').trim().toLowerCase();
-      return slug ? `https://${slug}.kauze.cl/` : '';
+      if (!slug) return '';
+      const base = window.location.hostname === 'kauze.cl' || window.location.hostname.endsWith('.kauze.cl')
+        ? 'https://kauze.cl'
+        : window.location.origin;
+      return `${base}/cliente/?negocio=${encodeURIComponent(slug)}`;
     }
 
     function updateSearchPreviewCard() {
       const profile = currentProfile();
       const name = settingsBusiness?.value.trim() || state.name || 'Mi negocio';
-      const location = currentPublicBusiness?.location || 'Ubicación por confirmar';
-      const address = currentPublicBusiness?.address || location;
+      const location = settingsCommune?.value.trim() || state.commune || currentPublicBusiness?.location || 'Ubicación por confirmar';
+      const city = settingsCity?.value.trim() || state.city || currentPublicBusiness?.city || '';
+      const address = settingsAddress?.value.trim() || state.address || currentPublicBusiness?.address || location;
       const services = getServices();
       const prices = services.map(item => Number(item.price || 0)).filter(value => value > 0);
       const minimumPrice = prices.length ? Math.min(...prices) : 0;
@@ -1738,8 +1766,8 @@
       const previewStatus = document.getElementById('searchPreviewStatus');
       const previewRating = document.getElementById('searchPreviewRating');
       if (previewName) previewName.textContent = name;
-      if (previewType) previewType.textContent = `${profile.label} · ${location}`;
-      if (previewLocation) previewLocation.textContent = address;
+      if (previewType) previewType.textContent = `${profile.label} · ${[location, city].filter(Boolean).join(', ')}`;
+      if (previewLocation) previewLocation.textContent = address === location ? address : `${address}, ${location}`;
       if (previewPrice) previewPrice.textContent = minimumPrice ? `Desde ${fmt(minimumPrice)}` : 'Configura tus servicios';
       if (previewStatus) previewStatus.textContent = state.businessStatus === 'DISPONIBLE' ? 'Disponible ahora' : 'Reservas online';
       if (previewRating) previewRating.textContent = state.publicReviews
@@ -1750,11 +1778,22 @@
 
     function renderIntegrations() {
       const link = businessPublicUrl();
+      const publicReady = Boolean(state.publicBookingEnabled && state.address && state.commune && state.city);
       if (directBookingLink) directBookingLink.value = link;
-      if (openBookingLink) openBookingLink.href = link || '#';
+      if (copyBookingLink) copyBookingLink.disabled = !publicReady;
+      if (openBookingLink) {
+        openBookingLink.href = publicReady ? link : '#';
+        openBookingLink.setAttribute('aria-disabled', publicReady ? 'false' : 'true');
+        openBookingLink.textContent = publicReady ? 'Abrir página pública' : 'Completa la ubicación';
+      }
       if (shareBookingWhatsapp) {
         const message = `Reserva tu hora en ${state.name || 'nuestro negocio'}: ${link}`;
-        shareBookingWhatsapp.href = link ? `https://wa.me/?text=${encodeURIComponent(message)}` : '#';
+        shareBookingWhatsapp.href = publicReady ? `https://wa.me/?text=${encodeURIComponent(message)}` : '#';
+        shareBookingWhatsapp.setAttribute('aria-disabled', publicReady ? 'false' : 'true');
+      }
+      if (kauzeLinkStatus) {
+        kauzeLinkStatus.textContent = publicReady ? 'Activo' : 'Pendiente de ubicación';
+        kauzeLinkStatus.classList.toggle('ready', publicReady);
       }
       if (!integrationsDirty) {
         if (integrationInstagramUrl) integrationInstagramUrl.value = state.instagramUrl || '';
@@ -1787,7 +1826,7 @@
           const image = new Image();
           image.onerror = () => reject(new Error('El archivo no contiene una imagen válida.'));
           image.onload = () => {
-            const maxSide = 512;
+            const maxSide = 320;
             const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
             const canvas = document.createElement('canvas');
             canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
@@ -1796,8 +1835,8 @@
             context.imageSmoothingEnabled = true;
             context.imageSmoothingQuality = 'high';
             context.drawImage(image, 0, 0, canvas.width, canvas.height);
-            const dataUrl = canvas.toDataURL('image/webp', 0.86);
-            if (dataUrl.length > 750000) {
+            const dataUrl = canvas.toDataURL('image/webp', 0.82);
+            if (dataUrl.length > 350000) {
               reject(new Error('La imagen sigue siendo demasiado pesada después de optimizarla.'));
               return;
             }
@@ -2380,6 +2419,11 @@
       if (typeof normalized.instagramUrl !== 'string') normalized.instagramUrl = '';
       if (typeof normalized.instagramHandle !== 'string') normalized.instagramHandle = '';
       if (typeof normalized.logoUrl !== 'string') normalized.logoUrl = '';
+      if (typeof normalized.address !== 'string') normalized.address = '';
+      if (typeof normalized.commune !== 'string') normalized.commune = '';
+      if (typeof normalized.city !== 'string') normalized.city = '';
+      normalized.latitude = Number.isFinite(Number(normalized.latitude)) && normalized.latitude !== '' && normalized.latitude !== null ? Number(normalized.latitude) : null;
+      normalized.longitude = Number.isFinite(Number(normalized.longitude)) && normalized.longitude !== '' && normalized.longitude !== null ? Number(normalized.longitude) : null;
       if (!['CERRADO', 'DISPONIBLE', 'OCUPADO', 'PAUSADO'].includes(normalized.businessStatus)) normalized.businessStatus = 'CERRADO';
       if (!normalized.operatingDay || typeof normalized.operatingDay !== 'object') normalized.operatingDay = {date:'', openedAt:''};
       if (typeof normalized.depositEnabled === 'undefined') normalized.depositEnabled = true;
@@ -2405,6 +2449,9 @@
     function hydrateBusinessState(account) {
       currentAccount = account;
       pendingUserProfileImage = null;
+      pendingLogoData = null;
+      logoDirty = false;
+      settingsDirty = false;
       const key = businessStateStorageKey();
       let cached = null;
       try { cached = key ? JSON.parse(localStorage.getItem(key) || 'null') : null; } catch (e) { cached = null; }
@@ -2451,6 +2498,11 @@
     const saveUserPhoto = document.getElementById('saveUserPhoto');
     const settingsType = document.getElementById('settingsType');
     const settingsBusiness = document.getElementById('settingsBusiness');
+    const settingsAddress = document.getElementById('settingsAddress');
+    const settingsCommune = document.getElementById('settingsCommune');
+    const settingsCity = document.getElementById('settingsCity');
+    const useBusinessLocation = document.getElementById('useBusinessLocation');
+    const businessLocationStatus = document.getElementById('businessLocationStatus');
     const settingsLogoUrl = document.getElementById('settingsLogoUrl');
     const settingsLogoFile = document.getElementById('settingsLogoFile');
     const settingsLogoPreview = document.getElementById('settingsLogoPreview');
@@ -2474,6 +2526,7 @@
     const settingsBannerImage = document.getElementById('settingsBannerImage');
     const themeMiniList = document.getElementById('themeMiniList');
     const directBookingLink = document.getElementById('directBookingLink');
+    const kauzeLinkStatus = document.getElementById('kauzeLinkStatus');
     const copyBookingLink = document.getElementById('copyBookingLink');
     const copyBookingFeedback = document.getElementById('copyBookingFeedback');
     const openBookingLink = document.getElementById('openBookingLink');
@@ -2605,6 +2658,7 @@
       if (settingsThemeSelector && !settingsThemeSelector.dataset.bound) {
         settingsThemeSelector.dataset.bound = 'true';
         settingsThemeSelector.addEventListener('change', () => {
+          settingsDirty = true;
           const type = settingsType ? settingsType.value : state.type;
           const theme = ensureThemeForType(type, settingsThemeSelector.value);
           settingsThemeSelector.value = theme.name;
@@ -2745,7 +2799,10 @@
     function saveState(){
       const scopedKey = businessStateStorageKey();
       if (scopedKey) localStorage.setItem(scopedKey, JSON.stringify(state));
-      localStorage.setItem('kauzeBusinessContactV1', JSON.stringify({
+      const contactStorageKey = currentAccount?.business?.slug
+        ? `kauzeBusinessContactV1:${currentAccount.business.slug}`
+        : null;
+      if (contactStorageKey) localStorage.setItem(contactStorageKey, JSON.stringify({
         businessName: state.name || currentProfile().business,
         businessType: state.type,
         logoUrl: state.logoUrl || '',
@@ -2949,6 +3006,7 @@
       const hasSchedule = professionals.some(pro => Array.isArray(pro.shifts) && pro.shifts.length > 0);
       return [
         { label:'Personalizar el negocio y subir el logo', done:Boolean(state.logoUrl), view:'ajustes' },
+        { label:'Agregar dirección, comuna y ciudad', done:Boolean(state.address && state.commune && state.city), view:'ajustes' },
         { label:'Crear el primer servicio', done:services.length > 0, view:'servicios' },
         { label:'Agregar al primer trabajador', done:professionals.length > 0, view:'profesionales' },
         { label:'Definir días y horarios de atención', done:hasSchedule, view:'profesionales' },
@@ -2993,29 +3051,38 @@
       sideBusiness.textContent=name;
       sideType.textContent=`${p.emoji} ${p.label}`;
       businessTypeSwitch.value=state.type;
-      settingsType.value=state.type;
-      settingsBusiness.value=name;
-      pendingLogoData = String(state.logoUrl || '').startsWith('data:image/') ? state.logoUrl : null;
-      if (settingsLogoUrl) settingsLogoUrl.value = pendingLogoData ? '' : (state.logoUrl || '');
-      if (settingsOwnerWhatsapp) settingsOwnerWhatsapp.value = state.ownerWhatsapp || '';
-      if (settingsCalendarEmail) settingsCalendarEmail.value = state.ownerCalendarEmail || '';
-      if (settingsDepositEnabled) settingsDepositEnabled.checked = !!state.depositEnabled;
-      if (settingsDepositMode) settingsDepositMode.value = state.depositMode || 'percent';
-      if (settingsDepositPercent) settingsDepositPercent.value = Number(state.depositPercent || 0);
-      if (settingsDepositFixed) settingsDepositFixed.value = Number(state.depositFixedAmount || 0);
-      if (settingsDepositMinimum) settingsDepositMinimum.value = Number(state.depositMinimum || 0);
-      if (settingsClientRatingMode) settingsClientRatingMode.value = state.clientRatingMode || 'none';
-      if (settingsPageTitle) settingsPageTitle.value = state.pageTitle || '';
-      if (settingsPageSubtitle) settingsPageSubtitle.value = state.pageSubtitle || '';
-      if (settingsPageCta) settingsPageCta.value = state.pageCta || '';
-      if (settingsBannerStyle) settingsBannerStyle.value = state.bannerStyle || 'soft';
-      if (settingsBannerImage) settingsBannerImage.value = state.bannerImage || '';
+      if (!settingsDirty) {
+        settingsType.value=state.type;
+        settingsBusiness.value=name;
+        if (!logoDirty) pendingLogoData = String(state.logoUrl || '').startsWith('data:image/') ? state.logoUrl : null;
+        if (settingsLogoUrl && !logoDirty) settingsLogoUrl.value = pendingLogoData ? '' : (state.logoUrl || '');
+        if (settingsAddress) settingsAddress.value = state.address || '';
+        if (settingsCommune) settingsCommune.value = state.commune || '';
+        if (settingsCity) settingsCity.value = state.city || '';
+        if (businessLocationStatus) businessLocationStatus.textContent = state.address && state.commune && state.city
+          ? (state.latitude !== null && state.longitude !== null ? 'Ubicación guardada con coordenadas para ordenar por cercanía.' : 'Dirección guardada. Puedes agregar la ubicación precisa si lo deseas.')
+          : 'Completa los tres campos. La ubicación precisa es opcional y mejora el orden por cercanía.';
+        if (settingsOwnerWhatsapp) settingsOwnerWhatsapp.value = state.ownerWhatsapp || '';
+        if (settingsCalendarEmail) settingsCalendarEmail.value = state.ownerCalendarEmail || '';
+        if (settingsDepositEnabled) settingsDepositEnabled.checked = !!state.depositEnabled;
+        if (settingsDepositMode) settingsDepositMode.value = state.depositMode || 'percent';
+        if (settingsDepositPercent) settingsDepositPercent.value = Number(state.depositPercent || 0);
+        if (settingsDepositFixed) settingsDepositFixed.value = Number(state.depositFixedAmount || 0);
+        if (settingsDepositMinimum) settingsDepositMinimum.value = Number(state.depositMinimum || 0);
+        if (settingsClientRatingMode) settingsClientRatingMode.value = state.clientRatingMode || 'none';
+        if (settingsPageTitle) settingsPageTitle.value = state.pageTitle || '';
+        if (settingsPageSubtitle) settingsPageSubtitle.value = state.pageSubtitle || '';
+        if (settingsPageCta) settingsPageCta.value = state.pageCta || '';
+        if (settingsBannerStyle) settingsBannerStyle.value = state.bannerStyle || 'soft';
+        if (settingsBannerImage) settingsBannerImage.value = state.bannerImage || '';
+      }
       updateUserProfileUI();
       
       if (settingsThemeSelector) {
-        const currentTheme = renderThemeSelectorForType(state.type, state.activeTheme);
+        const requestedTheme = settingsDirty ? settingsThemeSelector.value : state.activeTheme;
+        const currentTheme = renderThemeSelectorForType(state.type, requestedTheme);
         if (currentTheme) {
-          state.activeTheme = currentTheme.name;
+          if (!settingsDirty) state.activeTheme = currentTheme.name;
           updateMockupPreview(currentTheme);
         }
       }
@@ -3937,12 +4004,51 @@
     mobileMenu.addEventListener('click',()=>sidebar.classList.toggle('open'));
     [settingsPageTitle, settingsPageSubtitle, settingsPageCta, settingsBannerStyle, settingsBannerImage].filter(Boolean).forEach(input => {
       const eventName = input.tagName === 'SELECT' ? 'change' : 'input';
-      input.addEventListener(eventName, () => updatePagePreview());
+      input.addEventListener(eventName, () => {
+        settingsDirty = true;
+        updatePagePreview();
+      });
     });
 
     if (settingsBusiness) {
-      settingsBusiness.addEventListener('input', () => updateSearchPreviewCard());
+      settingsBusiness.addEventListener('input', () => {
+        settingsDirty = true;
+        updateSearchPreviewCard();
+      });
     }
+
+    [settingsAddress, settingsCommune, settingsCity].filter(Boolean).forEach(input => {
+      input.addEventListener('input', () => {
+        settingsDirty = true;
+        updateSearchPreviewCard();
+      });
+    });
+
+    [settingsOwnerWhatsapp, settingsCalendarEmail, settingsDepositEnabled, settingsDepositMode, settingsDepositPercent, settingsDepositFixed, settingsDepositMinimum, settingsClientRatingMode].filter(Boolean).forEach(input => {
+      const eventName = input.type === 'checkbox' || input.tagName === 'SELECT' ? 'change' : 'input';
+      input.addEventListener(eventName, () => { settingsDirty = true; });
+    });
+
+    useBusinessLocation?.addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        businessLocationStatus.textContent = 'Este navegador no permite detectar la ubicación. Completa dirección, comuna y ciudad manualmente.';
+        return;
+      }
+      useBusinessLocation.disabled = true;
+      businessLocationStatus.textContent = 'Esperando autorización para detectar la ubicación…';
+      navigator.geolocation.getCurrentPosition(position => {
+        state.latitude = Number(position.coords.latitude.toFixed(7));
+        state.longitude = Number(position.coords.longitude.toFixed(7));
+        settingsDirty = true;
+        businessLocationStatus.textContent = 'Ubicación precisa detectada. Completa también dirección, comuna y ciudad antes de guardar.';
+        useBusinessLocation.disabled = false;
+      }, error => {
+        businessLocationStatus.textContent = error.code === 1
+          ? 'No autorizaste la ubicación. Puedes completar los datos manualmente.'
+          : 'No pudimos detectar la ubicación. Intenta nuevamente o completa los datos manualmente.';
+        useBusinessLocation.disabled = false;
+      }, { enableHighAccuracy:false, timeout:10000, maximumAge:300000 });
+    });
 
     if (settingsUserPhotoFile) {
       settingsUserPhotoFile.addEventListener('change', async () => {
@@ -4003,6 +4109,8 @@
     if (settingsLogoUrl) {
       settingsLogoUrl.addEventListener('input', () => {
         pendingLogoData = null;
+        logoDirty = true;
+        settingsDirty = true;
         if (settingsLogoFeedback) settingsLogoFeedback.textContent = 'Vista previa desde la URL indicada.';
         updateBusinessLogoPreviews();
       });
@@ -4015,6 +4123,8 @@
         if (settingsLogoFeedback) settingsLogoFeedback.textContent = 'Optimizando imagen…';
         try {
           pendingLogoData = await resizeBusinessLogo(file);
+          logoDirty = true;
+          settingsDirty = true;
           if (settingsLogoUrl) settingsLogoUrl.value = '';
           if (settingsLogoFeedback) settingsLogoFeedback.textContent = 'Logo listo. Presiona “Guardar cambios” para publicarlo.';
           updateBusinessLogoPreviews();
@@ -4030,6 +4140,8 @@
     if (clearBusinessLogo) {
       clearBusinessLogo.addEventListener('click', () => {
         pendingLogoData = '';
+        logoDirty = true;
+        settingsDirty = true;
         if (settingsLogoUrl) settingsLogoUrl.value = '';
         if (settingsLogoFeedback) settingsLogoFeedback.textContent = 'Logo quitado de la vista previa. Guarda los cambios para confirmar.';
         updateBusinessLogoPreviews();
@@ -4144,14 +4256,26 @@
       const selectedType = currentAccount?.business?.type || state.type;
       const typedLogoUrl = settingsLogoUrl ? settingsLogoUrl.value.trim() : '';
       const selectedLogo = currentBusinessLogoSource();
+      const address = settingsAddress?.value.trim() || '';
+      const commune = settingsCommune?.value.trim() || '';
+      const city = settingsCity?.value.trim() || '';
       if (typedLogoUrl && !selectedLogo) {
         if (settingsLogoFeedback) settingsLogoFeedback.textContent = 'Usa una URL HTTPS válida o carga una imagen desde tu equipo.';
         settingsLogoUrl.focus();
         return;
       }
-      state.name = settingsBusiness.value.trim() || profiles[selectedType].business; 
-      state.type = selectedType; 
+      if (!address || !commune || !city) {
+        if (businessLocationStatus) businessLocationStatus.textContent = 'Completa dirección, comuna y ciudad para que los clientes puedan encontrarte.';
+        (address ? (commune ? settingsCity : settingsCommune) : settingsAddress)?.focus();
+        return;
+      }
+      state.name = settingsBusiness.value.trim() || profiles[selectedType].business;
+      state.type = selectedType;
       state.logoUrl = selectedLogo;
+      state.address = address;
+      state.commune = commune;
+      state.city = city;
+      state.publicBookingEnabled = true;
       state.ownerWhatsapp = settingsOwnerWhatsapp ? settingsOwnerWhatsapp.value.trim() : ''; 
       state.ownerCalendarEmail = settingsCalendarEmail ? settingsCalendarEmail.value.trim() : ''; 
       state.depositEnabled = settingsDepositEnabled ? settingsDepositEnabled.checked : false; 
@@ -4183,7 +4307,16 @@
         if (!saved) throw new Error('Railway no confirmó el guardado.');
         const refreshed = await syncOnlineState(false);
         if (!refreshed) throw new Error('No fue posible verificar el cambio guardado.');
+        if (state.logoUrl !== selectedLogo || state.address !== address || state.commune !== commune || state.city !== city) {
+          throw new Error('El servidor no devolvió la personalización completa. Intenta nuevamente.');
+        }
+        settingsDirty = false;
+        logoDirty = false;
+        pendingLogoData = String(state.logoUrl || '').startsWith('data:image/') ? state.logoUrl : null;
         render();
+        if (businessLocationStatus) businessLocationStatus.textContent = state.latitude !== null && state.longitude !== null
+          ? 'Ubicación guardada con coordenadas para ordenar por cercanía.'
+          : 'Dirección guardada. Puedes usar “Ubicación actual” para mejorar el orden por cercanía.';
         saveMsg.style.color='var(--teal)';
         saveMsg.textContent='Cambios y logo guardados correctamente en KAUZE.';
       } catch (error) {
@@ -4538,13 +4671,13 @@
     });
 
     window.addEventListener('focus', async () => {
-      if(!currentAccount) return;
+      if(!currentAccount || settingsDirty || integrationsDirty || logoDirty) return;
       await syncOnlineState(false);
       render();
     });
 
     async function refreshPanelFromServer() {
-      if (!currentAccount || document.hidden || onlineSavePending > 0) return;
+      if (!currentAccount || document.hidden || onlineSavePending > 0 || settingsDirty || integrationsDirty || logoDirty) return;
       const before = JSON.stringify(state);
       const synced = await syncOnlineState(false);
       if (synced && JSON.stringify(state) !== before) render();

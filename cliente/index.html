@@ -2267,7 +2267,13 @@
 
     function getBusinessContact() {
       try {
-        const raw = localStorage.getItem('kauzeBusinessContactV1');
+        const params = new URLSearchParams(window.location.search);
+        const hostname = window.location.hostname.toLowerCase();
+        const hostSlug = hostname.endsWith('.kauze.cl') && hostname.split('.').length === 3
+          ? hostname.split('.')[0]
+          : '';
+        const slug = String(params.get('negocio') || hostSlug || '').trim().toLowerCase();
+        const raw = slug ? localStorage.getItem(`kauzeBusinessContactV1:${slug}`) : null;
         return raw ? JSON.parse(raw) : {};
       } catch (error) {
         return {};
