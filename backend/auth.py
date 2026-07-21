@@ -3,6 +3,7 @@ import os
 import re
 import secrets
 from datetime import datetime, timedelta, timezone
+from urllib.parse import urlparse
 
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerifyMismatchError
@@ -11,7 +12,7 @@ from psycopg.types.json import Jsonb
 
 from backend.db import connection
 from backend.email_delivery import email_delivery_configured, send_email
-from backend.tenant import tenant_connection
+from backend.tenant import assume_tenant_runtime_role, set_tenant_context, tenant_connection
 
 
 SESSION_HOURS = 8
@@ -69,6 +70,22 @@ def _profile_image_value(value):
     if candidate.startswith("https://") and len(candidate) <= 1_000:
         return candidate
     raise ValueError("La imagen de perfil no es válida.")
+
+
+def _business_logo_value(value):
+    candidate = str(value or "").strip()
+    if not candidate:
+        return ""
+    if re.fullmatch(
+        r"data:image/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+",
+        candidate,
+    ) and len(candidate) <= 750_000:
+        return candidate
+    if candidate.startswith("https://") and len(candidate) <= 1_000:
+        return candidate
+    if candidate.startswith("/cliente/assets/") and len(candidate) <= 1_000:
+        return candidate
+    raise ValueError("El logo del negocio no es válido.")
 
 
 def _account_payload(row):
@@ -362,24 +379,130 @@ def load_business_state(local_id):
         }
 
 
-def save_business_state(local_id, user_id, state):
+def _normalized_business_state(state, business_type=None, business_name=None):
     if not isinstance(state, dict):
         raise ValueError("El estado del panel debe ser un objeto.")
-    with tenant_connection(local_id, user_id) as conn:
-        conn.row_factory = dict_row
-        row = conn.execute(
-            """
-            INSERT INTO estados_panel_local (local_id, estado, actualizado_por)
-            VALUES (%s, %s, %s)
-            ON CONFLICT (local_id) DO UPDATE
-            SET estado = EXCLUDED.estado,
-                actualizado_por = EXCLUDED.actualizado_por,
-                actualizado_en = NOW(),
-                version = estados_panel_local.version + 1
-            RETURNING version, actualizado_en
-            """,
-            (local_id, Jsonb(state), user_id),
-        ).fetchone()
+    normalized = dict(state)
+    if business_type:
+        normalized["type"] = str(business_type)
+    requested_name = " ".join(str(normalized.get("name") or business_name or "").split())
+    if len(requested_name) < 2 or len(requested_name) > 160 or "<" in requested_name or ">" in requested_name:
+        raise ValueError("El nombre del negocio no es válido.")
+    normalized["name"] = requested_name
+    normalized["logoUrl"] = _business_logo_value(normalized.get("logoUrl"))
+    public_phone = " ".join(str(normalized.get("publicPhone") or "").split())
+    if public_phone and (
+        len(public_phone) > 30
+        or not re.fullmatch(r"[+()\d\s.-]+", public_phone)
+        or len(re.sub(r"\D", "", public_phone)) < 8
+    ):
+        raise ValueError("El WhatsApp público no es válido.")
+    normalized["publicPhone"] = public_phone
+
+    instagram_url = str(normalized.get("instagramUrl") or "").strip()
+    if instagram_url:
+        parsed_instagram = urlparse(instagram_url)
+        instagram_host = (parsed_instagram.hostname or "").lower()
+        if (
+            parsed_instagram.scheme != "https"
+            or instagram_host not in {"instagram.com", "www.instagram.com"}
+            or len(instagram_url) > 500
+        ):
+            raise ValueError("Usa un enlace HTTPS válido de Instagram.")
+    normalized["instagramUrl"] = instagram_url
+
+    instagram_handle = str(normalized.get("instagramHandle") or "").strip()
+    if instagram_handle:
+        instagram_handle = instagram_handle.lstrip("@")
+        if not re.fullmatch(r"[A-Za-z0-9._]{1,30}", instagram_handle):
+            raise ValueError("El usuario de Instagram no es válido.")
+        instagram_handle = f"@{instagram_handle}"
+    normalized["instagramHandle"] = instagram_handle
+    if normalized.get("businessStatus") not in {
+        "CERRADO",
+        "DISPONIBLE",
+        "OCUPADO",
+        "PAUSADO",
+    }:
+        normalized["businessStatus"] = "CERRADO"
+    if not isinstance(normalized.get("operatingDay"), dict):
+        normalized["operatingDay"] = {"date": "", "openedAt": ""}
+    return normalized
+
+
+def save_business_state(
+    local_id,
+    user_id,
+    state,
+    business_type=None,
+    business_name=None,
+):
+    normalized = _normalized_business_state(state, business_type, business_name)
+    deposit_enabled = bool(normalized.get("depositEnabled"))
+    deposit_mode = str(normalized.get("depositMode") or "percent")
+    if deposit_mode not in {"percent", "fixed"}:
+        deposit_mode = "percent"
+    deposit_percent = min(max(int(normalized.get("depositPercent") or 0), 0), 100)
+    deposit_fixed = max(int(normalized.get("depositFixedAmount") or 0), 0)
+    deposit_minimum = max(int(normalized.get("depositMinimum") or 0), 0)
+    if deposit_enabled and deposit_mode == "percent" and deposit_percent == 0:
+        raise ValueError("El porcentaje de abono debe ser mayor que cero.")
+    if deposit_enabled and deposit_mode == "fixed" and deposit_fixed == 0:
+        raise ValueError("El monto fijo del abono debe ser mayor que cero.")
+    database_deposit_mode = (
+        "porcentaje" if deposit_enabled and deposit_mode == "percent"
+        else "fijo" if deposit_enabled
+        else "none"
+    )
+    with connection() as conn:
+        with conn.transaction():
+            conn.row_factory = dict_row
+            updated = conn.execute(
+                """
+                UPDATE locales
+                SET nombre = %s,
+                    logo_url = %s,
+                    email_calendar = %s,
+                    tema_visual = %s,
+                    requiere_abono = %s,
+                    tipo_abono = %s,
+                    porcentaje_abono = %s,
+                    monto_abono_fijo = %s,
+                    monto_abono_minimo = %s,
+                    actualizado_en = NOW()
+                WHERE id = %s AND estado = 'activo'
+                RETURNING id
+                """,
+                (
+                    normalized["name"],
+                    normalized["logoUrl"] or None,
+                    str(normalized.get("ownerCalendarEmail") or "")[:320] or None,
+                    str(normalized.get("activeTheme") or "Kauze Base")[:120],
+                    deposit_enabled,
+                    database_deposit_mode,
+                    deposit_percent,
+                    deposit_fixed,
+                    deposit_minimum,
+                    local_id,
+                ),
+            ).fetchone()
+            if not updated:
+                raise AccountUnavailable("El negocio no está disponible.")
+            assume_tenant_runtime_role(conn)
+            set_tenant_context(conn, local_id, user_id)
+            row = conn.execute(
+                """
+                INSERT INTO estados_panel_local (local_id, estado, actualizado_por)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (local_id) DO UPDATE
+                SET estado = EXCLUDED.estado,
+                    actualizado_por = EXCLUDED.actualizado_por,
+                    actualizado_en = NOW(),
+                    version = estados_panel_local.version + 1
+                RETURNING version, actualizado_en
+                """,
+                (local_id, Jsonb(normalized), user_id),
+            ).fetchone()
         return {
             "version": int(row["version"]),
             "updatedAt": row["actualizado_en"].isoformat(),

@@ -20,8 +20,9 @@ export default {
     const businessSubdomain = isSubdomain ? hostParts[0] : "";
 
     // Subdominio de negocio → redirigir a la página pública del cliente
-    if (businessSubdomain && !["www", "admin"].includes(businessSubdomain)) {
+    if (businessSubdomain && !["www", "admin", "api", "app"].includes(businessSubdomain)) {
       const destination = new URL("https://kauze.cl/cliente/");
+      incomingUrl.searchParams.forEach((value, key) => destination.searchParams.append(key, value));
       destination.searchParams.set("negocio", businessSubdomain);
       return Response.redirect(destination.toString(), 302);
     }

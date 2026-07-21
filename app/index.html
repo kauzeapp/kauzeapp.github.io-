@@ -437,6 +437,24 @@
       line-height: 1.45;
     }
 
+    .search-preview-wrap{width:100%;margin-bottom:20px;padding:16px;border:1px solid var(--border);border-radius:22px;background:linear-gradient(145deg,#f8fbff,#f3f5ff)}
+    .search-preview-label{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+    .search-preview-card{display:grid;gap:12px;padding:18px;border:1px solid var(--border);border-radius:24px;background:#fff;box-shadow:var(--shadow-soft)}
+    .search-preview-top{display:flex;align-items:flex-start;gap:10px}
+    .search-preview-logo{width:50px;height:50px;display:grid;place-items:center;flex:0 0 auto;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-family:Sora,sans-serif;font-size:14px;font-weight:900}
+    .search-preview-logo img{width:100%;height:100%;display:block;object-fit:contain;background:#fff;padding:2px}
+    .search-preview-title{min-width:0;flex:1}.search-preview-title strong{display:block;color:var(--navy);font-family:Sora,sans-serif;font-size:17px;line-height:1.2}.search-preview-title span{display:block;margin-top:4px;color:var(--muted);font-size:12px}
+    .search-preview-check{width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:rgba(16,185,129,.12);color:#059669;font-weight:900}
+    .search-preview-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px}.search-preview-meta div{padding:9px 10px;border-radius:12px;background:var(--soft);font-size:11px;color:var(--muted)}.search-preview-meta strong{display:block;margin-top:2px;color:var(--navy);font-size:12px}
+    .search-preview-tags{display:flex;gap:7px;flex-wrap:wrap}.search-preview-tag{padding:6px 9px;border-radius:999px;background:rgba(37,99,235,.08);color:var(--blue);font-size:10px;font-weight:800}.search-preview-tag.good{background:rgba(16,185,129,.10);color:#059669}
+    .integration-hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);gap:18px;align-items:stretch}
+    .integration-link-box{padding:18px;border:1px solid rgba(37,99,235,.18);border-radius:22px;background:linear-gradient(135deg,rgba(239,246,255,.95),rgba(245,243,255,.95))}
+    .integration-link-row{display:flex;gap:8px;margin-top:10px}.integration-link-row .field{font-weight:800;color:var(--navy)}
+    .integration-link-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.integration-link-actions .btn{width:auto}
+    .integration-status-list{display:grid;gap:9px;margin-top:12px}.integration-status{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border:1px solid var(--border);border-radius:14px;background:#fff;font-size:12px}.integration-status strong{color:var(--navy)}.integration-status span{color:var(--muted);font-weight:800}.integration-status span.ready{color:#059669}
+    .integration-help{display:flex;align-items:flex-start;gap:12px;padding:14px;border-radius:18px;background:var(--soft);color:var(--muted);font-size:12px;line-height:1.55}.integration-help strong{display:block;color:var(--navy);margin-bottom:3px}
+    @media(max-width:900px){.integration-hero{grid-template-columns:1fr}}
+
     .theme-mini-list {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -625,6 +643,7 @@
         <button type="button" data-view="servicios">✦ Servicios</button>
         <button type="button" data-view="profesionales" id="navProfessionals">☷ Profesionales</button>
         <button type="button" data-view="marketing">✧ Marketing</button>
+        <button type="button" data-view="integraciones">↗ Integraciones</button>
         <button type="button" data-view="facturacion">$ Facturación</button>
         <button type="button" data-view="ayuda">? Centro de ayuda</button>
         <button type="button" data-view="ajustes">⚙ Ajustes</button>
@@ -639,17 +658,17 @@
         <div class="top-right">
           <button type="button" class="btn small" id="panelHelpBtn">? Cómo funciona</button>
           <!-- Status Badge -->
-          <div class="status-badge disponible" id="businessStatusBadge" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px; font-size: 13px; font-weight: 700; border: 1px solid var(--border); background: rgba(16, 185, 129, 0.08); color: var(--teal); border-color: rgba(16, 185, 129, 0.22); cursor: pointer; transition: all 0.2s ease;">
-            🟢 DISPONIBLE
+          <div class="status-badge" id="businessStatusBadge" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px; font-size: 13px; font-weight: 700; border: 1px solid var(--border); background: rgba(100, 116, 139, 0.08); color: var(--muted); cursor: default; transition: all 0.2s ease;">
+            🔒 CERRADO
           </div>
-          <select class="type-switch" id="businessTypeSwitch"></select>
+          <select class="type-switch" id="businessTypeSwitch" disabled title="Rubro asignado a este negocio"></select>
           <div class="user-chip"><div class="avatar" id="headerUserAvatar">K</div><div><strong id="headerUserName">Usuario Kauze</strong><small id="headerUserRole">Dueño del negocio</small></div></div>
         </div>
       </header>
 
       <aside class="panel-guide" id="panelGuide" aria-live="polite">
         <div class="panel-guide-copy">
-          <div class="panel-guide-icon"><img src="/app/assets/kauzi-otter-guide-v1.png" alt="Kauzi, la nutria asistente de Kauze"></div>
+          <div class="panel-guide-icon"><img src="/app/assets/kauzi-otter-guide-v1.png" alt="Küyen, la nutria asistente de Kauze"></div>
           <div class="panel-guide-message">
             <span class="panel-guide-step" id="panelGuideStep">Guía de esta sección</span>
             <strong id="panelGuideTitle">Inicio</strong>
@@ -665,9 +684,9 @@
         </div>
       </aside>
 
-      <button type="button" class="kauzi-float" id="kauziFloat" aria-label="Pedir ayuda a Kauzi">
+      <button type="button" class="kauzi-float" id="kauziFloat" aria-label="Pedir ayuda a Küyen">
         <img src="/app/assets/kauzi-otter-guide-v1.png" alt="">
-        <span><strong>Kauzi te acompaña</strong><small id="kauziFloatText">Te explico la sección Inicio</small></span>
+        <span><strong>Küyen te acompaña</strong><small id="kauziFloatText">Te explico la sección Inicio</small></span>
       </button>
 
       <section class="view active" id="view-inicio">
@@ -678,13 +697,13 @@
               <h2 id="welcomeTitle">¡Bienvenido a Kauze!</h2>
               <p>Tu negocio ya está creado. Ahora te acompañaremos para configurar lo esencial y comenzar a recibir reservas con información real.</p>
               <div class="welcome-actions">
-                <button type="button" class="btn primary" id="startPanelTour">Comenzar con Kauzi</button>
+                <button type="button" class="btn primary" id="startPanelTour">Comenzar con Küyen</button>
                 <button type="button" class="btn" id="hideWelcomeCard">Ocultar bienvenida</button>
               </div>
             </div>
             <div class="welcome-mascot">
-              <img src="/app/assets/kauzi-otter-guide-v1.png" alt="Kauzi, la nutria asistente de Kauze">
-              <span>Hola, soy Kauzi. Te mostraré el panel paso a paso.</span>
+              <img src="/app/assets/kauzi-otter-guide-v1.png" alt="Küyen, la nutria asistente de Kauze">
+              <span>Hola, soy Küyen. Te mostraré el panel paso a paso.</span>
             </div>
           </div>
           <div class="onboarding-summary">
@@ -705,6 +724,7 @@
             <p>Agenda, ingresos y acciones rápidas.</p>
           </div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" class="btn primary" id="startDayBtn" style="width:auto">▶ Iniciar día</button>
             <button type="button" class="btn primary" id="openAppointmentFromHome" style="width:auto">+ Nueva reserva</button>
             <button type="button" class="btn" id="openWalkInBtn" style="width:auto; background: #10B981; border-color: #10B981; color: white;">⚡ Ingresar Walk-In</button>
             <button type="button" class="btn" id="openPauseBtn" style="width:auto; background: #F59E0B; border-color: #F59E0B; color: white;">☕ Pausar atención</button>
@@ -755,6 +775,52 @@
         <div class="notice" style="margin-top:14px">Los profesionales se guardan en el negocio conectado a PostgreSQL. Si asignas citas a un profesional y luego lo eliminas, las citas antiguas se mantienen como registro.</div>
       </section>
       <section class="view" id="view-marketing"><div class="section-head"><div><h2>Marketing</h2><p>Promociones, fidelización y recuperación.</p></div><button type="button" class="btn primary" id="newCampaignBtn" style="width:auto">Crear campaña</button></div><div class="grid-3" id="marketingGrid"></div><div class="section-head"><div><h2>Análisis de integraciones</h2><p>Vista comercial para explicar cómo Kauze conectará WhatsApp e Instagram.</p></div></div><div class="grid-3" id="integrationGrid"></div><article class="card" style="margin-top:14px"><h3 style="font-family:Sora,sans-serif;font-size:18px;color:var(--navy);margin-bottom:8px">Checklist antes de conectar Meta</h3><div class="checklist"><div class="check-item"><span class="check-dot">1</span><span>Número de WhatsApp corporativo libre, sin WhatsApp normal activo en celular.</span></div><div class="check-item"><span class="check-dot">2</span><span>Cuenta de Meta Business verificada y permisos para WhatsApp Business Cloud API.</span></div><div class="check-item"><span class="check-dot">3</span><span>Plantillas de confirmación, recordatorio, reactivación y postventa aprobadas por Meta.</span></div><div class="check-item"><span class="check-dot">4</span><span>Instagram conectado para automatizar respuestas, seguimiento y recuperación de clientes.</span></div></div></article></section>
+      <section class="view" id="view-integraciones">
+        <div class="section-head"><div><h2>Integraciones</h2><p>Comparte tu enlace directo y conecta los canales públicos del negocio.</p></div></div>
+        <div class="integration-hero">
+          <article class="card">
+            <div class="integration-link-box">
+              <span class="welcome-badge">🔗 Enlace oficial del negocio</span>
+              <h2 style="font-family:Sora,sans-serif;font-size:22px;margin:12px 0 6px;color:var(--navy)">Tus clientes llegan directo a reservar</h2>
+              <p style="color:var(--muted);font-size:13px;line-height:1.6">Este enlace identifica solamente a tu negocio. Úsalo en la biografía de Instagram, WhatsApp, Google Maps o un código QR.</p>
+              <div class="integration-link-row"><input class="field" id="directBookingLink" type="text" readonly aria-label="Enlace directo de reservas"></div>
+              <div class="integration-link-actions">
+                <button type="button" class="btn primary" id="copyBookingLink">Copiar enlace</button>
+                <a class="btn" id="openBookingLink" href="#" target="_blank" rel="noopener noreferrer">Abrir página pública</a>
+                <a class="btn" id="shareBookingWhatsapp" href="#" target="_blank" rel="noopener noreferrer">Compartir por WhatsApp</a>
+              </div>
+              <div class="save-msg" id="copyBookingFeedback">Enlace copiado.</div>
+            </div>
+          </article>
+          <article class="card">
+            <h3 style="font-family:Sora,sans-serif;color:var(--navy);font-size:18px">Estado de canales</h3>
+            <p style="color:var(--muted);font-size:12px;line-height:1.55;margin-top:5px">El enlace público ya funciona. Las automatizaciones avanzadas de Meta se activarán en una etapa posterior.</p>
+            <div class="integration-status-list">
+              <div class="integration-status"><strong>Enlace KAUZE</strong><span class="ready">Activo</span></div>
+              <div class="integration-status"><strong>Instagram</strong><span id="instagramIntegrationStatus">Pendiente</span></div>
+              <div class="integration-status"><strong>WhatsApp público</strong><span id="whatsappIntegrationStatus">Pendiente</span></div>
+            </div>
+          </article>
+        </div>
+        <div class="grid-2" style="margin-top:18px">
+          <article class="card">
+            <h2 style="font-family:Sora,sans-serif;font-size:20px;margin-bottom:6px">Instagram</h2>
+            <p style="color:var(--muted);font-size:13px;line-height:1.55;margin-bottom:14px">Agrega el perfil oficial. El cliente podrá volver a Instagram para revisar trabajos, mientras el enlace de la biografía lo traerá directo a reservar.</p>
+            <div class="field-group"><label for="integrationInstagramUrl">Enlace del perfil</label><input class="field" id="integrationInstagramUrl" type="url" placeholder="https://www.instagram.com/tu.negocio"></div>
+            <div class="field-group"><label for="integrationInstagramHandle">Usuario de Instagram</label><input class="field" id="integrationInstagramHandle" type="text" maxlength="31" placeholder="@tu.negocio"></div>
+          </article>
+          <article class="card">
+            <h2 style="font-family:Sora,sans-serif;font-size:20px;margin-bottom:6px">WhatsApp público</h2>
+            <p style="color:var(--muted);font-size:13px;line-height:1.55;margin-bottom:14px">Este número será visible para el cliente como alternativa de contacto. Es independiente del número interno que recibe avisos de la agenda.</p>
+            <div class="field-group"><label for="integrationPublicWhatsapp">Número público del negocio</label><input class="field" id="integrationPublicWhatsapp" type="tel" maxlength="30" placeholder="+56 9 1234 5678"></div>
+            <div class="integration-help"><span>💡</span><div><strong>Importante</strong>Configurar el número y el perfil crea accesos públicos. La automatización de mensajes requerirá conectar posteriormente Meta Business y Zavu.</div></div>
+          </article>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px">
+          <button type="button" class="btn primary" id="saveIntegrations" style="width:auto">Guardar integraciones</button>
+          <div class="save-msg" id="integrationSaveMsg">Integraciones guardadas.</div>
+        </div>
+      </section>
       <section class="view" id="view-facturacion"><div class="section-head"><div><h2>Facturación</h2><p>Ingresos, métodos de pago y movimientos.</p></div><button type="button" class="btn primary" style="width:auto">Registrar pago</button></div><div class="grid-4"><article class="card metric"><div class="label">Ventas del día</div><div class="value" id="billingToday">$0</div><div class="trend">Registradas</div></article><article class="card metric"><div class="label">Ticket promedio</div><div class="value" id="billingAvg">$0</div><div class="trend">Por atención</div></article><article class="card metric"><div class="label">Pagos pendientes</div><div class="value" id="billingPending">0</div><div class="trend" id="billingPendingTrend">Sin pagos pendientes</div></article><article class="card metric"><div class="label">Método principal</div><div class="value" id="billingMainMethod">—</div><div class="trend" id="billingMainMethodTrend">Sin movimientos</div></article></div><div class="section-head"><div><h2>Últimos pagos</h2><p>Los movimientos aparecerán cuando registres atenciones reales.</p></div></div><article class="card table-wrap"><table><thead><tr><th>Cliente</th><th>Servicio</th><th>Método</th><th>Monto</th></tr></thead><tbody id="billingTable"></tbody></table></article></section>
       <section class="view" id="view-ayuda">
         <div class="section-head"><div><h2>Centro de ayuda</h2><p>Tutoriales y contacto directo con el equipo Kauze.</p></div><button type="button" class="btn primary" id="restartPanelTour" style="width:auto">Recorrer el panel</button></div>
@@ -804,7 +870,8 @@
             </div>
             <div class="field-group">
               <label>Tipo de negocio</label>
-              <select class="field" id="settingsType"></select>
+              <select class="field" id="settingsType" disabled></select>
+              <div class="theme-helper">El rubro quedó asociado al crear la cuenta y no puede modificarse desde este panel. Solo el equipo administrador de KAUZE puede corregirlo internamente.</div>
             </div>
             <div class="field-group">
               <label>Tema visual permitido por tipo de negocio</label>
@@ -929,16 +996,33 @@
               </div>
             </div>
 
-            <button type="button" class="btn primary" id="saveSettings">Guardar cambios locales</button>
+            <button type="button" class="btn primary" id="saveSettings">Guardar cambios</button>
             <div class="save-msg" id="saveMsg">Cambios guardados en Kauze.</div>
           </article>
 
           <article class="card" style="display: flex; flex-direction: column; align-items: center;">
             <h2 style="font-family:Sora,sans-serif;font-size:21px;margin-bottom:6px;width:100%;text-align:left;">Vista previa del cliente</h2>
             <p style="color:var(--muted);font-size:13px;margin-bottom:20px;width:100%;text-align:left;">
-              Ejemplo de previsualización en tiempo real del portal de reserva.
+              Así aparecerá tu negocio al buscar y luego al entrar a reservar.
             </p>
-            
+
+            <div class="search-preview-wrap">
+              <div class="search-preview-label"><span>Resultado de búsqueda</span><span>Vista del cliente</span></div>
+              <div class="search-preview-card">
+                <div class="search-preview-top">
+                  <div class="search-preview-logo" id="searchPreviewLogo">K</div>
+                  <div class="search-preview-title"><strong id="searchPreviewName">Mi negocio</strong><span id="searchPreviewType">Barbería · Santiago</span></div>
+                  <span class="search-preview-check" title="Negocio verificado por Kauze">✓</span>
+                </div>
+                <div class="search-preview-meta">
+                  <div>Ubicación<strong id="searchPreviewLocation">Dirección por confirmar</strong></div>
+                  <div>Precio<strong id="searchPreviewPrice">Configura tus servicios</strong></div>
+                </div>
+                <div class="search-preview-tags"><span class="search-preview-tag good" id="searchPreviewStatus">Reservas online</span><span class="search-preview-tag" id="searchPreviewRating">Sin reseñas todavía</span></div>
+                <button type="button" class="btn" style="width:100%;cursor:default">Ver detalles</button>
+              </div>
+            </div>
+
             <!-- SMARTPHONE MOCKUP -->
             <div class="phone-mockup" style="width: 320px; border: 12px solid #202D4A; border-radius: 40px; background: var(--preview-bg, #F7F9FC); padding: 18px; box-shadow: var(--shadow); position: relative; font-family: sans-serif; transition: all 0.2s ease;">
               <!-- Smartphone speaker and camera notches -->
@@ -1371,7 +1455,7 @@
 
 
   <script>
-    const defaultBusiness = { name:'Mi negocio', type:'barberia', logoUrl:'', ownerWhatsapp:'', ownerCalendarEmail:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, clientRatingMode:'none', publicRating:null, publicReviews:0, activeTheme:'Kauze Base', pageTitle:'Agenda tu próxima hora sin escribir por WhatsApp', pageSubtitle:'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.', pageCta:'Reservar ahora', bannerStyle:'soft', bannerImage:'', publicBookingEnabled:false, appointments:{}, professionals:{}, clients:{}, services:{}, campaigns:{}, onboarding:{ welcomeDismissed:false, tourCompleted:false } };
+    const defaultBusiness = { name:'Mi negocio', type:'barberia', logoUrl:'', ownerWhatsapp:'', ownerCalendarEmail:'', publicPhone:'', instagramUrl:'', instagramHandle:'', depositEnabled:true, depositMode:'percent', depositPercent:15, depositFixedAmount:1000, depositMinimum:1000, clientRatingMode:'none', publicRating:null, publicReviews:0, activeTheme:'Kauze Base', pageTitle:'Agenda tu próxima hora sin escribir por WhatsApp', pageSubtitle:'Elige servicio, profesional y horario disponible. Kauze se encarga del resto.', pageCta:'Reservar ahora', bannerStyle:'soft', bannerImage:'', publicBookingEnabled:false, businessStatus:'CERRADO', operatingDay:{date:'',openedAt:''}, appointments:{}, professionals:{}, clients:{}, services:{}, campaigns:{}, onboarding:{ welcomeDismissed:false, tourCompleted:false } };
     let pendingLogoData = null;
     let pendingUserProfileImage = null;
     let pendingProfessionalPhoto = null;
@@ -1493,15 +1577,15 @@
               if (!state.publicRating && previousPublicRating) state.publicRating = previousPublicRating;
               if (!state.publicReviews && previousPublicReviews) state.publicReviews = previousPublicReviews;
               if (currentAccount?.business) {
-                state.name = currentAccount.business.name;
                 state.type = currentAccount.business.type || state.type;
+                if (state.name) currentAccount.business.name = state.name;
               }
               const key = businessStateStorageKey();
               if (key) localStorage.setItem(key, JSON.stringify(state));
               if (state.activeTheme) {
                 applyTheme(state.activeTheme);
               }
-              updateBusinessStatus(state.businessStatus || 'DISPONIBLE', false);
+              updateBusinessStatus(state.businessStatus || 'CERRADO', false);
             }
           }
         }
@@ -1622,7 +1706,8 @@
       const source = currentBusinessLogoSource();
       const fallback = businessLogoInitials();
       const previewLogo = document.getElementById('preview-logo-badge');
-      [settingsLogoPreview, previewLogo].forEach(element => {
+      const searchPreviewLogo = document.getElementById('searchPreviewLogo');
+      [settingsLogoPreview, previewLogo, searchPreviewLogo].forEach(element => {
         if (!element) return;
         element.style.padding = '0';
         element.style.background = source ? '#FFFFFF' : theme.primary;
@@ -1630,6 +1715,60 @@
       });
       paintBusinessLogo(settingsLogoPreview, source, fallback);
       paintBusinessLogo(previewLogo, source, fallback, true);
+      paintBusinessLogo(searchPreviewLogo, source, fallback, true);
+    }
+
+    function businessPublicUrl() {
+      const slug = String(currentAccount?.business?.slug || '').trim().toLowerCase();
+      return slug ? `https://${slug}.kauze.cl/` : '';
+    }
+
+    function updateSearchPreviewCard() {
+      const profile = currentProfile();
+      const name = settingsBusiness?.value.trim() || state.name || 'Mi negocio';
+      const location = currentPublicBusiness?.location || 'Ubicación por confirmar';
+      const address = currentPublicBusiness?.address || location;
+      const services = getServices();
+      const prices = services.map(item => Number(item.price || 0)).filter(value => value > 0);
+      const minimumPrice = prices.length ? Math.min(...prices) : 0;
+      const previewName = document.getElementById('searchPreviewName');
+      const previewType = document.getElementById('searchPreviewType');
+      const previewLocation = document.getElementById('searchPreviewLocation');
+      const previewPrice = document.getElementById('searchPreviewPrice');
+      const previewStatus = document.getElementById('searchPreviewStatus');
+      const previewRating = document.getElementById('searchPreviewRating');
+      if (previewName) previewName.textContent = name;
+      if (previewType) previewType.textContent = `${profile.label} · ${location}`;
+      if (previewLocation) previewLocation.textContent = address;
+      if (previewPrice) previewPrice.textContent = minimumPrice ? `Desde ${fmt(minimumPrice)}` : 'Configura tus servicios';
+      if (previewStatus) previewStatus.textContent = state.businessStatus === 'DISPONIBLE' ? 'Disponible ahora' : 'Reservas online';
+      if (previewRating) previewRating.textContent = state.publicReviews
+        ? `★ ${Number(state.publicRating || 0).toFixed(1)} · ${state.publicReviews} reseña${state.publicReviews === 1 ? '' : 's'}`
+        : 'Sin reseñas todavía';
+      updateBusinessLogoPreviews();
+    }
+
+    function renderIntegrations() {
+      const link = businessPublicUrl();
+      if (directBookingLink) directBookingLink.value = link;
+      if (openBookingLink) openBookingLink.href = link || '#';
+      if (shareBookingWhatsapp) {
+        const message = `Reserva tu hora en ${state.name || 'nuestro negocio'}: ${link}`;
+        shareBookingWhatsapp.href = link ? `https://wa.me/?text=${encodeURIComponent(message)}` : '#';
+      }
+      if (!integrationsDirty) {
+        if (integrationInstagramUrl) integrationInstagramUrl.value = state.instagramUrl || '';
+        if (integrationInstagramHandle) integrationInstagramHandle.value = state.instagramHandle || '';
+        if (integrationPublicWhatsapp) integrationPublicWhatsapp.value = state.publicPhone || '';
+      }
+      if (instagramIntegrationStatus) {
+        instagramIntegrationStatus.textContent = state.instagramUrl ? 'Configurado' : 'Pendiente';
+        instagramIntegrationStatus.classList.toggle('ready', Boolean(state.instagramUrl));
+      }
+      if (whatsappIntegrationStatus) {
+        whatsappIntegrationStatus.textContent = state.publicPhone ? 'Configurado' : 'Pendiente';
+        whatsappIntegrationStatus.classList.toggle('ready', Boolean(state.publicPhone));
+      }
     }
 
     function resizeBusinessLogo(file) {
@@ -2147,11 +2286,18 @@
     }
 
     function updateBusinessStatus(status, save = true) {
-      state.businessStatus = status || 'DISPONIBLE';
+      state.businessStatus = status || 'CERRADO';
       const badge = document.getElementById('businessStatusBadge');
       if (!badge) return;
-      
-      if (state.businessStatus === 'DISPONIBLE') {
+
+      if (state.businessStatus === 'CERRADO') {
+        badge.innerHTML = '🔒 CERRADO';
+        badge.style.background = 'rgba(100, 116, 139, 0.08)';
+        badge.style.color = 'var(--muted)';
+        badge.style.borderColor = 'rgba(100, 116, 139, 0.22)';
+        badge.style.cursor = 'default';
+        badge.title = 'Presiona Iniciar día antes de comenzar la jornada';
+      } else if (state.businessStatus === 'DISPONIBLE') {
         badge.innerHTML = '🟢 DISPONIBLE';
         badge.style.background = 'rgba(16, 185, 129, 0.08)';
         badge.style.color = 'var(--teal)';
@@ -2174,10 +2320,36 @@
         badge.style.cursor = 'pointer';
         badge.title = 'Haz clic para liberar y volver a DISPONIBLE';
       }
+
+      if (startDayBtn) {
+        const openedToday = state.operatingDay?.date === businessTodayISO() && state.businessStatus !== 'CERRADO';
+        startDayBtn.disabled = openedToday;
+        startDayBtn.textContent = openedToday ? '✓ Día iniciado' : '▶ Iniciar día';
+      }
+      if (openWalkInBtn) openWalkInBtn.disabled = state.businessStatus === 'CERRADO';
+      if (openPauseBtn) openPauseBtn.disabled = state.businessStatus === 'CERRADO';
       
       if (save) {
         saveState();
       }
+    }
+
+    function businessTodayISO() {
+      return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Santiago',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(new Date());
+    }
+
+    function closeExpiredOperatingDay() {
+      const currentDate = businessTodayISO();
+      const openedDate = state.operatingDay?.date || '';
+      if (openedDate === currentDate || state.businessStatus === 'CERRADO') return false;
+      state.businessStatus = 'CERRADO';
+      state.operatingDay = {date:'', openedAt:''};
+      return true;
     }
 
     const profiles = {
@@ -2189,6 +2361,7 @@
     };
 
     let currentAccount = null;
+    let currentPublicBusiness = null;
 
     function normalizeBusinessState(candidate = {}) {
       const normalized = {...defaultBusiness, ...candidate};
@@ -2203,7 +2376,12 @@
       };
       if (typeof normalized.ownerWhatsapp === 'undefined') normalized.ownerWhatsapp = '';
       if (typeof normalized.ownerCalendarEmail === 'undefined') normalized.ownerCalendarEmail = '';
+      if (typeof normalized.publicPhone !== 'string') normalized.publicPhone = '';
+      if (typeof normalized.instagramUrl !== 'string') normalized.instagramUrl = '';
+      if (typeof normalized.instagramHandle !== 'string') normalized.instagramHandle = '';
       if (typeof normalized.logoUrl !== 'string') normalized.logoUrl = '';
+      if (!['CERRADO', 'DISPONIBLE', 'OCUPADO', 'PAUSADO'].includes(normalized.businessStatus)) normalized.businessStatus = 'CERRADO';
+      if (!normalized.operatingDay || typeof normalized.operatingDay !== 'object') normalized.operatingDay = {date:'', openedAt:''};
       if (typeof normalized.depositEnabled === 'undefined') normalized.depositEnabled = true;
       if (!normalized.depositMode) normalized.depositMode = 'percent';
       if (typeof normalized.depositPercent === 'undefined') normalized.depositPercent = 15;
@@ -2295,6 +2473,18 @@
     const settingsBannerStyle = document.getElementById('settingsBannerStyle');
     const settingsBannerImage = document.getElementById('settingsBannerImage');
     const themeMiniList = document.getElementById('themeMiniList');
+    const directBookingLink = document.getElementById('directBookingLink');
+    const copyBookingLink = document.getElementById('copyBookingLink');
+    const copyBookingFeedback = document.getElementById('copyBookingFeedback');
+    const openBookingLink = document.getElementById('openBookingLink');
+    const shareBookingWhatsapp = document.getElementById('shareBookingWhatsapp');
+    const integrationInstagramUrl = document.getElementById('integrationInstagramUrl');
+    const integrationInstagramHandle = document.getElementById('integrationInstagramHandle');
+    const integrationPublicWhatsapp = document.getElementById('integrationPublicWhatsapp');
+    const instagramIntegrationStatus = document.getElementById('instagramIntegrationStatus');
+    const whatsappIntegrationStatus = document.getElementById('whatsappIntegrationStatus');
+    const saveIntegrations = document.getElementById('saveIntegrations');
+    const integrationSaveMsg = document.getElementById('integrationSaveMsg');
     const notificationCenter = document.getElementById('notificationCenter');
     const navProfessionals = document.getElementById('navProfessionals');
     const professionalsTitle = document.getElementById('professionalsTitle');
@@ -2346,6 +2536,7 @@
     const billingTable = document.getElementById('billingTable');
     const saveSettings = document.getElementById('saveSettings');
     const saveMsg = document.getElementById('saveMsg');
+    const startDayBtn = document.getElementById('startDayBtn');
     const openAppointmentFromHome = document.getElementById('openAppointmentFromHome');
     const openAppointmentFromAgenda = document.getElementById('openAppointmentFromAgenda');
     const appointmentModal = document.getElementById('appointmentModal');
@@ -2399,11 +2590,14 @@
     const integrationGrid = document.getElementById('integrationGrid');
     let editingProfessionalId = null;
     let editingCampaignId = null;
+    let integrationsDirty = false;
 
     function fillTypeSelects(){
       const opts = Object.entries(profiles).map(([k,p])=>`<option value="${k}">${p.emoji} ${p.label}</option>`).join('');
       businessTypeSwitch.innerHTML = opts;
       settingsType.innerHTML = opts;
+      businessTypeSwitch.disabled = true;
+      settingsType.disabled = true;
 
       const selected = renderThemeSelectorForType(state.type, state.activeTheme);
       if (selected && !state.activeTheme) state.activeTheme = selected.name;
@@ -2419,15 +2613,6 @@
         });
       }
 
-      if (settingsType && !settingsType.dataset.themeBound) {
-        settingsType.dataset.themeBound = 'true';
-        settingsType.addEventListener('change', () => {
-          const type = settingsType.value;
-          const theme = renderThemeSelectorForType(type, state.activeTheme);
-          if (theme) updateMockupPreview(theme);
-          renderThemeMiniList();
-        });
-      }
     }
 
     async function syncPublicBusinessRating() {
@@ -2437,6 +2622,7 @@
         const data = await res.json();
         const publicBusiness = (data.businesses || []).find(item => item.slug === currentAccount?.business?.slug);
         if (!publicBusiness) return false;
+        currentPublicBusiness = publicBusiness;
         state.publicRating = publicBusiness.rating || null;
         state.publicReviews = Number(publicBusiness.reviews || 0);
         return true;
@@ -2565,6 +2751,9 @@
         logoUrl: state.logoUrl || '',
         ownerWhatsapp: state.ownerWhatsapp || '',
         ownerCalendarEmail: state.ownerCalendarEmail || '',
+        publicPhone: state.publicPhone || '',
+        instagramUrl: state.instagramUrl || '',
+        instagramHandle: state.instagramHandle || '',
         depositEnabled: !!state.depositEnabled,
         depositMode: state.depositMode || 'percent',
         depositPercent: Number(state.depositPercent || 0),
@@ -2832,6 +3021,8 @@
       }
       renderThemeMiniList();
       updatePagePreview();
+      updateSearchPreviewCard();
+      renderIntegrations();
       
       navProfessionals.innerHTML=`☷ ${p.proPlural}`;
       professionalsTitle.textContent=p.proPlural;
@@ -3608,16 +3799,17 @@
 
     async function showApp(account = currentAccount){
       if (account) hydrateBusinessState(account);
-      loginScreen.style.display='none'; 
-      app.style.display='grid'; 
+      loginScreen.style.display='none';
+      app.style.display='grid';
       await syncOnlineState(false);
+      const closedForNewDay = closeExpiredOperatingDay();
       await syncPublicBusinessRating();
       const initialTheme = ensureThemeForType(state.type, state.activeTheme);
       state.activeTheme = initialTheme.name;
       applyTheme(initialTheme.name);
-      updateBusinessStatus(state.businessStatus || 'DISPONIBLE', false);
-      render(); 
-      saveState();
+      updateBusinessStatus(state.businessStatus || 'CERRADO', false);
+      render();
+      if (closedForNewDay) await saveState();
     }
 
     toggleLoginPassword.addEventListener('click',()=>{
@@ -3743,23 +3935,13 @@
       }
     });
     mobileMenu.addEventListener('click',()=>sidebar.classList.toggle('open'));
-    businessTypeSwitch.addEventListener('change',()=>{ 
-      state.type = businessTypeSwitch.value; 
-      state.name = profiles[state.type].business;
-      const theme = ensureThemeForType(state.type, state.activeTheme);
-      state.activeTheme = theme.name;
-      saveState(); 
-      render(); 
-      applyTheme(theme.name);
-    });
-    
     [settingsPageTitle, settingsPageSubtitle, settingsPageCta, settingsBannerStyle, settingsBannerImage].filter(Boolean).forEach(input => {
       const eventName = input.tagName === 'SELECT' ? 'change' : 'input';
       input.addEventListener(eventName, () => updatePagePreview());
     });
 
     if (settingsBusiness) {
-      settingsBusiness.addEventListener('input', () => updateBusinessLogoPreviews());
+      settingsBusiness.addEventListener('input', () => updateSearchPreviewCard());
     }
 
     if (settingsUserPhotoFile) {
@@ -3888,8 +4070,78 @@
       proCommissionCustomType.addEventListener('change', syncProfessionalCommissionFields);
     }
 
-    saveSettings.addEventListener('click',()=>{ 
-      const selectedType = settingsType.value;
+    copyBookingLink?.addEventListener('click', async () => {
+      const link = businessPublicUrl();
+      if (!link) return;
+      try {
+        if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(link);
+        else {
+          directBookingLink.select();
+          document.execCommand('copy');
+        }
+        copyBookingFeedback.style.display = 'block';
+        copyBookingFeedback.style.color = 'var(--teal)';
+        copyBookingFeedback.textContent = 'Enlace directo copiado.';
+        setTimeout(() => { copyBookingFeedback.style.display = 'none'; }, 2400);
+      } catch (error) {
+        copyBookingFeedback.style.display = 'block';
+        copyBookingFeedback.style.color = 'var(--red)';
+        copyBookingFeedback.textContent = 'No se pudo copiar automáticamente. Selecciona el enlace y cópialo.';
+      }
+    });
+
+    [integrationInstagramUrl, integrationInstagramHandle, integrationPublicWhatsapp].filter(Boolean).forEach(input => {
+      input.addEventListener('input', () => { integrationsDirty = true; });
+    });
+
+    saveIntegrations?.addEventListener('click', async () => {
+      const instagramUrl = integrationInstagramUrl?.value.trim() || '';
+      let instagramHandle = integrationInstagramHandle?.value.trim() || '';
+      const publicPhone = integrationPublicWhatsapp?.value.trim() || '';
+      try {
+        if (instagramUrl) {
+          const parsed = new URL(instagramUrl);
+          if (parsed.protocol !== 'https:' || !['instagram.com', 'www.instagram.com'].includes(parsed.hostname.toLowerCase())) {
+            throw new Error('Usa el enlace HTTPS real del perfil de Instagram.');
+          }
+          if (!instagramHandle) instagramHandle = `@${parsed.pathname.split('/').filter(Boolean)[0] || ''}`;
+        }
+        if (instagramHandle) {
+          instagramHandle = `@${instagramHandle.replace(/^@+/, '')}`;
+          if (!/^@[A-Za-z0-9._]{1,30}$/.test(instagramHandle)) throw new Error('El usuario de Instagram no es válido.');
+        }
+        if (publicPhone && (!/^[+()\d\s.-]+$/.test(publicPhone) || publicPhone.replace(/\D/g, '').length < 8)) {
+          throw new Error('Ingresa un número de WhatsApp válido con código de país.');
+        }
+        state.instagramUrl = instagramUrl;
+        state.instagramHandle = instagramHandle;
+        state.publicPhone = publicPhone;
+        saveIntegrations.disabled = true;
+        saveIntegrations.textContent = 'Guardando…';
+        integrationSaveMsg.style.display = 'block';
+        integrationSaveMsg.style.color = 'var(--muted)';
+        integrationSaveMsg.textContent = 'Confirmando las integraciones con KAUZE…';
+        const saved = await saveState();
+        if (!saved) throw new Error('El servidor no confirmó el guardado.');
+        const refreshed = await syncOnlineState(false);
+        if (!refreshed) throw new Error('No fue posible verificar las integraciones guardadas.');
+        integrationsDirty = false;
+        render();
+        integrationSaveMsg.style.color = 'var(--teal)';
+        integrationSaveMsg.textContent = 'Instagram y WhatsApp guardados correctamente.';
+      } catch (error) {
+        integrationSaveMsg.style.display = 'block';
+        integrationSaveMsg.style.color = 'var(--red)';
+        integrationSaveMsg.textContent = error.message || 'No fue posible guardar las integraciones.';
+      } finally {
+        saveIntegrations.disabled = false;
+        saveIntegrations.textContent = 'Guardar integraciones';
+        setTimeout(() => { integrationSaveMsg.style.display = 'none'; }, 3800);
+      }
+    });
+
+    saveSettings.addEventListener('click', async()=>{
+      const selectedType = currentAccount?.business?.type || state.type;
       const typedLogoUrl = settingsLogoUrl ? settingsLogoUrl.value.trim() : '';
       const selectedLogo = currentBusinessLogoSource();
       if (typedLogoUrl && !selectedLogo) {
@@ -3921,10 +4173,27 @@
       state.activeTheme = theme.name;
       applyTheme(theme.name);
 
-      saveState(); 
-      render(); 
-      saveMsg.style.display='block'; 
-      setTimeout(()=>saveMsg.style.display='none',1600); 
+      saveSettings.disabled = true;
+      saveSettings.textContent = 'Guardando en KAUZE…';
+      saveMsg.style.display='block';
+      saveMsg.style.color='var(--muted)';
+      saveMsg.textContent='Confirmando los cambios con el servidor…';
+      try {
+        const saved = await saveState();
+        if (!saved) throw new Error('Railway no confirmó el guardado.');
+        const refreshed = await syncOnlineState(false);
+        if (!refreshed) throw new Error('No fue posible verificar el cambio guardado.');
+        render();
+        saveMsg.style.color='var(--teal)';
+        saveMsg.textContent='Cambios y logo guardados correctamente en KAUZE.';
+      } catch (error) {
+        saveMsg.style.color='var(--red)';
+        saveMsg.textContent=error.message || 'No fue posible guardar. Intenta nuevamente.';
+      } finally {
+        saveSettings.disabled = false;
+        saveSettings.textContent = 'Guardar cambios';
+        setTimeout(()=>saveMsg.style.display='none',3600);
+      }
     });
 
     // --- MODAL WALK-IN HANDLERS ---
@@ -4045,9 +4314,27 @@
     pauseModal.addEventListener('click', e => { if (e.target === pauseModal) closePauseModal(); });
     savePauseBtn.addEventListener('click', savePause);
 
-    // Status Badge Click Listener to Clear Blockages
+    startDayBtn?.addEventListener('click', async () => {
+      const today = businessTodayISO();
+      if (state.operatingDay?.date === today && state.businessStatus !== 'CERRADO') return;
+      if (!confirm('¿Iniciar la jornada de hoy y habilitar la operación del negocio?')) return;
+      const previousStatus = state.businessStatus;
+      const previousOperatingDay = {...(state.operatingDay || {})};
+      state.operatingDay = {date: today, openedAt: new Date().toISOString()};
+      updateBusinessStatus('DISPONIBLE', false);
+      const saved = await saveState();
+      if (!saved) {
+        state.operatingDay = previousOperatingDay;
+        updateBusinessStatus(previousStatus || 'CERRADO', false);
+        alert('No fue posible iniciar el día porque el servidor no confirmó el cambio. Intenta nuevamente.');
+        return;
+      }
+      render();
+    });
+
+    // El distintivo solo libera pausas o atenciones; un negocio cerrado se abre con Iniciar día.
     document.getElementById('businessStatusBadge').addEventListener('click', () => {
-      if (state.businessStatus !== 'DISPONIBLE') {
+      if (state.businessStatus === 'PAUSADO' || state.businessStatus === 'OCUPADO') {
         const confirmClear = confirm("¿Deseas finalizar el bloqueo/atención actual y restablecer el estado a DISPONIBLE?");
         if (confirmClear) {
           updateBusinessStatus('DISPONIBLE');
@@ -4140,11 +4427,12 @@
       servicios:{title:'Servicios',subtitle:'Catálogo, duración y precios.',guide:'Configura lo que vendes. La duración se utiliza para calcular horas disponibles y el precio se muestra al cliente antes de reservar.',action:'Crea tu primer servicio con nombre, duración y precio reales.'},
       profesionales:{title:'Profesionales',subtitle:'Equipo, horarios y desempeño.',guide:'Tus trabajadores son perfiles internos del negocio; no necesitan crear cuentas. Puedes asignarles servicios, horarios, foto y comisión.',action:'Agrega un trabajador y asígnale al menos un servicio y un horario.'},
       marketing:{title:'Marketing',subtitle:'Promociones, campañas y fidelización.',guide:'Esta sección reunirá campañas para atraer, fidelizar y recuperar clientes. Las automatizaciones se activarán al conectar WhatsApp e Instagram.',action:'Por ahora puedes preparar una campaña y revisar qué integración necesita.'},
+      integraciones:{title:'Integraciones',subtitle:'Enlace directo, Instagram y WhatsApp.',guide:'Aquí encuentras la dirección pública exclusiva de tu negocio. Puedes copiarla para Instagram, compartirla por WhatsApp y configurar los canales que verá el cliente.',action:'Copia tu enlace oficial, agrega el Instagram y define el WhatsApp público del negocio.'},
       facturacion:{title:'Facturación',subtitle:'Ingresos, pagos y movimientos.',guide:'Las cifras comienzan en cero y se construyen con atenciones reales. Aquí verás ventas, pagos pendientes, métodos de pago y ticket promedio.',action:'Cuando completes una atención, confirma que el movimiento aparezca en este resumen.'},
       ayuda:{title:'Centro de ayuda',subtitle:'Tutoriales y contacto directo con Kauze.',guide:'Puedes repetir este recorrido cuando quieras, resolver dudas frecuentes o escribir directamente al equipo Kauze.',action:'Guarda esta sección como tu punto de apoyo y vuelve al recorrido cuando lo necesites.'},
-      ajustes:{title:'Ajustes',subtitle:'Personalización y configuración del negocio.',guide:'Aquí defines la identidad y las reglas de tu negocio: logo, contacto, tipo de negocio, anticipo, apariencia y preferencias.',action:'Completa primero el tipo de negocio, el logo y los datos de contacto que verá el cliente.'}
+      ajustes:{title:'Ajustes',subtitle:'Personalización y configuración del negocio.',guide:'Aquí defines la identidad y las reglas de tu negocio: logo, banner, anticipo, apariencia y preferencias. El rubro elegido al crear la cuenta queda bloqueado para proteger la separación de datos.',action:'Carga el logo y revisa cómo aparecerá tu tarjeta en la búsqueda de clientes.'}
     };
-    const tourOrder=['inicio','agenda','clientes','servicios','profesionales','marketing','facturacion','ayuda','ajustes'];
+    const tourOrder=['inicio','agenda','clientes','servicios','profesionales','marketing','integraciones','facturacion','ayuda','ajustes'];
     let activeView='inicio';
     let tourActive=false;
     let tourIndex=0;
@@ -4174,7 +4462,7 @@
       if(!meta) return;
       panelGuide.classList.toggle('tour-mode',tourActive);
       panelGuideStep.textContent=tourActive ? `Recorrido guiado · Paso ${tourIndex+1} de ${tourOrder.length}` : 'Guía de esta sección';
-      panelGuideTitle.textContent=tourActive ? `Kauzi te muestra: ${meta.title}` : `Kauzi explica ${meta.title}`;
+      panelGuideTitle.textContent=tourActive ? `Küyen te muestra: ${meta.title}` : `Küyen explica ${meta.title}`;
       panelGuideText.textContent=meta.guide;
       panelGuideAction.textContent=meta.action;
       panelGuideProgress.hidden=!tourActive;

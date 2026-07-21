@@ -9,7 +9,7 @@ from backend.trials import (
     _phone,
     register_trial,
 )
-from backend.email_delivery import _send_with_resend, email_provider
+from backend.email_delivery import _send_with_resend, email_provider, kauze_email_html
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -113,6 +113,7 @@ class TrialRegistrationTests(unittest.TestCase):
                 "Bienvenida",
                 "Contenido",
                 "trial-access/user-1",
+                "<strong>KAUZE</strong>",
             )
 
         self.assertEqual(
@@ -122,6 +123,23 @@ class TrialRegistrationTests(unittest.TestCase):
             request.call_args.args[0].get_header("Idempotency-key"),
             "trial-access/user-1",
         )
+        payload = request.call_args.args[0].data.decode("utf-8")
+        self.assertIn('"html": "<strong>KAUZE</strong>"', payload)
+
+    def test_corporate_html_escapes_account_data(self):
+        html = kauze_email_html(
+            "Activa KAUZE",
+            "Hola <script>",
+            ["Negocio seguro"],
+            "https://kauze.cl/app/?token=abc&next=1",
+            "Entrar",
+        )
+        self.assertIn("KAUZE", html)
+        self.assertIn("Hola &lt;script&gt;", html)
+        self.assertNotIn("Hola <script>", html)
+        self.assertIn("token=abc&amp;next=1", html)
+        self.assertIn("https://kauze.cl/app/kauze-logo-panel.png", html)
+        self.assertIn('alt="KAUZE"', html)
 
     def test_resend_retries_temporary_failures_without_duplicates(self):
         response = Mock()

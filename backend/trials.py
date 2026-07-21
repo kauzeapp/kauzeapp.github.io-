@@ -9,7 +9,7 @@ from psycopg.types.json import Jsonb
 
 from backend.auth import _sha256
 from backend.db import connection
-from backend.email_delivery import email_delivery_configured, send_email
+from backend.email_delivery import email_delivery_configured, kauze_email_html, send_email
 from backend.onboarding import business_slug
 from backend.tenant import set_tenant_context
 
@@ -111,11 +111,24 @@ def _send_initial_access_email(
         "Si no solicitaste esta cuenta, puedes ignorar este mensaje.\n\n"
         "Equipo Kauze"
     )
+    html = kauze_email_html(
+        "Activa tu prueba gratis",
+        f"Hola {owner_name}",
+        [
+            f"Tu negocio {business_name} ya fue preparado en KAUZE.",
+            f"Crea tu contraseña durante las próximas {INITIAL_ACCESS_HOURS} horas. Después podrás configurar tu logo, servicios, trabajadores y agenda.",
+            f"Tu prueba gratuita dura {TRIAL_DAYS} días.",
+        ],
+        access_url,
+        "Crear mi contraseña",
+        [("Negocio", business_name), ("Plan", f"Trial · {TRIAL_DAYS} días")],
+    )
     return send_email(
         recipient,
         "Activa tu prueba gratis de Kauze",
         content,
         idempotency_key=idempotency_key,
+        html=html,
     )
 
 
@@ -231,12 +244,16 @@ def register_trial(data, client_key="unknown"):
                             "name": business_name,
                             "type": category_slug,
                             "logoUrl": "",
+                            "instagramUrl": "",
+                            "instagramHandle": "",
+                            "publicPhone": "",
                             "professionals": {},
                             "services": {},
                             "clients": {},
                             "appointments": {},
                             "publicBookingEnabled": False,
-                            "businessStatus": "DISPONIBLE",
+                            "businessStatus": "CERRADO",
+                            "operatingDay": {"date": "", "openedAt": ""},
                             "onboarding": {"welcomeDismissed": False, "tourCompleted": False},
                         }
                     ),

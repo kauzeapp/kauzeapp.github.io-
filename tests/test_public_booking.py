@@ -64,7 +64,7 @@ class PublicBookingTests(unittest.TestCase):
             "data:image/webp;base64,QUJDRA==",
         )
         self.assertTrue(business["demoMode"])
-        self.assertEqual(business["route"], "masterplan.kauze.cl")
+        self.assertEqual(business["route"], "barberia-cauce-norte-demo.kauze.cl")
         self.assertEqual(business["instagramHandle"], "@masterplan.soluciones")
         self.assertEqual(business["logoUrl"], "/cliente/assets/masterplan-logo.jpg")
         self.assertEqual(
@@ -92,6 +92,24 @@ class PublicBookingTests(unittest.TestCase):
         self.assertEqual(business["instagramUrl"], "")
         self.assertEqual(business["logoUrl"], "")
         self.assertEqual(business["route"], "masterplan.kauze.cl")
+
+    def test_closed_business_keeps_online_booking_message(self):
+        self.state["businessStatus"] = "CERRADO"
+        business = _public_business(
+            {
+                "slug": "barberia-cauce-norte-demo",
+                "name": "Barbería Cauce Norte",
+                "description": "Demo funcional",
+                "address": "Avenida Demo 123",
+                "commune": "Providencia",
+                "city": "Santiago",
+                "phone": None,
+                "category_slug": "barberia",
+                "panel_state": self.state,
+            }
+        )
+        self.assertIn("Cerrado ahora", business["statusLabel"])
+        self.assertIn("reservas online", business["statusLabel"])
 
     def test_occupied_slot_is_not_offered(self):
         available = _available_slots(

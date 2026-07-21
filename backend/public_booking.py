@@ -175,15 +175,23 @@ def _public_business(row):
         "address": _public_text(row.get("address") or "Dirección por confirmar", 160),
         "location": _public_text(row.get("commune") or row.get("city") or "Santiago", 100),
         "city": _public_text(row.get("city") or "Santiago", 100),
-        "route": f'{_public_subdomain(state.get("publicSubdomain"), row["slug"])}.kauze.cl',
+        # El slug de la base es la dirección canónica; la personalización no puede
+        # apuntar a otro negocio ni apropiarse de su subdominio.
+        "route": f'{_public_subdomain(row["slug"], row["slug"])}.kauze.cl',
         "logoUrl": _public_logo_url(state.get("logoUrl") or row.get("logo_url")),
         "instagramUrl": _instagram_url(state.get("instagramUrl")),
         "instagramHandle": _public_text(state.get("instagramHandle") or "", 80),
         "phone": _public_text(state.get("publicPhone") or row.get("phone") or "", 30),
         "rating": str(state.get("publicRating") or "5.0"),
         "reviews": int(state.get("publicReviews") or 1),
-        "statusLabel": "Disponible" if state.get("businessStatus") == "DISPONIBLE" else "Agenda pausada",
-        "statusTone": "good" if state.get("businessStatus") == "DISPONIBLE" else "warn",
+        "statusLabel": (
+            "Disponible ahora"
+            if state.get("businessStatus") == "DISPONIBLE"
+            else "Cerrado ahora · reservas online"
+            if state.get("businessStatus") == "CERRADO"
+            else "Agenda pausada"
+        ),
+        "statusTone": "warn" if state.get("businessStatus") == "PAUSADO" else "good",
         "hero": _public_text(state.get("pageTitle") or "Reserva tu próxima hora con Kauze.", 180),
         "subtitle": _public_text(state.get("pageSubtitle") or "Elige servicio, profesional y horario.", 240),
         "cta": _public_text(state.get("pageCta") or "Reservar ahora", 80),
@@ -357,7 +365,9 @@ def create_public_appointment(payload, client_key="unknown"):
             raise PublicBookingError("El negocio no está disponible.", "business_not_found", 404)
 
         state = dict(row["panel_state"] or {})
-        if state.get("businessStatus") != "DISPONIBLE":
+        # CERRADO describe la jornada presencial. La reserva futura sigue abierta
+        # las 24 horas; PAUSADO sí suspende temporalmente nuevas solicitudes.
+        if state.get("businessStatus") == "PAUSADO":
             raise PublicBookingError("La agenda del negocio está pausada.", "business_paused", 409)
         business_type = str(state.get("type") or row["category_slug"])
         services = [

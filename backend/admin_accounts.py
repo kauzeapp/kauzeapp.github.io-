@@ -10,7 +10,7 @@ from psycopg.types.json import Jsonb
 
 from backend.auth import _sha256
 from backend.db import connection, is_configured
-from backend.email_delivery import email_delivery_configured, send_email
+from backend.email_delivery import email_delivery_configured, kauze_email_html, send_email
 from backend.onboarding import business_slug
 from backend.subscriptions import read_local_db, safe_parse_datetime, write_local_db
 from backend.tenant import set_tenant_context
@@ -290,11 +290,23 @@ def _send_access_email(recipient, owner_name, business_name, access_url, key):
         "Al ingresar podras configurar el logo, los servicios, los trabajadores y la agenda.\n\n"
         "Equipo Kauze"
     )
+    html = kauze_email_html(
+        "Tu cuenta KAUZE está lista",
+        f"Hola {owner_name}",
+        [
+            f"Creamos el acceso para {business_name}.",
+            f"Define tu contraseña durante las próximas {INITIAL_ACCESS_HOURS} horas y entra a configurar el negocio.",
+        ],
+        access_url,
+        "Activar mi cuenta",
+        [("Negocio", business_name), ("Acceso", "Panel privado KAUZE")],
+    )
     return send_email(
         recipient,
         "Activa tu cuenta de Kauze",
         content,
         idempotency_key=key,
+        html=html,
     )
 
 
@@ -309,7 +321,20 @@ def _send_reset_email(recipient, owner_name, access_url, key):
         "Si no solicitaste este cambio, contacta al equipo Kauze.\n\n"
         "Equipo Kauze"
     )
-    return send_email(recipient, "Renueva tu acceso a Kauze", content, idempotency_key=key)
+    html = kauze_email_html(
+        "Renueva tu acceso",
+        f"Hola {owner_name}",
+        [f"Crea una nueva contraseña durante las próximas {INITIAL_ACCESS_HOURS} horas."],
+        access_url,
+        "Crear nueva contraseña",
+    )
+    return send_email(
+        recipient,
+        "Renueva tu acceso a Kauze",
+        content,
+        idempotency_key=key,
+        html=html,
+    )
 
 
 def create_admin_client(data):
@@ -462,12 +487,16 @@ def create_admin_client(data):
                             "name": business_name,
                             "type": category_slug,
                             "logoUrl": "",
+                            "instagramUrl": "",
+                            "instagramHandle": "",
+                            "publicPhone": "",
                             "professionals": {},
                             "services": {},
                             "clients": {},
                             "appointments": {},
                             "publicBookingEnabled": False,
-                            "businessStatus": "DISPONIBLE",
+                            "businessStatus": "CERRADO",
+                            "operatingDay": {"date": "", "openedAt": ""},
                             "onboarding": {"welcomeDismissed": False, "tourCompleted": False},
                         }
                     ),
