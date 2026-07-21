@@ -39,6 +39,13 @@ for (const required of [
   "integrationPublicWhatsapp",
   "searchPreviewLogo",
   "businessPublicUrl",
+  "settingsAddress",
+  "settingsCommune",
+  "settingsCity",
+  "useBusinessLocation",
+  "/cliente/?negocio=",
+  "settingsDirty",
+  "logoDirty",
 ]) {
   if (!source.includes(required)) throw new Error(`Falta personalización de perfil: ${required}`);
 }

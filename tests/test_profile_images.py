@@ -66,6 +66,32 @@ class ProfileImageValidationTests(unittest.TestCase):
                 "barberia",
                 "Barbería",
             )
+
+    def test_business_location_is_normalized_and_coordinates_are_bounded(self):
+        state = _normalized_business_state(
+            {
+                "name": "Barbería autorizada",
+                "address": "  Av. Providencia 1234  ",
+                "commune": "Providencia",
+                "city": "Santiago",
+                "latitude": "-33.4267",
+                "longitude": "-70.6122",
+            },
+            "barberia",
+            "Barbería autorizada",
+        )
+        self.assertEqual(state["address"], "Av. Providencia 1234")
+        self.assertEqual(state["commune"], "Providencia")
+        self.assertEqual(state["city"], "Santiago")
+        self.assertEqual(state["latitude"], -33.4267)
+        self.assertEqual(state["longitude"], -70.6122)
+
+        with self.assertRaisesRegex(ValueError, "latitud"):
+            _normalized_business_state(
+                {"name": "Barbería", "latitude": 120},
+                "barberia",
+                "Barbería",
+            )
         with self.assertRaisesRegex(ValueError, "WhatsApp"):
             _normalized_business_state(
                 {"name": "Barbería", "publicPhone": "llámame"},

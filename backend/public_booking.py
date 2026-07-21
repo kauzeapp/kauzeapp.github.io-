@@ -166,6 +166,12 @@ def _public_business(row):
         )
     ]
     tomorrow = (date.today() + timedelta(days=1)).isoformat()
+    try:
+        latitude = float(state.get("latitude")) if state.get("latitude") not in (None, "") else None
+        longitude = float(state.get("longitude")) if state.get("longitude") not in (None, "") else None
+    except (TypeError, ValueError):
+        latitude = None
+        longitude = None
     return {
         "id": str(row["slug"]),
         "slug": str(row["slug"]),
@@ -175,6 +181,8 @@ def _public_business(row):
         "address": _public_text(row.get("address") or "Dirección por confirmar", 160),
         "location": _public_text(row.get("commune") or row.get("city") or "Santiago", 100),
         "city": _public_text(row.get("city") or "Santiago", 100),
+        "lat": latitude,
+        "lng": longitude,
         # El slug de la base es la dirección canónica; la personalización no puede
         # apuntar a otro negocio ni apropiarse de su subdominio.
         "route": f'{_public_subdomain(row["slug"], row["slug"])}.kauze.cl',

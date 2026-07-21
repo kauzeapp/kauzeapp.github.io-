@@ -16,6 +16,8 @@ class PublicBookingTests(unittest.TestCase):
             "instagramHandle": "@masterplan.soluciones",
             "logoUrl": "/cliente/assets/masterplan-logo.jpg",
             "publicSubdomain": "masterplan",
+            "latitude": -33.4267,
+            "longitude": -70.6122,
             "services": {
                 "barberia": [
                     {"id": "service-1", "name": "Fade", "duration": "60 min", "price": 18000}
@@ -67,6 +69,8 @@ class PublicBookingTests(unittest.TestCase):
         self.assertEqual(business["route"], "barberia-cauce-norte-demo.kauze.cl")
         self.assertEqual(business["instagramHandle"], "@masterplan.soluciones")
         self.assertEqual(business["logoUrl"], "/cliente/assets/masterplan-logo.jpg")
+        self.assertEqual(business["lat"], -33.4267)
+        self.assertEqual(business["lng"], -70.6122)
         self.assertEqual(
             business["instagramUrl"],
             "https://www.instagram.com/masterplan.soluciones",

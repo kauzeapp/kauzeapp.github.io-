@@ -88,6 +88,27 @@ def _business_logo_value(value):
     raise ValueError("El logo del negocio no es válido.")
 
 
+def _business_public_text(value, label, maximum, required=False):
+    candidate = " ".join(str(value or "").split())
+    if required and len(candidate) < 2:
+        raise ValueError(f"{label} es obligatoria para publicar el negocio.")
+    if len(candidate) > maximum or "<" in candidate or ">" in candidate:
+        raise ValueError(f"{label} no es válida.")
+    return candidate
+
+
+def _business_coordinate(value, label, minimum, maximum):
+    if value in (None, ""):
+        return None
+    try:
+        candidate = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{label} no es válida.") from exc
+    if candidate < minimum or candidate > maximum:
+        raise ValueError(f"{label} no es válida.")
+    return round(candidate, 7)
+
+
 def _account_payload(row):
     return {
         "user": {
@@ -390,6 +411,21 @@ def _normalized_business_state(state, business_type=None, business_name=None):
         raise ValueError("El nombre del negocio no es válido.")
     normalized["name"] = requested_name
     normalized["logoUrl"] = _business_logo_value(normalized.get("logoUrl"))
+    normalized["address"] = _business_public_text(
+        normalized.get("address"), "La dirección", 180
+    )
+    normalized["commune"] = _business_public_text(
+        normalized.get("commune"), "La comuna", 100
+    )
+    normalized["city"] = _business_public_text(
+        normalized.get("city"), "La ciudad", 100
+    )
+    normalized["latitude"] = _business_coordinate(
+        normalized.get("latitude"), "La latitud", -90, 90
+    )
+    normalized["longitude"] = _business_coordinate(
+        normalized.get("longitude"), "La longitud", -180, 180
+    )
     public_phone = " ".join(str(normalized.get("publicPhone") or "").split())
     if public_phone and (
         len(public_phone) > 30
@@ -462,6 +498,10 @@ def save_business_state(
                 UPDATE locales
                 SET nombre = %s,
                     logo_url = %s,
+                    direccion = %s,
+                    comuna = %s,
+                    ciudad = %s,
+                    telefono_whatsapp = %s,
                     email_calendar = %s,
                     tema_visual = %s,
                     requiere_abono = %s,
@@ -476,6 +516,10 @@ def save_business_state(
                 (
                     normalized["name"],
                     normalized["logoUrl"] or None,
+                    normalized["address"] or None,
+                    normalized["commune"] or None,
+                    normalized["city"] or None,
+                    normalized["publicPhone"] or None,
                     str(normalized.get("ownerCalendarEmail") or "")[:320] or None,
                     str(normalized.get("activeTheme") or "Kauze Base")[:120],
                     deposit_enabled,
