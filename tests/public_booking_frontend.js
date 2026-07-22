@@ -24,6 +24,8 @@ for (const required of [
   "item.lng",
   "profileImage",
   "pro-avatar",
+  "distanceFilter",
+  "explorerMaxDistance",
   "Reservas conectadas a PostgreSQL",
 ]) {
   if (!source.includes(required)) throw new Error(`Falta integración: ${required}`);
@@ -36,6 +38,10 @@ if (!fs.existsSync(masterplanLogo) || fs.statSync(masterplanLogo).size < 1000) {
 
 if (source.includes("También quedará visible en el panel del negocio cuando abras /app/ en este mismo navegador")) {
   throw new Error("El portal aún promete sincronización limitada al mismo navegador.");
+}
+
+for (const forbidden of ["searchInGoogleMaps", "google.com/maps/search", "Buscar en Google Maps"]) {
+  if (source.includes(forbidden)) throw new Error(`El portal aún contiene una salida hacia Google Maps: ${forbidden}`);
 }
 
 console.log("Portal cliente válido: catálogo, disponibilidad y reservas usan la API pública.");
