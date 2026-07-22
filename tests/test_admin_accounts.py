@@ -109,6 +109,83 @@ class AdminAccountsLocalTests(unittest.TestCase):
                     client_id, {"subdominio": "negocio-suspendido", "action": "activar"}
                 )
 
+    def test_database_subdomain_activation_reads_state_inside_tenant_context(self):
+        client_id = "11111111-1111-4111-8111-111111111111"
+        local_id = "22222222-2222-4222-8222-222222222222"
+        operations = []
+
+        class Result:
+            def __init__(self, one=None):
+                self.one = one
+
+            def fetchone(self):
+                return self.one
+
+        class Context:
+            def __init__(self, value):
+                self.value = value
+
+            def __enter__(self):
+                return self.value
+
+            def __exit__(self, *_args):
+                return False
+
+        class FakeConnection:
+            row_factory = None
+
+            def transaction(self):
+                return Context(self)
+
+            def execute(self, statement, _params=None):
+                normalized = " ".join(statement.split())
+                operations.append(normalized)
+                if "FROM usuarios u" in normalized:
+                    return Result(
+                        one={
+                            "id": client_id,
+                            "legacy_subscription_state": "trial",
+                            "legacy_subscription_expiry": None,
+                            "local_id": local_id,
+                            "direccion": "Atahualpa 2812",
+                            "comuna": "Recoleta",
+                            "ciudad": "Región Metropolitana",
+                        }
+                    )
+                if "FROM estados_panel_local e" in normalized:
+                    return Result(
+                        one={
+                            "panel_state": {"publicBookingEnabled": True},
+                            "subscription_state": "trial",
+                            "subscription_expiry": None,
+                        }
+                    )
+                return Result()
+
+        fake = FakeConnection()
+
+        def tenant_context(_conn, selected_local_id, selected_user_id):
+            operations.append(f"TENANT:{selected_local_id}:{selected_user_id}")
+
+        with (
+            patch.object(admin_accounts, "is_configured", return_value=True),
+            patch.object(admin_accounts, "connection", return_value=Context(fake)),
+            patch.object(admin_accounts, "set_tenant_context", side_effect=tenant_context),
+        ):
+            result = admin_accounts.set_admin_client_subdomain(
+                client_id,
+                {"subdominio": "negocio-listo", "action": "activar"},
+            )
+
+        tenant_index = operations.index(f"TENANT:{local_id}:{client_id}")
+        state_index = next(
+            index
+            for index, operation in enumerate(operations)
+            if "FROM estados_panel_local e" in operation
+        )
+        self.assertLess(tenant_index, state_index)
+        self.assertEqual(result["subdominioEstado"], "activo")
+
     def test_update_and_reactivate_keep_cards_consistent(self):
         with (
             patch.object(admin_accounts, "is_configured", return_value=False),

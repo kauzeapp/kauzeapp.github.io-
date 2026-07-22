@@ -789,19 +789,16 @@ def set_admin_client_subdomain(client_id, data, actor_id=None):
                 """
                 SELECT
                   u.id,
+                  u.estado_suscripcion AS legacy_subscription_state,
+                  u.fecha_vencimiento AS legacy_subscription_expiry,
                   l.id AS local_id,
                   l.direccion,
                   l.comuna,
-                  l.ciudad,
-                  e.estado AS panel_state,
-                  COALESCE(s.estado, u.estado_suscripcion, 'trial') AS subscription_state,
-                  COALESCE(s.periodo_fin_en, s.trial_fin_en, u.fecha_vencimiento) AS subscription_expiry
+                  l.ciudad
                 FROM usuarios u
                 INNER JOIN usuario_roles ur ON ur.usuario_id = u.id
                 INNER JOIN roles r ON r.id = ur.rol_id AND r.slug = 'dueno'
                 INNER JOIN locales l ON l.id = ur.local_id
-                LEFT JOIN estados_panel_local e ON e.local_id = l.id
-                LEFT JOIN suscripciones_saas s ON s.local_id = l.id
                 WHERE u.id = %s
                 ORDER BY ur.creado_en
                 LIMIT 1
@@ -810,15 +807,36 @@ def set_admin_client_subdomain(client_id, data, actor_id=None):
             ).fetchone()
             if not owner:
                 raise ValueError("Cliente no encontrado.")
+
+            # estados_panel_local y suscripciones_saas tienen RLS forzado.
+            # La administracion debe fijar el tenant validado antes de leerlos;
+            # de lo contrario PostgreSQL oculta la fila y parece que el negocio
+            # nunca guardo su agenda o configuracion.
+            set_tenant_context(conn, owner["local_id"], normalized_client_id)
+            tenant_state = conn.execute(
+                """
+                SELECT
+                  e.estado AS panel_state,
+                  s.estado AS subscription_state,
+                  COALESCE(s.periodo_fin_en, s.trial_fin_en) AS subscription_expiry
+                FROM estados_panel_local e
+                LEFT JOIN suscripciones_saas s ON s.local_id = e.local_id
+                WHERE e.local_id = %s
+                """,
+                (owner["local_id"],),
+            ).fetchone()
             if conn.execute(
                 "SELECT 1 FROM locales WHERE slug = %s AND id <> %s",
                 (slug, owner["local_id"]),
             ).fetchone():
                 raise ValueError("El subdominio ya esta en uso.")
 
-            panel_state = owner.get("panel_state") or {}
+            panel_state = tenant_state.get("panel_state") if tenant_state else {}
             subscription_state = _display_state(
-                owner.get("subscription_state"), owner.get("subscription_expiry")
+                (tenant_state or {}).get("subscription_state")
+                or owner.get("legacy_subscription_state"),
+                (tenant_state or {}).get("subscription_expiry")
+                or owner.get("legacy_subscription_expiry"),
             )
             if target_state == "activo" and subscription_state not in ("trial", "activo"):
                 raise ValueError(
