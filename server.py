@@ -26,6 +26,7 @@ from backend.public_booking import (
     create_public_appointment,
     list_public_businesses,
     public_availability,
+    resolve_public_subdomain,
 )
 
 
@@ -218,6 +219,21 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
                 self._json_response(503, {"error": "database_not_configured"})
             return
 
+        if path.startswith("/api/public/subdomains/"):
+            parts = [unquote(part) for part in path.strip("/").split("/")]
+            if len(parts) != 4:
+                self._json_response(404, {"error": "not_found"})
+                return
+            try:
+                self._json_response(200, resolve_public_subdomain(parts[3]))
+            except PublicBookingError as exc:
+                self._json_response(
+                    exc.status, {"error": exc.code, "message": str(exc)}
+                )
+            except DatabaseNotConfigured:
+                self._json_response(503, {"error": "database_not_configured"})
+            return
+
         if path.startswith("/api/public/businesses/") and path.endswith("/availability"):
             parts = [unquote(part) for part in path.strip("/").split("/")]
             if len(parts) != 5:
@@ -394,6 +410,39 @@ class KauzeHandler(http.server.SimpleHTTPRequestHandler):
         path = urlparse(self.path).path
         if not self._origin_allowed():
             self._json_response(403, {"error": "origin_not_allowed"})
+            return
+
+        if path.startswith("/api/admin/clientes/") and path.endswith("/subdominio"):
+            account = self._require_session()
+            if not account:
+                return
+            if not self._is_admin(account):
+                self._json_response(403, {"error": "forbidden", "message": "Acceso denegado."})
+                return
+            try:
+                parts = path.strip("/").split("/")
+                if len(parts) != 5:
+                    self._json_response(404, {"error": "not_found"})
+                    return
+                data = self._read_json()
+                from backend.admin_accounts import set_admin_client_subdomain
+                result = set_admin_client_subdomain(
+                    parts[3], data, account.get("user", {}).get("id")
+                )
+                self._json_response(200, result)
+            except ValueError as exc:
+                self._json_response(400, {"error": "invalid_request", "message": str(exc)})
+            except DatabaseNotConfigured:
+                self._json_response(503, {"error": "database_not_configured"})
+            except Exception as exc:
+                print(f"No fue posible actualizar el subdominio: {type(exc).__name__}")
+                self._json_response(
+                    500,
+                    {
+                        "error": "subdomain_update_failed",
+                        "message": "No fue posible actualizar el subdominio.",
+                    },
+                )
             return
 
         if path.startswith("/api/admin/clientes/") and path.endswith("/activar"):
