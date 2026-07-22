@@ -123,6 +123,13 @@ def _account_payload(row):
             "slug": row["local_slug"],
             "type": row["categoria_slug"],
             "status": row["local_estado"],
+            "subdomainStatus": row.get("subdominio_estado") or "pendiente",
+            "subdomain": f"{row['local_slug']}.kauze.cl",
+            "subdomainUrl": (
+                f"https://{row['local_slug']}.kauze.cl"
+                if row.get("subdominio_estado") == "activo"
+                else None
+            ),
         },
         "role": {
             "id": str(row["rol_id"]),
@@ -206,6 +213,7 @@ def login(email, password, remember=False, local_slug=None, user_agent=""):
               l.nombre AS local_nombre,
               l.slug AS local_slug,
               l.estado AS local_estado,
+              l.subdominio_estado,
               c.slug AS categoria_slug,
               r.id AS rol_id,
               r.nombre AS rol_nombre,
@@ -332,6 +340,7 @@ def current_session(session_token):
               l.nombre AS local_nombre,
               l.slug AS local_slug,
               l.estado AS local_estado,
+              l.subdominio_estado,
               c.slug AS categoria_slug,
               r.id AS rol_id,
               r.nombre AS rol_nombre,

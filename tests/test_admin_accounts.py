@@ -42,6 +42,8 @@ class AdminAccountsLocalTests(unittest.TestCase):
         self.assertEqual(stats["trial"], 1)
         self.assertEqual(stats["total"], 1)
         self.assertEqual(clients[0]["businessName"], "Negocio Preview")
+        self.assertEqual(clients[0]["subdominioEstado"], "pendiente")
+        self.assertIsNone(clients[0]["subdominioUrl"])
 
     def test_duplicate_email_is_rejected(self):
         with (
@@ -52,6 +54,60 @@ class AdminAccountsLocalTests(unittest.TestCase):
             self._create()
             with self.assertRaisesRegex(ValueError, "correo ya esta registrado"):
                 self._create()
+
+    def test_admin_can_activate_and_suspend_subdomain(self):
+        with (
+            patch.object(admin_accounts, "is_configured", return_value=False),
+            patch.object(admin_accounts, "read_local_db", side_effect=self._read),
+            patch.object(admin_accounts, "write_local_db", side_effect=self._write),
+        ):
+            client_id = self._create()["client"]["id"]
+            activated = admin_accounts.set_admin_client_subdomain(
+                client_id,
+                {"subdominio": "masterplansoluciones", "action": "activar"},
+            )
+            self.assertEqual(activated["subdominioEstado"], "activo")
+            self.assertEqual(activated["subdominioUrl"], "https://masterplansoluciones.kauze.cl")
+            suspended = admin_accounts.set_admin_client_subdomain(
+                client_id,
+                {"subdominio": "masterplansoluciones", "action": "suspender"},
+            )
+
+        self.assertEqual(suspended["subdominioEstado"], "suspendido")
+        self.assertIsNone(suspended["subdominioUrl"])
+
+    def test_reserved_and_duplicate_subdomains_are_rejected(self):
+        with (
+            patch.object(admin_accounts, "is_configured", return_value=False),
+            patch.object(admin_accounts, "read_local_db", side_effect=self._read),
+            patch.object(admin_accounts, "write_local_db", side_effect=self._write),
+        ):
+            first_id = self._create("first@example.com")["client"]["id"]
+            second_id = self._create("second@example.com")["client"]["id"]
+            admin_accounts.set_admin_client_subdomain(
+                first_id, {"subdominio": "masterplan", "action": "activar"}
+            )
+            with self.assertRaisesRegex(ValueError, "ya esta en uso"):
+                admin_accounts.set_admin_client_subdomain(
+                    second_id, {"subdominio": "masterplan", "action": "activar"}
+                )
+            with self.assertRaisesRegex(ValueError, "reservado"):
+                admin_accounts.set_admin_client_subdomain(
+                    second_id, {"subdominio": "admin", "action": "activar"}
+                )
+
+    def test_suspended_account_cannot_publish_subdomain(self):
+        with (
+            patch.object(admin_accounts, "is_configured", return_value=False),
+            patch.object(admin_accounts, "read_local_db", side_effect=self._read),
+            patch.object(admin_accounts, "write_local_db", side_effect=self._write),
+        ):
+            client_id = self._create()["client"]["id"]
+            self.local_db["subscriptions"][0]["estadoSuscripcion"] = "desactivado"
+            with self.assertRaisesRegex(ValueError, "plan activo"):
+                admin_accounts.set_admin_client_subdomain(
+                    client_id, {"subdominio": "negocio-suspendido", "action": "activar"}
+                )
 
     def test_update_and_reactivate_keep_cards_consistent(self):
         with (

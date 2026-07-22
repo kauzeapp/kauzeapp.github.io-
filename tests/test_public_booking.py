@@ -1,7 +1,8 @@
 import unittest
 from datetime import date, timedelta
+from unittest.mock import patch
 
-from backend.public_booking import _available_slots, _public_business
+from backend.public_booking import PublicBookingError, _available_slots, _public_business, resolve_public_subdomain
 
 
 class PublicBookingTests(unittest.TestCase):
@@ -56,6 +57,7 @@ class PublicBookingTests(unittest.TestCase):
                 "city": "Santiago",
                 "phone": None,
                 "category_slug": "barberia",
+                "subdomain_state": "activo",
                 "panel_state": self.state,
             }
         )
@@ -90,6 +92,7 @@ class PublicBookingTests(unittest.TestCase):
                 "city": "Santiago",
                 "phone": None,
                 "category_slug": "barberia",
+                "subdomain_state": "activo",
                 "panel_state": self.state,
             }
         )
@@ -109,6 +112,7 @@ class PublicBookingTests(unittest.TestCase):
                 "city": "Santiago",
                 "phone": None,
                 "category_slug": "barberia",
+                "subdomain_state": "activo",
                 "panel_state": self.state,
             }
         )
@@ -127,6 +131,50 @@ class PublicBookingTests(unittest.TestCase):
             self.state, "barberia", self.target_date, "Otro Profesional"
         )
         self.assertIn("10:00", available)
+
+    def test_pending_subdomain_uses_stable_direct_route(self):
+        business = _public_business(
+            {
+                "slug": "masterplan",
+                "name": "Masterplan",
+                "category_slug": "barberia",
+                "subdomain_state": "pendiente",
+                "panel_state": self.state,
+            }
+        )
+        self.assertEqual(business["route"], "kauze.cl/cliente/?negocio=masterplan")
+        self.assertIsNone(business["subdomainUrl"])
+
+    def test_resolver_only_returns_admin_approved_subdomain(self):
+        class Result:
+            def fetchone(self):
+                return {"slug": "masterplan"}
+
+        class FakeConnection:
+            row_factory = None
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+            def execute(self, statement, params):
+                self.statement = " ".join(statement.split())
+                self.params = params
+                return Result()
+
+        fake = FakeConnection()
+        with patch("backend.public_booking.connection", return_value=fake):
+            result = resolve_public_subdomain("masterplan")
+
+        self.assertEqual(result["destination"], "https://kauze.cl/cliente/?negocio=masterplan")
+        self.assertIn("l.subdominio_estado = 'activo'", fake.statement)
+        self.assertIn("s.estado IN ('trial', 'activo')", fake.statement)
+
+    def test_resolver_rejects_invalid_subdomain(self):
+        with self.assertRaises(PublicBookingError):
+            resolve_public_subdomain("admin.kauze.cl/path")
 
 
 if __name__ == "__main__":

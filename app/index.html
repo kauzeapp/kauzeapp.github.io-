@@ -1744,6 +1744,9 @@
     function businessPublicUrl() {
       const slug = String(currentAccount?.business?.slug || '').trim().toLowerCase();
       if (!slug) return '';
+      if (currentAccount?.business?.subdomainStatus === 'activo') {
+        return `https://${slug}.kauze.cl`;
+      }
       const base = window.location.hostname === 'kauze.cl' || window.location.hostname.endsWith('.kauze.cl')
         ? 'https://kauze.cl'
         : window.location.origin;
@@ -1792,7 +1795,12 @@
         shareBookingWhatsapp.setAttribute('aria-disabled', publicReady ? 'false' : 'true');
       }
       if (kauzeLinkStatus) {
-        kauzeLinkStatus.textContent = publicReady ? 'Activo' : 'Pendiente de ubicación';
+        const officialSubdomainActive = currentAccount?.business?.subdomainStatus === 'activo';
+        kauzeLinkStatus.textContent = !publicReady
+          ? 'Pendiente de ubicación'
+          : officialSubdomainActive
+          ? 'Subdominio oficial activo'
+          : 'Link directo activo · subdominio pendiente de aprobación';
         kauzeLinkStatus.classList.toggle('ready', publicReady);
       }
       if (!integrationsDirty) {

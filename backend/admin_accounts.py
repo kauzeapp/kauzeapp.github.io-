@@ -20,6 +20,11 @@ TRIAL_DAYS = 7
 INITIAL_ACCESS_HOURS = 24
 VALID_PLANS = {"trial", "mensual", "trimestral", "anual"}
 VALID_STATES = {"trial", "activo", "en_mora", "desactivado"}
+VALID_SUBDOMAIN_STATES = {"pendiente", "activo", "suspendido"}
+RESERVED_SUBDOMAINS = {
+    "admin", "api", "app", "ayuda", "cdn", "cliente", "correo", "mail",
+    "soporte", "static", "status", "www",
+}
 
 
 def _clean(value, label, minimum=2, maximum=160):
@@ -41,6 +46,22 @@ def _phone(value):
     if not re.fullmatch(r"\+[1-9][0-9]{7,14}", result):
         raise ValueError("Usa un telefono con codigo de pais, por ejemplo +56912345678.")
     return result
+
+
+def _subdomain_slug(value):
+    candidate = str(value or "").strip().lower()
+    candidate = re.sub(r"^https?://", "", candidate).split("/", 1)[0]
+    if candidate.endswith(".kauze.cl"):
+        candidate = candidate[:-9]
+    if (
+        len(candidate) < 3
+        or len(candidate) > 50
+        or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", candidate)
+    ):
+        raise ValueError("El subdominio debe usar entre 3 y 50 caracteres, letras, numeros o guiones.")
+    if candidate in RESERVED_SUBDOMAINS:
+        raise ValueError("Ese subdominio esta reservado por Kauze.")
+    return candidate
 
 
 def _expiry(plan, now=None):
@@ -66,6 +87,8 @@ def _client_from_row(row):
     expiry = row["fecha_vencimiento"]
     state = _display_state(row["estado_suscripcion"], expiry)
     slug = row["local_slug"] or ""
+    subdomain_state = row.get("subdominio_estado") or "pendiente"
+    activated_at = row.get("subdominio_activado_en")
     return {
         "id": str(row["usuario_id"]),
         "localId": str(row["local_id"]),
@@ -76,6 +99,9 @@ def _client_from_row(row):
         "estadoSuscripcion": state,
         "fechaVencimiento": expiry.isoformat() if expiry else None,
         "subdominio": f"{slug}.kauze.cl" if slug else None,
+        "subdominioEstado": subdomain_state,
+        "subdominioUrl": f"https://{slug}.kauze.cl" if slug and subdomain_state == "activo" else None,
+        "subdominioActivadoEn": activated_at.isoformat() if activated_at else None,
         "requiereAprobacion": bool(row["requiere_aprobacion"]),
         "businessName": row["local_nombre"] or row["nombre_completo"],
         "categoriaSlug": row["categoria_slug"] or "barberia",
@@ -102,6 +128,14 @@ def get_admin_clients(status_filter=None, search_query=None):
                 "estadoSuscripcion": state,
                 "fechaVencimiento": expiry.isoformat() if expiry else None,
                 "subdominio": item.get("subdominio"),
+                "subdominioEstado": item.get("subdominio_estado") or item.get("subdominioEstado") or "pendiente",
+                "subdominioUrl": (
+                    f"https://{item.get('subdominio')}"
+                    if item.get("subdominio")
+                    and (item.get("subdominio_estado") or item.get("subdominioEstado")) == "activo"
+                    else None
+                ),
+                "subdominioActivadoEn": item.get("subdominio_activado_en") or item.get("subdominioActivadoEn"),
                 "requiereAprobacion": bool(
                     item.get("requiere_aprobacion") or item.get("requiereAprobacion")
                 ),
@@ -125,6 +159,8 @@ def get_admin_clients(status_filter=None, search_query=None):
                   l.id AS local_id,
                   l.nombre AS local_nombre,
                   l.slug AS local_slug,
+                  l.subdominio_estado,
+                  l.subdominio_activado_en,
                   c.slug AS categoria_slug,
                   COALESCE(s.plan_tipo, u.plan_tipo, 'trial') AS plan_tipo,
                   COALESCE(s.estado, u.estado_suscripcion, 'trial') AS estado_suscripcion,
@@ -378,6 +414,8 @@ def create_admin_client(data):
                 "estadoSuscripcion": state,
                 "fechaVencimiento": expiry.isoformat(),
                 "subdominio": f"{slug}.kauze.cl",
+                "subdominioEstado": "pendiente",
+                "subdominioActivadoEn": None,
                 "requiereAprobacion": False,
                 "categoriaSlug": category_slug,
                 "creadoEn": now.isoformat(),
@@ -386,7 +424,12 @@ def create_admin_client(data):
         write_local_db(db)
         return {
             "status": "success",
-            "client": {"id": item_id, "email": email, "subdominio": f"{slug}.kauze.cl"},
+            "client": {
+                "id": item_id,
+                "email": email,
+                "subdominio": f"{slug}.kauze.cl",
+                "subdominioEstado": "pendiente",
+            },
             "emailAccepted": False,
             "simulated": True,
         }
@@ -442,8 +485,8 @@ def create_admin_client(data):
                 """
                 INSERT INTO locales (
                   categoria_id, nombre, slug, email_contacto, telefono_whatsapp,
-                  creado_por, onboarding_estado, estado
-                ) VALUES (%s, %s, %s, %s, %s, %s, 'en_progreso', 'activo')
+                  creado_por, onboarding_estado, estado, subdominio_estado
+                ) VALUES (%s, %s, %s, %s, %s, %s, 'en_progreso', 'activo', 'pendiente')
                 RETURNING id
                 """,
                 (category["id"], business_name, slug, email, phone, owner["id"]),
@@ -535,6 +578,7 @@ def create_admin_client(data):
             "email": email,
             "businessName": business_name,
             "subdominio": f"{slug}.kauze.cl",
+            "subdominioEstado": "pendiente",
             "expiry": expiry.isoformat(),
         },
         "emailAccepted": True,
@@ -557,11 +601,7 @@ def update_admin_client(client_id, data):
     if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", category_slug):
         raise ValueError("El rubro seleccionado no es valido.")
 
-    requested_subdomain = str(data.get("subdominio") or "").strip().lower()
-    if requested_subdomain.endswith(".kauze.cl"):
-        requested_subdomain = requested_subdomain[:-9]
-    if requested_subdomain and not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", requested_subdomain):
-        raise ValueError("El subdominio no es valido.")
+    requested_subdomain = _subdomain_slug(data.get("subdominio")) if data.get("subdominio") else ""
     expiry = safe_parse_datetime(data.get("fechaVencimiento")) or _expiry(plan)
 
     if not is_configured():
@@ -576,6 +616,13 @@ def update_admin_client(client_id, data):
         ):
             raise ValueError("El correo ya esta registrado.")
         slug = requested_subdomain or str(item.get("subdominio") or "").split(".", 1)[0] or business_slug(business_name)
+        if any(
+            str(row.get("id")) != str(client_id)
+            and str(row.get("subdominio") or "").split(".", 1)[0] == slug
+            for row in db.get("subscriptions", [])
+        ):
+            raise ValueError("El subdominio ya esta en uso.")
+        slug_changed = slug != str(item.get("subdominio") or "").split(".", 1)[0]
         item.update(
             {
                 "name": name,
@@ -586,6 +633,8 @@ def update_admin_client(client_id, data):
                 "estadoSuscripcion": state,
                 "fechaVencimiento": expiry.isoformat(),
                 "subdominio": f"{slug}.kauze.cl",
+                "subdominioEstado": "pendiente" if slug_changed else item.get("subdominioEstado", "pendiente"),
+                "subdominioActivadoEn": None if slug_changed else item.get("subdominioActivadoEn"),
                 "categoriaSlug": category_slug,
             }
         )
@@ -627,6 +676,7 @@ def update_admin_client(client_id, data):
             if not category:
                 raise ValueError("El rubro seleccionado no esta disponible.")
             slug = requested_subdomain or owner["slug"]
+            slug_changed = slug != owner["slug"]
             if conn.execute(
                 "SELECT 1 FROM locales WHERE slug = %s AND id <> %s",
                 (slug, owner["local_id"]),
@@ -648,10 +698,23 @@ def update_admin_client(client_id, data):
                 """
                 UPDATE locales
                 SET nombre = %s, slug = %s, categoria_id = %s,
-                    email_contacto = %s, telefono_whatsapp = %s
+                    email_contacto = %s, telefono_whatsapp = %s,
+                    subdominio_estado = CASE WHEN %s THEN 'pendiente' ELSE subdominio_estado END,
+                    subdominio_activado_en = CASE WHEN %s THEN NULL ELSE subdominio_activado_en END,
+                    subdominio_activado_por = CASE WHEN %s THEN NULL ELSE subdominio_activado_por END
                 WHERE id = %s
                 """,
-                (business_name, slug, category["id"], email, phone, owner["local_id"]),
+                (
+                    business_name,
+                    slug,
+                    category["id"],
+                    email,
+                    phone,
+                    slug_changed,
+                    slug_changed,
+                    slug_changed,
+                    owner["local_id"],
+                ),
             )
             conn.execute(
                 """
@@ -667,6 +730,140 @@ def update_admin_client(client_id, data):
                 (owner["local_id"], plan, state, expiry if plan == "trial" else None, expiry),
             )
     return {"status": "success", "message": "Cliente actualizado."}
+
+
+def set_admin_client_subdomain(client_id, data, actor_id=None):
+    if not isinstance(data, dict):
+        raise ValueError("La solicitud no es valida.")
+    slug = _subdomain_slug(data.get("subdominio"))
+    action = str(data.get("action") or "activar").strip().lower()
+    if action not in ("activar", "suspender"):
+        raise ValueError("La accion del subdominio no es valida.")
+    target_state = "activo" if action == "activar" else "suspendido"
+
+    if not is_configured():
+        db = read_local_db()
+        item = next(
+            (row for row in db.get("subscriptions", []) if str(row.get("id")) == str(client_id)),
+            None,
+        )
+        if not item:
+            raise ValueError("Cliente no encontrado.")
+        if any(
+            str(row.get("id")) != str(client_id)
+            and str(row.get("subdominio") or "").split(".", 1)[0] == slug
+            for row in db.get("subscriptions", [])
+        ):
+            raise ValueError("El subdominio ya esta en uso.")
+        subscription_state = _display_state(
+            item.get("estado_suscripcion") or item.get("estadoSuscripcion"),
+            safe_parse_datetime(item.get("fecha_vencimiento") or item.get("fechaVencimiento")),
+        )
+        if target_state == "activo" and subscription_state not in ("trial", "activo"):
+            raise ValueError(
+                "La cuenta debe estar en trial o con un plan activo antes de publicar su subdominio."
+            )
+        item["subdominio"] = f"{slug}.kauze.cl"
+        item["subdominioEstado"] = target_state
+        if target_state == "activo":
+            item["subdominioActivadoEn"] = datetime.now(timezone.utc).isoformat()
+        write_local_db(db)
+        return {
+            "status": "success",
+            "message": "Subdominio activado correctamente." if target_state == "activo" else "Subdominio suspendido.",
+            "subdominio": f"{slug}.kauze.cl",
+            "subdominioEstado": target_state,
+            "subdominioUrl": f"https://{slug}.kauze.cl" if target_state == "activo" else None,
+        }
+
+    try:
+        normalized_client_id = str(uuid.UUID(str(client_id)))
+        normalized_actor_id = str(uuid.UUID(str(actor_id))) if actor_id else None
+    except (ValueError, TypeError, AttributeError) as exc:
+        raise ValueError("Cliente no encontrado.") from exc
+
+    with connection() as conn:
+        with conn.transaction():
+            conn.row_factory = dict_row
+            owner = conn.execute(
+                """
+                SELECT
+                  u.id,
+                  l.id AS local_id,
+                  l.direccion,
+                  l.comuna,
+                  l.ciudad,
+                  e.estado AS panel_state,
+                  COALESCE(s.estado, u.estado_suscripcion, 'trial') AS subscription_state,
+                  COALESCE(s.periodo_fin_en, s.trial_fin_en, u.fecha_vencimiento) AS subscription_expiry
+                FROM usuarios u
+                INNER JOIN usuario_roles ur ON ur.usuario_id = u.id
+                INNER JOIN roles r ON r.id = ur.rol_id AND r.slug = 'dueno'
+                INNER JOIN locales l ON l.id = ur.local_id
+                LEFT JOIN estados_panel_local e ON e.local_id = l.id
+                LEFT JOIN suscripciones_saas s ON s.local_id = l.id
+                WHERE u.id = %s
+                ORDER BY ur.creado_en
+                LIMIT 1
+                """,
+                (normalized_client_id,),
+            ).fetchone()
+            if not owner:
+                raise ValueError("Cliente no encontrado.")
+            if conn.execute(
+                "SELECT 1 FROM locales WHERE slug = %s AND id <> %s",
+                (slug, owner["local_id"]),
+            ).fetchone():
+                raise ValueError("El subdominio ya esta en uso.")
+
+            panel_state = owner.get("panel_state") or {}
+            subscription_state = _display_state(
+                owner.get("subscription_state"), owner.get("subscription_expiry")
+            )
+            if target_state == "activo" and subscription_state not in ("trial", "activo"):
+                raise ValueError(
+                    "La cuenta debe estar en trial o con un plan activo antes de publicar su subdominio."
+                )
+            if target_state == "activo" and (
+                not panel_state.get("publicBookingEnabled")
+                or not owner.get("direccion")
+                or not owner.get("comuna")
+                or not owner.get("ciudad")
+            ):
+                raise ValueError(
+                    "El negocio debe publicar su agenda y completar direccion, comuna y ciudad antes de activar el subdominio."
+                )
+
+            conn.execute(
+                """
+                UPDATE locales
+                SET slug = %s,
+                    subdominio_estado = %s,
+                    subdominio_activado_en = CASE WHEN %s = 'activo' THEN NOW() ELSE subdominio_activado_en END,
+                    subdominio_activado_por = CASE WHEN %s = 'activo' THEN %s ELSE subdominio_activado_por END
+                WHERE id = %s
+                """,
+                (
+                    slug,
+                    target_state,
+                    target_state,
+                    target_state,
+                    normalized_actor_id,
+                    owner["local_id"],
+                ),
+            )
+            conn.execute(
+                "UPDATE usuarios SET subdominio = %s WHERE id = %s",
+                (f"{slug}.kauze.cl", normalized_client_id),
+            )
+
+    return {
+        "status": "success",
+        "message": "Subdominio activado correctamente." if target_state == "activo" else "Subdominio suspendido.",
+        "subdominio": f"{slug}.kauze.cl",
+        "subdominioEstado": target_state,
+        "subdominioUrl": f"https://{slug}.kauze.cl" if target_state == "activo" else None,
+    }
 
 
 def activate_admin_client(client_id):

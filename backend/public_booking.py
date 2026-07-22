@@ -172,6 +172,8 @@ def _public_business(row):
     except (TypeError, ValueError):
         latitude = None
         longitude = None
+    slug = _public_subdomain(row["slug"], row["slug"])
+    subdomain_state = str(row.get("subdomain_state") or "pendiente")
     return {
         "id": str(row["slug"]),
         "slug": str(row["slug"]),
@@ -185,7 +187,9 @@ def _public_business(row):
         "lng": longitude,
         # El slug de la base es la dirección canónica; la personalización no puede
         # apuntar a otro negocio ni apropiarse de su subdominio.
-        "route": f'{_public_subdomain(row["slug"], row["slug"])}.kauze.cl',
+        "route": f"{slug}.kauze.cl" if subdomain_state == "activo" else f"kauze.cl/cliente/?negocio={slug}",
+        "subdomainStatus": subdomain_state,
+        "subdomainUrl": f"https://{slug}.kauze.cl" if subdomain_state == "activo" else None,
         "logoUrl": _public_logo_url(state.get("logoUrl") or row.get("logo_url")),
         "instagramUrl": _instagram_url(state.get("instagramUrl")),
         "instagramHandle": _public_text(state.get("instagramHandle") or "", 80),
@@ -236,12 +240,19 @@ def list_public_businesses():
               l.ciudad AS city,
               l.telefono_whatsapp AS phone,
               l.logo_url,
+              l.subdominio_estado AS subdomain_state,
               c.slug AS category_slug,
               e.estado AS panel_state
             FROM locales l
             INNER JOIN categorias c ON c.id = l.categoria_id AND c.activo = TRUE
             INNER JOIN estados_panel_local e ON e.local_id = l.id
+            INNER JOIN suscripciones_saas s ON s.local_id = l.id
             WHERE l.estado = 'activo'
+              AND s.estado IN ('trial', 'activo')
+              AND (
+                COALESCE(s.periodo_fin_en, s.trial_fin_en) IS NULL
+                OR COALESCE(s.periodo_fin_en, s.trial_fin_en) >= NOW()
+              )
               AND (
                 COALESCE(e.estado->>'publicBookingEnabled', 'false') = 'true'
                 OR COALESCE(e.estado->>'demoMode', 'false') = 'true'
@@ -250,6 +261,43 @@ def list_public_businesses():
             """
         ).fetchall()
     return [_public_business(row) for row in rows]
+
+
+def resolve_public_subdomain(slug):
+    from psycopg.rows import dict_row
+
+    normalized = _public_subdomain(slug, "")
+    if not normalized or normalized != str(slug or "").strip().lower():
+        raise PublicBookingError("El subdominio no es valido.", "invalid_subdomain", 404)
+
+    with connection() as conn:
+        conn.row_factory = dict_row
+        row = conn.execute(
+            """
+            SELECT l.slug
+            FROM locales l
+            INNER JOIN estados_panel_local e ON e.local_id = l.id
+            INNER JOIN suscripciones_saas s ON s.local_id = l.id
+            WHERE l.slug = %s
+              AND l.estado = 'activo'
+              AND l.subdominio_estado = 'activo'
+              AND s.estado IN ('trial', 'activo')
+              AND (
+                COALESCE(s.periodo_fin_en, s.trial_fin_en) IS NULL
+                OR COALESCE(s.periodo_fin_en, s.trial_fin_en) >= NOW()
+              )
+              AND COALESCE(e.estado->>'publicBookingEnabled', 'false') = 'true'
+            LIMIT 1
+            """,
+            (normalized,),
+        ).fetchone()
+    if not row:
+        raise PublicBookingError("El subdominio no esta activo.", "subdomain_not_active", 404)
+    return {
+        "active": True,
+        "slug": normalized,
+        "destination": f"https://kauze.cl/cliente/?negocio={normalized}",
+    }
 
 
 def public_availability(slug, target_date, professional_id=None):
@@ -270,7 +318,13 @@ def public_availability(slug, target_date, professional_id=None):
             FROM locales l
             INNER JOIN categorias c ON c.id = l.categoria_id
             INNER JOIN estados_panel_local e ON e.local_id = l.id
+            INNER JOIN suscripciones_saas s ON s.local_id = l.id
             WHERE l.slug = %s AND l.estado = 'activo'
+              AND s.estado IN ('trial', 'activo')
+              AND (
+                COALESCE(s.periodo_fin_en, s.trial_fin_en) IS NULL
+                OR COALESCE(s.periodo_fin_en, s.trial_fin_en) >= NOW()
+              )
             LIMIT 1
             """,
             (slug,),
@@ -364,7 +418,13 @@ def create_public_appointment(payload, client_key="unknown"):
             FROM locales l
             INNER JOIN categorias c ON c.id = l.categoria_id AND c.activo = TRUE
             INNER JOIN estados_panel_local e ON e.local_id = l.id
+            INNER JOIN suscripciones_saas s ON s.local_id = l.id
             WHERE l.slug = %s AND l.estado = 'activo'
+              AND s.estado IN ('trial', 'activo')
+              AND (
+                COALESCE(s.periodo_fin_en, s.trial_fin_en) IS NULL
+                OR COALESCE(s.periodo_fin_en, s.trial_fin_en) >= NOW()
+              )
             FOR UPDATE OF e
             """,
             (business_slug,),

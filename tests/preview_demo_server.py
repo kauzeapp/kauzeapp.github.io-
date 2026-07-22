@@ -95,9 +95,40 @@ ACCOUNT = {
         "slug": PREVIEW_BUSINESS_SLUG,
         "type": "barberia",
         "status": "activo",
+        "subdomainStatus": "activo",
+        "subdomain": f"{PREVIEW_BUSINESS_SLUG}.kauze.cl",
+        "subdomainUrl": f"https://{PREVIEW_BUSINESS_SLUG}.kauze.cl",
     },
     "role": {"id": "preview-role", "name": "Dueño", "slug": "dueno"},
+    "isSuperAdmin": True,
 }
+
+PREVIEW_ADMIN_CLIENTS = [
+    {
+        "id": "preview-owner", "name": "Sergio Molina", "email": "preview@kauze.cl",
+        "phone": "+56911112222", "businessName": "KAUZE Demo", "categoriaSlug": "barberia",
+        "planTipo": "trial", "estadoSuscripcion": "trial",
+        "fechaVencimiento": (date.today() + timedelta(days=7)).isoformat(),
+        "requiereAprobacion": False, "subdominio": "kauze-demo.kauze.cl",
+        "subdominioEstado": "activo", "subdominioUrl": "https://kauze-demo.kauze.cl",
+    },
+    {
+        "id": "preview-masterplan", "name": "Esteban", "email": "masterplan@example.com",
+        "phone": "+56987654321", "businessName": "Masterplan Soluciones", "categoriaSlug": "barberia",
+        "planTipo": "mensual", "estadoSuscripcion": "activo",
+        "fechaVencimiento": (date.today() + timedelta(days=30)).isoformat(),
+        "requiereAprobacion": False, "subdominio": "masterplansoluciones.kauze.cl",
+        "subdominioEstado": "pendiente", "subdominioUrl": None,
+    },
+    {
+        "id": "preview-suspended", "name": "Cuenta de prueba", "email": "suspendido@example.com",
+        "phone": "+56955554444", "businessName": "Negocio Suspendido", "categoriaSlug": "barberia",
+        "planTipo": "mensual", "estadoSuscripcion": "desactivado",
+        "fechaVencimiento": (date.today() - timedelta(days=1)).isoformat(),
+        "requiereAprobacion": False, "subdominio": "negocio-suspendido.kauze.cl",
+        "subdominioEstado": "activo", "subdominioUrl": "https://negocio-suspendido.kauze.cl",
+    },
+]
 
 
 def business_payload(slug=DEMO_SLUG):
@@ -184,6 +215,34 @@ class PreviewHandler(SimpleHTTPRequestHandler):
             return
         if path == "/api/auth/me":
             return self.json_response(200, {"account": ACCOUNT})
+        if path == "/api/admin/clientes":
+            return self.json_response(200, PREVIEW_ADMIN_CLIENTS)
+        if path == "/api/admin/dashboard/stats":
+            stats = {"trial": 0, "activo": 0, "en_mora": 0, "desactivado": 0}
+            for client in PREVIEW_ADMIN_CLIENTS:
+                state = client.get("estadoSuscripcion", "trial")
+                if state in stats:
+                    stats[state] += 1
+            stats["total"] = len(PREVIEW_ADMIN_CLIENTS)
+            return self.json_response(200, stats)
+        if path.startswith("/api/public/subdomains/"):
+            slug = unquote(path.rstrip("/").split("/")[-1]).lower()
+            client = next(
+                (
+                    item for item in PREVIEW_ADMIN_CLIENTS
+                    if str(item.get("subdominio") or "").split(".", 1)[0] == slug
+                    and item.get("subdominioEstado") == "activo"
+                    and item.get("estadoSuscripcion") in ("trial", "activo")
+                ),
+                None,
+            )
+            if not client:
+                return self.json_response(404, {"error": "subdomain_not_active"})
+            return self.json_response(200, {
+                "active": True,
+                "slug": slug,
+                "destination": f"https://kauze.cl/cliente/?negocio={slug}",
+            })
         if path == "/api/app-state":
             return self.json_response(200, BUSINESS_STATES[PREVIEW_BUSINESS_SLUG])
         if path == "/api/public/businesses":
@@ -291,6 +350,57 @@ class PreviewHandler(SimpleHTTPRequestHandler):
             }
         )
         return self.json_response(201, {"appointment": appointment, "business": state["name"], "created": True})
+
+    def do_PUT(self):
+        path = urlparse(self.path).path
+        parts = path.strip("/").split("/")
+        if len(parts) != 5 or parts[:3] != ["api", "admin", "clientes"]:
+            return self.json_response(404, {"error": "not_found"})
+        client = next((item for item in PREVIEW_ADMIN_CLIENTS if item["id"] == parts[3]), None)
+        if not client:
+            return self.json_response(404, {"error": "client_not_found"})
+        if parts[4] == "activar":
+            client["estadoSuscripcion"] = "trial" if client.get("planTipo") == "trial" else "activo"
+            client["fechaVencimiento"] = (
+                date.today() + timedelta(days=7 if client["estadoSuscripcion"] == "trial" else 30)
+            ).isoformat()
+            return self.json_response(200, {"status": "success", "state": client["estadoSuscripcion"]})
+        if parts[4] == "editar":
+            data = self.read_json()
+            mapping = {
+                "name": "name", "email": "email", "phone": "phone",
+                "businessName": "businessName", "categoriaSlug": "categoriaSlug",
+                "planTipo": "planTipo", "estadoSuscripcion": "estadoSuscripcion",
+                "fechaVencimiento": "fechaVencimiento",
+            }
+            for source, target in mapping.items():
+                if source in data:
+                    client[target] = data[source]
+            if data.get("subdominio"):
+                slug = str(data["subdominio"]).lower().replace(".kauze.cl", "")
+                client["subdominio"] = f"{slug}.kauze.cl"
+            return self.json_response(200, {"status": "success", "message": "Cliente actualizado."})
+        if parts[4] != "subdominio":
+            return self.json_response(404, {"error": "not_found"})
+        data = self.read_json()
+        slug = str(data.get("subdominio") or "").strip().lower()
+        if not slug or any(
+            item["id"] != client["id"]
+            and str(item.get("subdominio") or "").split(".", 1)[0] == slug
+            for item in PREVIEW_ADMIN_CLIENTS
+        ):
+            return self.json_response(400, {"message": "El subdominio ya está en uso."})
+        target = "activo" if data.get("action") == "activar" else "suspendido"
+        client["subdominio"] = f"{slug}.kauze.cl"
+        client["subdominioEstado"] = target
+        client["subdominioUrl"] = f"https://{slug}.kauze.cl" if target == "activo" else None
+        return self.json_response(200, {
+            "status": "success",
+            "message": "Subdominio activado correctamente." if target == "activo" else "Subdominio suspendido.",
+            "subdominio": client["subdominio"],
+            "subdominioEstado": target,
+            "subdominioUrl": client["subdominioUrl"],
+        })
 
 
 if __name__ == "__main__":

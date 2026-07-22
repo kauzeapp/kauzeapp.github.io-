@@ -1039,14 +1039,14 @@
         <div class="hint">Planes vigentes pagados.</div>
       </article>
       <article class="card metric border-amber">
-        <div class="label">Clientes en Mora</div>
+        <div class="label">Pago vencido</div>
         <div class="value" id="statsMora">0</div>
-        <div class="hint">Trial o periodo vencido.</div>
+        <div class="hint">Ocultos hasta regularizar.</div>
       </article>
       <article class="card metric border-red">
-        <div class="label">Clientes Desactivados</div>
+        <div class="label">Suspendidos</div>
         <div class="value" id="statsDesactivado">0</div>
-        <div class="hint">Cuentas suspendidas.</div>
+        <div class="hint">Suspensión manual de Kauze.</div>
       </article>
     </section>
 
@@ -1056,8 +1056,7 @@
         <button class="button small" onclick="filterClients('todos')" id="btnFilter_todos">Todos</button>
         <button class="button small" onclick="filterClients('trial')" id="btnFilter_trial">Trial</button>
         <button class="button small" onclick="filterClients('activo')" id="btnFilter_activo">Activos</button>
-        <button class="button small" onclick="filterClients('en_mora')" id="btnFilter_en_mora">Mora</button>
-        <button class="button small" onclick="filterClients('desactivado')" id="btnFilter_desactivado">Desactivados</button>
+        <button class="button small" onclick="filterClients('suspendido')" id="btnFilter_suspendido">Suspendidos</button>
       </div>
       <div style="flex: 1; max-width: 350px;">
         <input type="text" id="adminSearchInput" oninput="searchClients()" placeholder="Buscar por negocio, nombre o email..." style="width: 100%; height: 38px; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px;">
@@ -2651,7 +2650,7 @@
 
     window.filterClients = function(status) {
         currentFilter = status;
-        const buttons = ["todos", "trial", "activo", "en_mora", "desactivado"];
+        const buttons = ["todos", "trial", "activo", "suspendido"];
         buttons.forEach(b => {
             const btn = document.getElementById(`btnFilter_${b}`);
             if (btn) {
@@ -2712,13 +2711,14 @@
             renderStatsFromClients();
 
                 // Actualizar banner de notificaciones
-                const pendingCount = clientsData.filter(c => c.requiereAprobacion).length;
+                const paymentPendingCount = clientsData.filter(c => c.requiereAprobacion).length;
+                const subdomainPendingCount = clientsData.filter(c => c.subdominioEstado !== "activo").length;
                 const banner = document.getElementById("adminNotificationBanner");
                 const bannerText = document.getElementById("adminNotificationText");
                 if (banner && bannerText) {
-                    if (pendingCount > 0) {
+                    if (paymentPendingCount > 0 || subdomainPendingCount > 0) {
                         banner.style.display = "flex";
-                        bannerText.textContent = `Tienes ${pendingCount} solicitud(es) de suscripción esperando validación de pago y activación.`;
+                        bannerText.textContent = `${paymentPendingCount} pago(s) pendiente(s) · ${subdomainPendingCount} subdominio(s) por revisar.`;
                     } else {
                         banner.style.display = "none";
                     }
@@ -2739,7 +2739,9 @@
         
         let filtered = clientsData;
         if (currentFilter !== "todos") {
-            filtered = filtered.filter(c => c.estadoSuscripcion === currentFilter);
+            filtered = filtered.filter(c => currentFilter === "suspendido"
+                ? ["en_mora", "desactivado"].includes(c.estadoSuscripcion)
+                : c.estadoSuscripcion === currentFilter);
         }
         
         if (searchQuery) {
@@ -2770,11 +2772,21 @@
             const safePhone = escapeHTML(client.phone || "—");
             const safeSubdomain = escapeHTML(client.subdominio || "");
             const safePlan = escapeHTML(client.planTipo || "trial");
-            const safeState = escapeHTML(client.estadoSuscripcion || "trial");
+            const stateLabels = {
+                trial: "Trial",
+                activo: "Activo",
+                en_mora: "Suspendido · pago vencido",
+                desactivado: "Suspendido"
+            };
+            const safeState = escapeHTML(stateLabels[client.estadoSuscripcion] || "Trial");
             
             // Subdomain link
             const validSubdomain = /^[a-z0-9-]+\.kauze\.cl$/i.test(client.subdominio || "");
-            const url = validSubdomain ? `https://${client.subdominio}` : "#";
+            const subdomainActive = validSubdomain && client.subdominioEstado === "activo";
+            const subdomainSuspended = client.subdominioEstado === "suspendido";
+            const accountPublic = ["trial", "activo"].includes(client.estadoSuscripcion);
+            const subdomainAvailable = subdomainActive && accountPublic;
+            const url = subdomainActive ? `https://${client.subdominio}` : "#";
             
             // Mapeo de categorías
             const categoryNames = {
@@ -2788,9 +2800,12 @@
             };
             const categoryLabel = escapeHTML(categoryNames[client.categoriaSlug] || client.categoriaSlug || "💈 Barbería");
 
-            const subNameMarkup = validSubdomain
-                ? `<a href="${url}" target="_blank" rel="noopener" style="color: var(--blue); font-weight: 700; text-decoration: none;">${safeBusinessName}</a> <span style="font-size:10.5px; font-weight:bold; color:var(--text-muted); margin-left:6px; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${categoryLabel}</span><div style="font-size: 11px; color: var(--text-muted);">${safeSubdomain}</div>`
-                : `<span style="font-weight: 700; color: var(--navy);">${safeBusinessName}</span> <span style="font-size:10.5px; font-weight:bold; color:var(--text-muted); margin-left:6px; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${categoryLabel}</span><div style="font-size: 11px; color: #ef4444; font-weight: 700;">Pendiente activación</div>`;
+            const subdomainLabel = subdomainAvailable
+                ? `<a href="${url}" target="_blank" rel="noopener" style="color: var(--blue); font-weight: 700; text-decoration: none;">${safeSubdomain}</a> <span style="color:#059669;font-weight:800;">· Activo</span>`
+                : subdomainActive
+                ? `<span style="color:#b45309;font-weight:700;">${safeSubdomain} · Reservado · cuenta suspendida</span>`
+                : `<span style="color:${subdomainSuspended ? '#b45309' : '#64748b'};font-weight:700;">${safeSubdomain || 'Nombre por definir'} · ${subdomainSuspended ? 'Suspendido' : 'Pendiente'}</span>`;
+            const subNameMarkup = `<span style="font-weight: 700; color: var(--navy);">${safeBusinessName}</span> <span style="font-size:10.5px; font-weight:bold; color:var(--text-muted); margin-left:6px; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${categoryLabel}</span><div style="font-size: 11px; margin-top:4px;">${subdomainLabel}</div>`;
             
             // Status badge
             let badgeStyle = "background: #e2e8f0; color: #475569;";
@@ -2811,16 +2826,30 @@
                 });
             }
             
-            // Actions
-            let actionsMarkup = "";
+            // Actions: separate operational controls from account management.
+            const operationalActions = [];
+            const managementActions = [];
+            const actionStyle = "margin:0;padding:6px 10px;font-size:11px;vertical-align:middle;white-space:nowrap;";
             if (client.requiereAprobacion) {
-                actionsMarkup += `<button class="button small primary" onclick="confirmClient('${safeId}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle;">Confirmar Ingreso</button>`;
+                operationalActions.push(`<button class="button small primary" onclick="confirmClient('${safeId}')" style="${actionStyle}">Confirmar ingreso</button>`);
             } else if (["en_mora", "desactivado"].includes(client.estadoSuscripcion)) {
-                actionsMarkup += `<button class="button small" onclick="reactivateClient('${safeId}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle; background: #e0f2fe; color: #0369a1; border-color: #bae6fd;">Reactivar</button>`;
+                operationalActions.push(`<button class="button small" onclick="reactivateClient('${safeId}')" style="${actionStyle}background:#e0f2fe;color:#0369a1;border-color:#bae6fd;">Reactivar</button>`);
             }
-            actionsMarkup += `<button class="button small" onclick="openEditClientModal('${safeId}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle; background: #fef3c7; color: #b45309; border-color: #fde68a;">Editar</button>`;
-            actionsMarkup += `<button class="button small" data-delete-client="${safeId}" onclick="deleteClient('${safeId}')" style="margin-right: 6px; padding: 4px 8px; font-size: 11px; vertical-align: middle; background: #fee2e2; color: #b91c1c; border-color: #fca5a5;">Eliminar</button>`;
-            actionsMarkup += `<button class="button small" onclick="resetClientPassword('${safeId}')" style="padding: 4px 8px; font-size: 11px; vertical-align: middle;">Enviar acceso</button>`;
+            operationalActions.push(!accountPublic
+                ? `<button class="button small" disabled title="Reactiva el plan antes de publicar" style="${actionStyle}opacity:.6;">Subdominio bloqueado</button>`
+                : subdomainActive
+                ? `<button class="button small" onclick="setClientSubdomain('${safeId}', 'suspender')" style="${actionStyle}">Suspender subdominio</button>`
+                : `<button class="button small primary" onclick="setClientSubdomain('${safeId}', 'activar')" style="${actionStyle}">Activar subdominio</button>`);
+
+            managementActions.push(`<button class="button small" onclick="resetClientPassword('${safeId}')" style="${actionStyle}">Enviar acceso</button>`);
+            managementActions.push(`<button class="button small" onclick="openEditClientModal('${safeId}')" style="${actionStyle}background:#fef3c7;color:#b45309;border-color:#fde68a;">Editar</button>`);
+            managementActions.push(`<button class="button small" data-delete-client="${safeId}" onclick="deleteClient('${safeId}')" style="${actionStyle}background:#fee2e2;color:#b91c1c;border-color:#fca5a5;">Eliminar</button>`);
+
+            const actionsMarkup = `
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px;min-width:255px;">
+                    <div style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;">${operationalActions.join("")}</div>
+                    <div style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;padding-top:7px;border-top:1px solid rgba(148,163,184,.24);">${managementActions.join("")}</div>
+                </div>`;
             
             tr.innerHTML = `
                 <td style="padding: 14px 18px; font-size: 13.5px;">${subNameMarkup}</td>
@@ -2972,6 +3001,33 @@
 
     window.closeEditClientModal = function() {
         document.getElementById("editClientModal").style.display = "none";
+    };
+
+    window.setClientSubdomain = async function(id, action) {
+        const client = clientsData.find(item => String(item.id) === String(id));
+        if (!client) return;
+        const currentSlug = String(client.subdominio || "").replace(/\.kauze\.cl$/i, "");
+        const slug = currentSlug.trim().toLowerCase();
+        if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+            showAdminToast("Primero define un nombre válido desde Editar.", "error");
+            return;
+        }
+        const verb = action === "activar" ? `activar https://${slug}.kauze.cl` : `suspender ${client.subdominio}`;
+        if (!confirm(`¿Confirmas ${verb}? Para cambiar el nombre, usa Editar antes de activarlo.`)) return;
+        try {
+            const response = await fetch(`/api/admin/clientes/${encodeURIComponent(id)}/subdominio`, {
+                method: "PUT",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ subdominio: slug, action })
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.message || "No fue posible actualizar el subdominio.");
+            showAdminToast(result.message || "Subdominio actualizado correctamente.");
+            await refreshAdminDashboard();
+        } catch (error) {
+            showAdminToast(error.message || "No fue posible actualizar el subdominio.", "error");
+        }
     };
 
     window.deleteClient = async function(id) {
@@ -3155,8 +3211,8 @@
           <select id="editState" class="form-input" style="padding-top:4px;">
             <option value="trial">Trial (Prueba)</option>
             <option value="activo">Activo (Pago al día)</option>
-            <option value="en_mora">En Mora</option>
-            <option value="desactivado">Desactivado</option>
+            <option value="en_mora">Suspendido (pago vencido)</option>
+            <option value="desactivado">Suspendido manualmente</option>
           </select>
         </div>
         <div class="form-group">
@@ -3220,8 +3276,8 @@
           <select id="mState" class="form-input" style="padding-top:4px;">
             <option value="activo">Activo (Pago al día)</option>
             <option value="trial">Trial (Prueba)</option>
-            <option value="en_mora">En Mora</option>
-            <option value="desactivado">Desactivado</option>
+            <option value="en_mora">Suspendido (pago vencido)</option>
+            <option value="desactivado">Suspendido manualmente</option>
           </select>
         </div>
         <p id="modalErrorMsg" style="color: #ef4444; font-size: 12px; font-weight: 700; margin-top: 8px; display: none; text-align: left;"></p>

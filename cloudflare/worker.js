@@ -19,11 +19,23 @@ export default {
       hostParts.length === 3 && hostParts.slice(1).join(".") === "kauze.cl";
     const businessSubdomain = isSubdomain ? hostParts[0] : "";
 
-    // Subdominio de negocio → redirigir a la página pública del cliente
+    // Subdominio de negocio: validar primero que Administración KAUZE lo activó.
     if (businessSubdomain && !["www", "admin", "api", "app"].includes(businessSubdomain)) {
-      const destination = new URL("https://kauze.cl/cliente/");
+      const validationUrl = new URL(
+        `/api/public/subdomains/${encodeURIComponent(businessSubdomain)}`,
+        UPSTREAM,
+      );
+      const validation = await fetch(validationUrl, {
+        headers: { Accept: "application/json" },
+        cf: { cacheTtl: 30, cacheEverything: true },
+      });
+      if (!validation.ok) {
+        return Response.redirect("https://kauze.cl/?subdominio=no-disponible", 302);
+      }
+      const approved = await validation.json();
+      const destination = new URL(approved.destination);
       incomingUrl.searchParams.forEach((value, key) => destination.searchParams.append(key, value));
-      destination.searchParams.set("negocio", businessSubdomain);
+      destination.searchParams.set("negocio", approved.slug);
       return Response.redirect(destination.toString(), 302);
     }
 
