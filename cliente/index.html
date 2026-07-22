@@ -908,6 +908,45 @@
       font-weight: 700;
     }
 
+    .kauze-filter-panel {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .kauze-filter-field {
+      display: grid;
+      gap: 6px;
+      text-align: left;
+    }
+
+    .kauze-filter-field label {
+      color: var(--navy);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .kauze-filter-field select {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 38px 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      color: var(--navy);
+      background: #fff;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      outline: none;
+    }
+
+    .kauze-filter-field select:focus {
+      border-color: rgba(37,99,235,.55);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.10);
+    }
+
     .explore-results {
       margin-top: 18px;
       padding: 26px;
@@ -1414,6 +1453,10 @@
         font-size: 12px;
       }
 
+      .kauze-filter-panel {
+        grid-template-columns: 1fr;
+      }
+
       .explore-results {
         padding: 20px;
         border-radius: 26px;
@@ -1639,11 +1682,6 @@
       font-weight: 800;
     }
 
-    .maps-btn:hover {
-      border-color: var(--blue) !important;
-      background: var(--soft-blue) !important;
-      transform: translateY(-1px);
-    }
   </style>
 </head>
 
@@ -1747,18 +1785,17 @@
             <button class="btn primary" type="button" id="searchBusinessLocation">Buscar negocios</button>
             <button class="btn location-button" type="button" id="useMyLocation">◎ Mi ubicación</button>
           </div>
-          
-          <!-- Filtros de búsqueda en Google Maps -->
-          <div class="maps-filter-container" style="margin-top: 18px; border-top: 1px solid var(--border); padding-top: 18px;">
-            <span style="font-size: 13px; font-weight: 700; color: var(--navy); display: block; margin-bottom: 10px; text-align: left;">🌐 Buscar en Google Maps por categoría:</span>
-            <div class="maps-filter-row" style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button type="button" class="btn maps-btn" onclick="searchInGoogleMaps('Barbería')" style="min-height: 38px; padding: 6px 14px; font-size: 12.5px; border-radius: 999px; background: white; font-weight: 600; box-shadow: var(--shadow-soft);">💈 Barberías</button>
-              <button type="button" class="btn maps-btn" onclick="searchInGoogleMaps('Salón de Belleza')" style="min-height: 38px; padding: 6px 14px; font-size: 12.5px; border-radius: 999px; background: white; font-weight: 600; box-shadow: var(--shadow-soft);">💅 Salones</button>
-              <button type="button" class="btn maps-btn" onclick="searchInGoogleMaps('Lashistas')" style="min-height: 38px; padding: 6px 14px; font-size: 12.5px; border-radius: 999px; background: white; font-weight: 600; box-shadow: var(--shadow-soft);">👁️ Lashistas</button>
-              <button type="button" class="btn maps-btn" onclick="searchInGoogleMaps('Estética')" style="min-height: 38px; padding: 6px 14px; font-size: 12.5px; border-radius: 999px; background: white; font-weight: 600; box-shadow: var(--shadow-soft);">💆 Estéticas</button>
-              <button type="button" class="btn maps-btn" onclick="searchInGoogleMaps('Peluquería')" style="min-height: 38px; padding: 6px 14px; font-size: 12.5px; border-radius: 999px; background: white; font-weight: 600; box-shadow: var(--shadow-soft);">💇 Peluquerías</button>
-              <button type="button" class="btn maps-btn" onclick="searchInGoogleMaps('Tatuajes')" style="min-height: 38px; padding: 6px 14px; font-size: 12.5px; border-radius: 999px; background: white; font-weight: 600; box-shadow: var(--shadow-soft);">🎨 Tatuajes</button>
-              <button type="button" class="btn maps-btn" onclick="searchInGoogleMaps('Taller Mecánico')" style="min-height: 38px; padding: 6px 14px; font-size: 12.5px; border-radius: 999px; background: white; font-weight: 600; box-shadow: var(--shadow-soft);">🚗 Talleres</button>
+          <div class="kauze-filter-panel" aria-label="Filtro de distancia en Kauze">
+            <div class="kauze-filter-field">
+              <label for="distanceFilter">Distancia desde tu ubicación</label>
+              <select id="distanceFilter">
+                <option value="todos">Cualquier distancia</option>
+                <option value="2">Hasta 2 km</option>
+                <option value="5">Hasta 5 km</option>
+                <option value="10">Hasta 10 km</option>
+                <option value="20">Hasta 20 km</option>
+                <option value="50">Hasta 50 km</option>
+              </select>
             </div>
           </div>
           
@@ -2320,6 +2357,7 @@
     let selectedBusinessId = localStorage.getItem(SELECTED_BUSINESS_KEY) || 'biz-corte-fino';
     let currentType = (featuredBusinesses.find(b => b.id === selectedBusinessId)?.type) || localStorage.getItem('kauzeClienteType') || 'barberia';
     let explorerType = 'todos';
+    let explorerMaxDistance = null;
     let businessSearchTerm = '';
     let explorerLocationLabel = 'Providencia, Santiago';
     let explorerCoords = { lat: -33.4326, lng: -70.6161 };
@@ -2668,19 +2706,6 @@
       return prices.length ? Math.min(...prices) : 0;
     }
 
-    function searchInGoogleMaps(businessType) {
-      const input = document.getElementById('businessSearch');
-      const location = input ? input.value.trim() : '';
-      let query = businessType;
-      if (location && location !== 'Ubicación actual detectada') {
-        query += ' ' + location;
-      } else {
-        query += ' cerca de mi';
-      }
-      const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
-      window.open(url, '_blank');
-    }
-
     function applyLocationSearch() {
       const input = document.getElementById('businessSearch');
       const status = document.getElementById('locationStatus');
@@ -2703,7 +2728,7 @@
       } else {
         explorerCoords = null;
         explorerLocationLabel = value;
-        status.textContent = 'Sector guardado. En producción, Kauze lo ubicará con precisión mediante el servicio de mapas.';
+        status.textContent = 'Buscando coincidencias en las direcciones y comunas registradas en Kauze.';
       }
 
       selectedPreviewBusinessId = null;
@@ -2808,8 +2833,20 @@
     function renderBusinessExplorer() {
       renderExploreChips();
 
+      const normalizedSearch = normalizeExplorerText(businessSearchTerm);
+      const hasCoordinateSearch = !!explorerCoords;
+
       const list = featuredBusinesses
         .filter(item => explorerType === 'todos' || item.type === explorerType)
+        .filter(item => !explorerMaxDistance || (hasCoordinateSearch && businessDistance(item) <= explorerMaxDistance))
+        .filter(item => {
+          if (!normalizedSearch || hasCoordinateSearch) return true;
+          const searchable = [item.name, item.address, item.location, item.city]
+            .concat((item.services || []).map(service => service[0]))
+            .map(normalizeExplorerText)
+            .join(' ');
+          return searchable.includes(normalizedSearch);
+        })
         .sort((a, b) => businessDistance(a) - businessDistance(b));
 
       const grid = document.getElementById('businessGrid');
@@ -2818,10 +2855,15 @@
       const resultCount = document.getElementById('businessResultCount');
       const resultContext = document.getElementById('businessResultContext');
       if (resultCount) resultCount.textContent = `${list.length} ${list.length === 1 ? 'negocio' : 'negocios'}`;
-      if (resultContext) resultContext.textContent = `Ordenados por cercanía a ${explorerLocationLabel}.`;
+      if (resultContext) {
+        const distanceText = explorerMaxDistance ? ` dentro de ${explorerMaxDistance} km` : '';
+        resultContext.textContent = hasCoordinateSearch
+          ? `Ordenados por cercanía a ${explorerLocationLabel}${distanceText}.`
+          : `Resultados registrados en Kauze para “${explorerLocationLabel}”.`;
+      }
 
       if (!list.length) {
-        grid.innerHTML = `<div class="empty-businesses">No encontramos negocios con ese filtro. Prueba otra categoría o cambia la búsqueda.</div>`;
+        grid.innerHTML = `<div class="empty-businesses">No encontramos negocios en Kauze con esos filtros. Amplía la distancia o cambia la categoría.</div>`;
         renderBusinessDetail();
         return;
       }
@@ -3087,6 +3129,11 @@
 
     document.getElementById('searchBusinessLocation').addEventListener('click', applyLocationSearch);
     document.getElementById('useMyLocation').addEventListener('click', useMyLocation);
+    document.getElementById('distanceFilter').addEventListener('change', event => {
+      explorerMaxDistance = event.target.value === 'todos' ? null : Number(event.target.value);
+      selectedPreviewBusinessId = null;
+      renderBusinessExplorer();
+    });
     document.getElementById('businessSearch').addEventListener('keydown', event => {
       if (event.key === 'Enter') applyLocationSearch();
     });
