@@ -89,6 +89,11 @@ def _client_from_row(row):
     slug = row["local_slug"] or ""
     subdomain_state = row.get("subdominio_estado") or "pendiente"
     activated_at = row.get("subdominio_activado_en")
+    bootstrap_email = os.environ.get("KAUZE_BOOTSTRAP_EMAIL", "").strip().lower()
+    is_primary_admin = bool(
+        bootstrap_email
+        and str(row.get("email") or "").strip().lower() == bootstrap_email
+    )
     return {
         "id": str(row["usuario_id"]),
         "localId": str(row["local_id"]),
@@ -106,6 +111,7 @@ def _client_from_row(row):
         "businessName": row["local_nombre"] or row["nombre_completo"],
         "categoriaSlug": row["categoria_slug"] or "barberia",
         "creadoEn": row["creado_en"].isoformat() if row["creado_en"] else None,
+        "isPrimaryAdmin": is_primary_admin,
     }
 
 
@@ -142,6 +148,7 @@ def get_admin_clients(status_filter=None, search_query=None):
                 "businessName": item.get("nombre_barberia") or item.get("businessName") or "",
                 "categoriaSlug": item.get("categoria_slug") or item.get("categoriaSlug") or "barberia",
                 "creadoEn": item.get("creado_en") or item.get("creadoEn"),
+                "isPrimaryAdmin": False,
             }
             clients.append(client)
     else:
@@ -968,6 +975,14 @@ def reset_admin_client_access(client_id):
             ).fetchone()
             if not user:
                 raise ValueError("Cliente no encontrado.")
+            bootstrap_email = os.environ.get("KAUZE_BOOTSTRAP_EMAIL", "").strip().lower()
+            if (
+                bootstrap_email
+                and str(user.get("email") or "").strip().lower() == bootstrap_email
+            ):
+                raise ValueError(
+                    "La cuenta administradora principal no se modifica desde Clientes."
+                )
             conn.execute(
                 """
                 UPDATE tokens_restablecimiento_password

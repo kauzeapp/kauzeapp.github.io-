@@ -297,6 +297,45 @@ class AdminAccountsLocalTests(unittest.TestCase):
         self.assertTrue(any(sql.startswith("DELETE FROM locales") for sql in fake.statements))
         self.assertTrue(any(sql.startswith("DELETE FROM usuarios") for sql in fake.statements))
 
+    def test_reset_access_rejects_primary_admin_account(self):
+        client_id = "11111111-1111-4111-8111-111111111111"
+
+        class Result:
+            def fetchone(self):
+                return {
+                    "id": client_id,
+                    "nombre_completo": "Equipo KAUZE",
+                    "email": "admin@example.com",
+                }
+
+        class Context:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+            def transaction(self):
+                return self
+
+            def execute(self, _statement, _params=None):
+                return Result()
+
+        with (
+            patch.object(admin_accounts, "is_configured", return_value=True),
+            patch.object(admin_accounts, "email_delivery_configured", return_value=True),
+            patch.object(admin_accounts, "connection", return_value=Context()),
+            patch.dict(
+                admin_accounts.os.environ,
+                {"KAUZE_BOOTSTRAP_EMAIL": "admin@example.com"},
+                clear=False,
+            ),
+        ):
+            with self.assertRaisesRegex(
+                ValueError, "cuenta administradora principal"
+            ):
+                admin_accounts.reset_admin_client_access(client_id)
+
 
 if __name__ == "__main__":
     unittest.main()

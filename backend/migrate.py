@@ -270,6 +270,22 @@ def bootstrap_owner(conn):
                 """,
                 (hasher.hash(password), user[0]),
             )
+            conn.execute(
+                """
+                UPDATE tokens_restablecimiento_password
+                SET usado_en = COALESCE(usado_en, NOW())
+                WHERE usuario_id = %s
+                """,
+                (user[0],),
+            )
+            conn.execute(
+                """
+                UPDATE sesiones_auth
+                SET revocada_en = COALESCE(revocada_en, NOW())
+                WHERE usuario_id = %s
+                """,
+                (user[0],),
+            )
 
     if invite_token and not existing_credential:
         conn.execute(

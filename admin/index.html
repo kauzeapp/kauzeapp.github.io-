@@ -2841,9 +2841,13 @@
                 ? `<button class="button small" onclick="setClientSubdomain('${safeId}', 'suspender')" style="${actionStyle}">Suspender subdominio</button>`
                 : `<button class="button small primary" onclick="setClientSubdomain('${safeId}', 'activar')" style="${actionStyle}">Activar subdominio</button>`);
 
-            managementActions.push(`<button class="button small" onclick="resetClientPassword('${safeId}')" style="${actionStyle}">Enviar acceso</button>`);
+            managementActions.push(client.isPrimaryAdmin
+                ? `<button class="button small" disabled title="La cuenta principal se administra únicamente desde la configuración segura de Kauze" style="${actionStyle}opacity:.6;">Acceso protegido</button>`
+                : `<button class="button small" onclick="resetClientPassword('${safeId}')" style="${actionStyle}">Enviar acceso</button>`);
             managementActions.push(`<button class="button small" onclick="openEditClientModal('${safeId}')" style="${actionStyle}background:#fef3c7;color:#b45309;border-color:#fde68a;">Editar</button>`);
-            managementActions.push(`<button class="button small" data-delete-client="${safeId}" onclick="deleteClient('${safeId}')" style="${actionStyle}background:#fee2e2;color:#b91c1c;border-color:#fca5a5;">Eliminar</button>`);
+            managementActions.push(client.isPrimaryAdmin
+                ? `<button class="button small" disabled title="La cuenta administradora principal no puede eliminarse" style="${actionStyle}opacity:.6;">Cuenta principal</button>`
+                : `<button class="button small" data-delete-client="${safeId}" onclick="deleteClient('${safeId}')" style="${actionStyle}background:#fee2e2;color:#b91c1c;border-color:#fca5a5;">Eliminar</button>`);
 
             const actionsMarkup = `
                 <div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px;min-width:255px;">
