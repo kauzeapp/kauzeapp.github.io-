@@ -58,6 +58,36 @@ def _verify_or_dummy(password, encoded_hash=None):
         return False
 
 
+def _select_membership(memberships, local_slug=None):
+    if local_slug:
+        selected = next(
+            (row for row in memberships if row["local_slug"] == local_slug), None
+        )
+        if selected is None:
+            raise AccountUnavailable("El negocio indicado no está disponible.")
+        return selected
+
+    if len(memberships) == 1:
+        return memberships[0]
+
+    superadmin_membership = next(
+        (row for row in memberships if row.get("is_superadmin")), None
+    )
+    if superadmin_membership is not None:
+        return superadmin_membership
+
+    businesses = [
+        {
+            "name": row["local_nombre"],
+            "slug": row["local_slug"],
+            "role": row["rol_nombre"],
+            "type": row["categoria_slug"],
+        }
+        for row in memberships
+    ]
+    raise BusinessSelectionRequired(businesses)
+
+
 def _profile_image_value(value):
     candidate = str(value or "").strip()
     if not candidate:
@@ -244,26 +274,7 @@ def login(email, password, remember=False, local_slug=None, user_agent=""):
         if not memberships:
             raise AccountUnavailable("La cuenta no tiene un negocio activo asignado.")
 
-        selected = None
-        if local_slug:
-            selected = next(
-                (row for row in memberships if row["local_slug"] == local_slug), None
-            )
-            if selected is None:
-                raise AccountUnavailable("El negocio indicado no está disponible.")
-        elif len(memberships) == 1:
-            selected = memberships[0]
-        else:
-            businesses = [
-                {
-                    "name": row["local_nombre"],
-                    "slug": row["local_slug"],
-                    "role": row["rol_nombre"],
-                    "type": row["categoria_slug"],
-                }
-                for row in memberships
-            ]
-            raise BusinessSelectionRequired(businesses)
+        selected = _select_membership(memberships, local_slug)
 
         if _password_hasher.check_needs_rehash(credential["password_hash"]):
             conn.execute(
