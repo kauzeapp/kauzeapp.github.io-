@@ -671,6 +671,76 @@
       display: none !important;
     }
 
+    .unavailable-business {
+      min-height: calc(100vh - 176px);
+      display: grid;
+      place-items: center;
+      padding: 36px 0 72px;
+    }
+
+    .unavailable-business-card {
+      width: min(100%, 660px);
+      padding: 44px 38px;
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      background: rgba(255,255,255,.94);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .unavailable-business-mark {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 21px;
+      background: linear-gradient(135deg, var(--blue), #5b5cf6);
+      color: #fff;
+      font-family: 'Sora', sans-serif;
+      font-size: 28px;
+      font-weight: 900;
+      box-shadow: 0 16px 36px rgba(37,99,235,.22);
+    }
+
+    .unavailable-business-card h1 {
+      margin: 14px auto;
+      max-width: 540px;
+      font-family: 'Sora', sans-serif;
+      color: var(--navy);
+      font-size: clamp(34px, 6vw, 54px);
+      line-height: 1.02;
+      letter-spacing: -2px;
+    }
+
+    .unavailable-business-card p {
+      max-width: 520px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .unavailable-business-card strong {
+      color: var(--navy);
+      overflow-wrap: anywhere;
+    }
+
+    .unavailable-business-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .unavailable-business-card small {
+      display: block;
+      margin-top: 18px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
     #clientWelcome.hero-centered {
       grid-template-columns: minmax(0, 660px);
       justify-content: center;
@@ -1416,6 +1486,24 @@
         border-radius: 26px;
       }
 
+      .unavailable-business {
+        min-height: auto;
+        padding: 20px 0 48px;
+      }
+
+      .unavailable-business-card {
+        padding: 32px 20px;
+        border-radius: 26px;
+      }
+
+      .unavailable-business-card h1 {
+        letter-spacing: -1.5px;
+      }
+
+      .unavailable-business-actions .btn {
+        width: 100%;
+      }
+
       .grid-3, .grid-2 {
         grid-template-columns: 1fr;
       }
@@ -1698,6 +1786,22 @@
         <button class="btn primary" type="button" id="topStartBtn" onclick="showClientFlow('inicio')">Comenzar</button>
       </div>
     </header>
+
+    <section class="unavailable-business flow-hidden" id="unavailableBusiness" aria-live="polite">
+      <article class="unavailable-business-card">
+        <div class="unavailable-business-mark">K</div>
+        <div class="kicker">Enlace administrado por Kauze</div>
+        <h1>Este negocio todavía no está disponible.</h1>
+        <p>
+          El enlace <strong id="unavailableBusinessHost">negocio.kauze.cl</strong> aún no corresponde a un negocio activo y publicado en Kauze.
+        </p>
+        <div class="unavailable-business-actions">
+          <button class="btn primary" type="button" id="retryUnavailableBusiness">Volver a comprobar</button>
+          <a class="btn" href="/cliente/">Buscar otros negocios</a>
+        </div>
+        <small>Si Kauze acaba de activarlo, vuelve a comprobar para ingresar directamente a su agenda.</small>
+      </article>
+    </section>
 
     <section class="hero" id="clientWelcome">
       <article class="hero-card">
@@ -3339,9 +3443,29 @@
     async function initializeClientPortal() {
       await loadPublicBusinesses();
       const requestedSlug = requestedBusinessSlug();
-      const requestedBusiness = requestedSlug
+      const requestedBusiness = requestedSlug && publicBusinessesLoaded
         ? featuredBusinesses.find(item => item.slug === requestedSlug || item.route === `${requestedSlug}.kauze.cl`)
         : null;
+
+      if (requestedSlug && !requestedBusiness) {
+        const unavailableBusiness = document.getElementById('unavailableBusiness');
+        const unavailableBusinessHost = document.getElementById('unavailableBusinessHost');
+        const topStartButton = document.getElementById('topStartBtn');
+        document.getElementById('clientWelcome')?.classList.add('flow-hidden');
+        document.getElementById('explorar')?.classList.add('flow-hidden');
+        document.getElementById('booking')?.classList.add('flow-hidden');
+        document.getElementById('appointmentManagement')?.classList.add('flow-hidden');
+        unavailableBusiness?.classList.remove('flow-hidden');
+        if (unavailableBusinessHost) unavailableBusinessHost.textContent = `${requestedSlug}.kauze.cl`;
+        if (topStartButton) {
+          topStartButton.textContent = 'Buscar negocios';
+          topStartButton.onclick = () => window.location.assign('/cliente/');
+        }
+        document.title = 'Negocio no disponible | Kauze';
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        return;
+      }
+
       const initialBusiness = requestedBusiness || featuredBusinesses.find(item => item.id === selectedBusinessId) || featuredBusinesses[0];
       selectedBusinessId = initialBusiness.id;
       currentType = initialBusiness.type;
@@ -3362,6 +3486,7 @@
       if (directBusinessMode) window.scrollTo({ top: 0, behavior: 'auto' });
     }
 
+    document.getElementById('retryUnavailableBusiness')?.addEventListener('click', () => window.location.reload());
     initializeClientPortal();
   </script>
 </body>
